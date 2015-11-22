@@ -42,6 +42,8 @@ INSTALLED_APPS = (
     'corsheaders',
     'debug_toolbar',
     'rest_framework_swagger',
+
+    'sigma_core',
 )
 
 MIDDLEWARE_CLASSES = (
@@ -134,3 +136,5 @@ STATIC_URL = '/static/'
 
 # CORS headers
 CORS_ORIGIN_ALLOW_ALL = True
+
+AUTH_USER_MODEL = 'sigma_core.User'
