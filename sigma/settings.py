@@ -86,6 +86,34 @@ DATABASES = {
     }
 }
 
+# Rest framework
+REST_FRAMEWORK = {
+    'DEFAULT_MODEL_SERIALIZER_CLASS':
+        'rest_framework.serializers.HyperlinkedModelSerializer',
+    # 'DEFAULT_PERMISSION_CLASSES': [
+    #     'rest_framework.permissions.AllowAny',
+    # ],
+    # 'DEFAULT_AUTHENTICATION_CLASSES': (
+    #     'rest_framework_jwt.authentication.JSONWebTokenAuthentication',
+    #     'rest_framework.authentication.SessionAuthentication',  # TODO: remove
+    #     'rest_framework.authentication.BasicAuthentication',  # TODO: remove
+    # ),
+    'DEFAULT_FILTER_BACKENDS': (
+        'rest_framework.filters.DjangoFilterBackend',
+        'rest_framework.filters.SearchFilter'
+    )
+}
+
+# Swagger REST
+SWAGGER_SETTINGS = {
+    'enabled_methods': [
+        'get',
+        'post',
+        'put',
+        'delete'
+    ]
+}
+
 
 # Internationalization
 # https://docs.djangoproject.com/en/1.8/topics/i18n/
