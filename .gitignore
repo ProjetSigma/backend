@@ -1,0 +1,7 @@
+/db.sqlite3
+/static
+*.pyc
+/.coverage
+/htmlcov
+/secret.key
+env/
