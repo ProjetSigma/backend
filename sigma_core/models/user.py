@@ -1,7 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 
-from rest_framework import serializers, viewsets, decorators
+from rest_framework import serializers, viewsets, decorators, status
 from rest_framework.response import Response
 
 
@@ -97,5 +97,8 @@ class UserViewSet(viewsets.ModelViewSet):
         """
         Gives the data of the current user
         """
-        serializer = self.serializer_class(request.user)
-        return Response(serializer.data)
+        if request.user.__class__.__name__ == 'AnonymousUser':
+            return Response(status=status.HTTP_401_UNAUTHORIZED)
+        else:
+            serializer = self.serializer_class(request.user)
+            return Response(serializer.data)

@@ -8,6 +8,8 @@ django-cors-headers==1.1.0
 django-extensions==1.5.9
 django-filter==0.10.0
 
+factory_boy==2.6.0
+
 markdown==2.6.2
 werkzeug==0.10.1
 django-debug-toolbar==1.4

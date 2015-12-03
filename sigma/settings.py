@@ -92,14 +92,14 @@ DATABASES = {
 REST_FRAMEWORK = {
     'DEFAULT_MODEL_SERIALIZER_CLASS':
         'rest_framework.serializers.HyperlinkedModelSerializer',
-    # 'DEFAULT_PERMISSION_CLASSES': [
-    #     'rest_framework.permissions.AllowAny',
-    # ],
-    # 'DEFAULT_AUTHENTICATION_CLASSES': (
-    #     'rest_framework_jwt.authentication.JSONWebTokenAuthentication',
-    #     'rest_framework.authentication.SessionAuthentication',  # TODO: remove
-    #     'rest_framework.authentication.BasicAuthentication',  # TODO: remove
-    # ),
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticated',
+    ],
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        # 'rest_framework_jwt.authentication.JSONWebTokenAuthentication',
+        'rest_framework.authentication.SessionAuthentication',  # TODO: remove
+        'rest_framework.authentication.BasicAuthentication',  # TODO: remove
+    ),
     'DEFAULT_FILTER_BACKENDS': (
         'rest_framework.filters.DjangoFilterBackend',
         'rest_framework.filters.SearchFilter'
