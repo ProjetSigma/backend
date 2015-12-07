@@ -9,7 +9,8 @@ Installation
 
 Install requirements
 
-`pip install -r requirements.txt`
+`pip install -r requirements/prod.txt`
+`pip install -r requirements/dev.txt`
 
 If problems to install mysqlclient
 
