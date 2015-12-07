@@ -41,7 +41,7 @@ class UserTests(APITestCase):
     def test_get_users_list_unauthed(self):
         # Client not authenticated
         response = self.client.get('/user/')
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
     # def test_get_users_list_forbidden(self):
     #     # Client authenticated but has no permission
@@ -60,7 +60,7 @@ class UserTests(APITestCase):
     def test_get_user_unauthed(self):
         # Client is not authenticated
         response = self.client.get(self.user_url)
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
     # def test_get_user_forbidden(self):
     #     response = self.client.get(self.user_url)
@@ -77,7 +77,7 @@ class UserTests(APITestCase):
     def test_get_my_data_unauthed(self):
         # Client is not authenticated
         response = self.client.get('/user/me/')
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
     def test_get_my_data_ok(self):
         # Client is authenticated
@@ -90,7 +90,7 @@ class UserTests(APITestCase):
     def test_create_user_unauthed(self):
         # Client is not authenticated
         response = self.client.post('/user/', self.new_user_data)
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
     # def test_create_user_forbidden(self):
     #     # Client has no permission
