@@ -43,6 +43,7 @@ INSTALLED_APPS = (
     'debug_toolbar',
     'rest_framework_swagger',
     'oauth2_provider',
+    'django_nose',
 
     'sigma_core',
 )
@@ -143,5 +144,8 @@ STATIC_URL = '/static/'
 
 # CORS headers
 CORS_ORIGIN_ALLOW_ALL = True
+
+# Test (django_nose conf)
+TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
 
 AUTH_USER_MODEL = 'sigma_core.User'
