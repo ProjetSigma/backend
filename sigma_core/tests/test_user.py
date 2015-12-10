@@ -1,27 +1,12 @@
-import factory
 import json
-
-from django.utils.text import slugify
 
 from rest_framework import status
 from rest_framework.test import APITestCase, force_authenticate
-from sigma_core.models.user import User
+
+from sigma_core.tests.factories import UserFactory, AdminUserFactory
 from sigma_core.serializers.user import UserSerializer
 
-# Factories
-class UserFactory(factory.django.DjangoModelFactory):
-    class Meta:
-        model = User
 
-    lastname = factory.Faker('last_name')
-    firstname = factory.Faker('first_name')
-    email = factory.LazyAttribute(lambda obj: '%s.%s@school.edu' % (slugify(obj.firstname), slugify(obj.lastname)))
-
-class AdminUserFactory(UserFactory):
-    is_staff = True
-
-
-# Tests for User management
 class UserTests(APITestCase):
     @classmethod
     def setUpTestData(self):
