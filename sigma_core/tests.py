@@ -5,7 +5,8 @@ from django.utils.text import slugify
 
 from rest_framework import status
 from rest_framework.test import APITestCase, force_authenticate
-from sigma_core.models.user import User, UserSerializer
+from sigma_core.models.user import User
+from sigma_core.serializers.user import UserSerializer
 
 # Factories
 class UserFactory(factory.django.DjangoModelFactory):
