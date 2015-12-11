@@ -11,8 +11,8 @@ class UserGroup(models.Model):
     user = models.ForeignKey(User, related_name='memberships')
     group = models.ForeignKey(Group, related_name='memberships')
     created = models.DateTimeField(auto_now_add=True)
-    entry = models.DateField(blank=True)
-    exit = models.DateField(blank=True)
+    entry = models.DateField(blank=True, null=True)
+    exit = models.DateField(blank=True, null=True)
 
     def __str__(self):
-        return "User %s in Group %s" % (self.user.__str__(), self.group.__str__())
+        return "User \"%s\" in Group \"%s\"" % (self.user.__str__(), self.group.__str__())
