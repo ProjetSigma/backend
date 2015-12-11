@@ -9,3 +9,5 @@ class UserSerializer(serializers.ModelSerializer):
         exclude = ('is_staff', 'is_superuser', )
         read_only_fields = ('last_login', 'is_active', )
         extra_kwargs = {'password': {'write_only': True}}
+
+    memberships = serializers.PrimaryKeyRelatedField(read_only=True, many=True)
