@@ -1,9 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 
-from rest_framework import serializers, viewsets, decorators, status
-from rest_framework.response import Response
-
 
 class UserManager(BaseUserManager):
     def create_user(self, email, lastname, firstname, password=None):
@@ -78,27 +75,3 @@ class User(AbstractBaseUser):
         TODO - Implement permissions
         """
         return True
-
-
-class UserSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = User
-        exclude = ('is_staff', 'is_superuser', )
-        read_only_fields = ('last_login', 'is_active', )
-        extra_kwargs = {'password': {'write_only': True}}
-
-
-class UserViewSet(viewsets.ModelViewSet):
-    queryset = User.objects.all()
-    serializer_class = UserSerializer
-
-    @decorators.list_route(methods=['get'])
-    def me(self, request):
-        """
-        Gives the data of the current user
-        """
-        if request.user.__class__.__name__ == 'AnonymousUser':
-            return Response(status=status.HTTP_401_UNAUTHORIZED)
-        else:
-            serializer = self.serializer_class(request.user)
-            return Response(serializer.data)

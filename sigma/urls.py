@@ -17,11 +17,13 @@ from django.conf.urls import include, url
 from django.contrib import admin
 from rest_framework import routers
 
-from sigma_core.models.user import UserViewSet
+from sigma_core.views.user import UserViewSet
+from sigma_core.views.group import GroupViewSet
 
 router = routers.DefaultRouter()
 
 router.register(r'user', UserViewSet)
+router.register(r'group', GroupViewSet)
 
 urlpatterns = [
     url(r'^admin/', include(admin.site.urls)),
