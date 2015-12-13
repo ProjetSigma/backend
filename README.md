@@ -44,6 +44,14 @@ To see all fixtures, browse the web API at `127.0.0.1:8000`.
 
 OAuth usage
 -----------
+###Create an application *(temporary)*
+NB. For frontend usage only, you can skip this part.
+
+When you are logged in, you can create a trusted application at: `http://127.0.0.1:8000/o/applications/`
+
+I still have to understand how to deal correctly with applications addition... :p
+
+For the name, put whatever you want. Choose **Client Type**: *confidential* and **Authorization Grant Type**: *Resource owner password-based*.
 
 ###Get your token
 `client_id` and `client_secret` depend on the trusted application. To get token, do:
