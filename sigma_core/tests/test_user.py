@@ -50,6 +50,8 @@ class UserTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
     # def test_get_user_forbidden(self):
+    #     # Client authenticated but has no permission
+    #     self.client.force_authenticate(user=self.user2)
     #     response = self.client.get(self.user_url)
     #     self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
@@ -79,11 +81,11 @@ class UserTests(APITestCase):
         response = self.client.post('/user/', self.new_user_data)
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
-    # def test_create_user_forbidden(self):
-    #     # Client has no permission
-    #     self.client.force_authenticate(user=self.user)
-    #     response = self.client.post('/user/', self.new_user_data)
-    #     self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+    def test_create_user_forbidden(self):
+        # Client has no permission
+        self.client.force_authenticate(user=self.user)
+        response = self.client.post('/user/', self.new_user_data)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_create_user_ok(self):
         # Client has permissions
@@ -93,13 +95,13 @@ class UserTests(APITestCase):
         self.assertEqual(response.data['lastname'], self.new_user_data['lastname'])
 
 #### Modification requests
-    # def test_edit_email_wrong_permission(self):
-    #     # Client wants to change another user's email
-    #     self.client.force_authenticate(user=self.user)
-    #     user_data = UserSerializer(self.user2).data
-    #     user_data['email'] = "pi@random.org"
-    #     response = self.client.put("/user/%d/" % self.user2.id, user_data)
-    #     self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+    def test_edit_email_wrong_permission(self):
+        # Client wants to change another user's email
+        self.client.force_authenticate(user=self.user)
+        user_data = UserSerializer(self.user2).data
+        user_data['email'] = "pi@random.org"
+        response = self.client.put("/user/%d/" % self.user2.id, user_data)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_edit_email_nonvalid_email(self):
         # Client wants to change his email with a non valid value
@@ -121,13 +123,13 @@ class UserTests(APITestCase):
         self.user.email = self.user_data['email']
         self.user.save()
 
-    # def test_edit_profile_wrong_permission(self):
-    #     # Client wants to change another user's phone number
-    #     self.client.force_authenticate(user=self.user)
-    #     user_data = UserSerializer(self.user2).data
-    #     user_data['phone'] = "0123456789"
-    #     response = self.client.put("/user/%d/" % self.user2.id, user_data)
-    #     self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+    def test_edit_profile_wrong_permission(self):
+        # Client wants to change another user's phone number
+        self.client.force_authenticate(user=self.user)
+        user_data = UserSerializer(self.user2).data
+        user_data['phone'] = "0123456789"
+        response = self.client.put("/user/%d/" % self.user2.id, user_data)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_edit_profile_ok(self):
         # Client wants to change his phone number
@@ -148,7 +150,6 @@ class UserTests(APITestCase):
     def test_edit_lastname_ok(self):
         # Admin wants to change an user's lastname
         pass
-
 
 
 #### "Change password" requests
