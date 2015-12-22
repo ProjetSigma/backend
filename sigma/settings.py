@@ -147,5 +147,6 @@ CORS_ORIGIN_ALLOW_ALL = True
 
 # Test (django_nose conf)
 TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
+NOSE_ARGS = ['--nocapture', '--nologcapture',] # To display debug during testing
 
 AUTH_USER_MODEL = 'sigma_core.User'
