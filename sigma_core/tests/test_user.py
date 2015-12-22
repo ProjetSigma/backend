@@ -60,7 +60,7 @@ class UserTests(APITestCase):
         self.client.force_authenticate(user=self.user)
         response = self.client.get(self.user_url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        response.data.pop('permissions', None) # Workaround because DRY rest permissions needs a request 
+        response.data.pop('permissions', None) # Workaround because DRY rest permissions needs a request
         self.assertEqual(response.data, self.user_data)
 
 #### "Get my data" requests
@@ -146,11 +146,24 @@ class UserTests(APITestCase):
 
     def test_edit_lastname_wrong_permission(self):
         # Client wants to change his lastname
-        pass
+        self.client.force_authenticate(user=self.user)
+        user_data = self.user_data.copy()
+        user_data['lastname'] = "Daudet"
+        response = self.client.put("/user/%d/" % self.user.id, user_data)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data['lastname'], self.user_data['lastname'])
 
     def test_edit_lastname_ok(self):
         # Admin wants to change an user's lastname
-        pass
+        self.client.force_authenticate(user=self.admin_user)
+        user_data = self.user_data.copy()
+        user_data['lastname'] = "Daudet"
+        response = self.client.put("/user/%d/" % self.user.id, user_data)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data['lastname'], user_data['lastname'])
+        # Guarantee that tests are independant
+        self.user.lastname = self.user_data['lastname']
+        self.user.save()
 
 
 #### "Change password" requests
