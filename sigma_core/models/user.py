@@ -42,6 +42,7 @@ class User(AbstractBaseUser):
     lastname = models.CharField(max_length=255)
     firstname = models.CharField(max_length=128)
     # username = models.CharField(max_length=128, unique=True) # TODO - Add unique username for frontend URLs
+    phone = models.CharField(max_length=20, blank=True)
 
     is_active = models.BooleanField(default=True)
     last_modified = models.DateTimeField(auto_now=True)
