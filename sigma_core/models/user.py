@@ -1,6 +1,8 @@
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 
+from dry_rest_permissions.generics import allow_staff_or_superuser, authenticated_users
+
 
 class UserManager(BaseUserManager):
     def create_user(self, email, lastname, firstname, password=None):
@@ -65,14 +67,53 @@ class User(AbstractBaseUser):
     def get_short_name(self):
         return self.email
 
+    # Perms for admin site
     def has_perm(self, perm, obj=None):
-        """
-        TODO - Implement permissions
-        """
         return True
 
     def has_module_perms(self, app_label):
+        return True
+
+    # Permissions
+    @staticmethod
+    @authenticated_users
+    def has_read_permission(request):
         """
-        TODO - Implement permissions
+        Only authenticated users can retrieve an users list.
         """
         return True
+
+    @authenticated_users
+    def has_object_read_permission(self, request):
+        """
+        Only authenticated users can retrieve an user.
+        """
+        return True
+
+    @staticmethod
+    def has_write_permission(request):
+        """
+        Everybody can edit or create users, but with certain restraints specified in below functions.
+        """
+        return True
+
+    @staticmethod
+    @allow_staff_or_superuser
+    def has_create_permission(request):
+        """
+        Only Sigma admins can create users.
+        """
+        return False
+
+    def has_object_write_permission(self, request):
+        """
+        Nobody has all write permissions on an user (espacially, nobody can delete an user).
+        """
+        return False
+
+    @allow_staff_or_superuser
+    def has_object_update_permission(self, request):
+        """
+        Only Sigma admin and oneself can edit an user.
+        """
+        return request.user.id == self.id

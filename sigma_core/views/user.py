@@ -1,11 +1,13 @@
 from rest_framework import viewsets, decorators, status
 from rest_framework.response import Response
+from dry_rest_permissions.generics import DRYPermissions
 
 from sigma_core.models.user import User
 from sigma_core.serializers.user import UserSerializer
 
 
 class UserViewSet(viewsets.ModelViewSet):
+    permission_classes = (DRYPermissions, )
     queryset = User.objects.all()
     serializer_class = UserSerializer
 
@@ -17,5 +19,5 @@ class UserViewSet(viewsets.ModelViewSet):
         if request.user.__class__.__name__ == 'AnonymousUser':
             return Response(status=status.HTTP_401_UNAUTHORIZED)
         else:
-            serializer = self.serializer_class(request.user)
+            serializer = self.serializer_class(request.user, context={'request': request})
             return Response(serializer.data)

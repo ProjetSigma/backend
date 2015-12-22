@@ -39,6 +39,7 @@ INSTALLED_APPS = (
 
     'django_extensions',
     'rest_framework',
+    'dry_rest_permissions',
     'corsheaders',
     'debug_toolbar',
     'rest_framework_swagger',
