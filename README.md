@@ -8,8 +8,10 @@ Sigma - Backend
 Installation
 ------------
 
+
 Install requirements  
-`pip install -r requirements.txt`
+`pip install -r requirements/prod.txt`
+`pip install -r requirements/dev.txt`
 
 If problems to install mysqlclient  
 `apt-get install python-dev libmysqlclient-dev` or `yum install python-devel mysql-devel`

@@ -1,0 +1,6 @@
+django-nose==1.4.2
+factory_boy==2.6.0
+django-debug-toolbar==1.4
+coverage==4.0.2
+ipython==4.0.0
+ipdb==0.8.1
