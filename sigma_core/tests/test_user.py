@@ -93,13 +93,13 @@ class UserTests(APITestCase):
         self.assertEqual(response.data['lastname'], self.new_user_data['lastname'])
 
 #### Modification requests
-    def test_edit_email_wrong_permission(self):
-        # Client wants to change another user's email
-        self.client.force_authenticate(user=self.user)
-        user_data = UserSerializer(self.user2).data
-        user_data['email'] = "pi@random.org"
-        response = self.client.put("/user/%d/" % self.user2.id, user_data)
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+    # def test_edit_email_wrong_permission(self):
+    #     # Client wants to change another user's email
+    #     self.client.force_authenticate(user=self.user)
+    #     user_data = UserSerializer(self.user2).data
+    #     user_data['email'] = "pi@random.org"
+    #     response = self.client.put("/user/%d/" % self.user2.id, user_data)
+    #     self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_edit_email_nonvalid_email(self):
         # Client wants to change his email with a non valid value
@@ -121,13 +121,13 @@ class UserTests(APITestCase):
         self.user.email = self.user_data['email']
         self.user.save()
 
-    def test_edit_profile_wrong_permission(self):
-        # Client wants to change another user's phone number
-        self.client.force_authenticate(user=self.user)
-        user_data = UserSerializer(self.user2).data
-        user_data['phone'] = "0123456789"
-        response = self.client.put("/user/%d/" % self.user2.id, user_data)
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+    # def test_edit_profile_wrong_permission(self):
+    #     # Client wants to change another user's phone number
+    #     self.client.force_authenticate(user=self.user)
+    #     user_data = UserSerializer(self.user2).data
+    #     user_data['phone'] = "0123456789"
+    #     response = self.client.put("/user/%d/" % self.user2.id, user_data)
+    #     self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_edit_profile_ok(self):
         # Client wants to change his phone number
