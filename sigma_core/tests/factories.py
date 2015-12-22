@@ -1,4 +1,5 @@
 import factory
+from faker import Factory as FakerFactory
 
 from django.utils.text import slugify
 
@@ -6,14 +7,16 @@ from sigma_core.models.user import User
 from sigma_core.models.group import Group
 from sigma_core.models.user_group import UserGroup
 
+faker = FakerFactory.create('fr_FR')
 
 class UserFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = User
 
-    lastname = factory.Faker('last_name')
-    firstname = factory.Faker('first_name')
+    lastname = factory.LazyAttribute(lambda obj: faker.last_name())
+    firstname = factory.LazyAttribute(lambda obj: faker.first_name())
     email = factory.LazyAttribute(lambda obj: '%s.%s@school.edu' % (slugify(obj.firstname), slugify(obj.lastname)))
+    phone = factory.LazyAttribute(lambda obj: faker.phone_number())
 
 
 class AdminUserFactory(UserFactory):
@@ -33,4 +36,4 @@ class UserGroupFactory(factory.django.DjangoModelFactory):
 
     user = factory.SubFactory(UserFactory)
     group = factory.SubFactory(GroupFactory)
-    join_date = factory.Faker('date')
+    join_date = factory.LazyAttribute(lambda obj: faker.date())

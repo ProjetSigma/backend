@@ -12,6 +12,7 @@ django-oauth-toolkit==0.9.0
 
 django-nose==1.4.2
 factory_boy==2.6.0
+faker==0.5.3
 
 markdown==2.6.2
 werkzeug==0.10.1
