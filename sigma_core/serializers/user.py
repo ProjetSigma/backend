@@ -1,9 +1,10 @@
 from rest_framework import serializers
+from dry_rest_permissions.generics import DRYPermissionsField
 
 from sigma_core.models.user import User
 
 
-class UserSerializer(serializers.ModelSerializer):
+class UserWithoutPermissionsSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         exclude = ('is_staff', 'is_superuser', )
@@ -11,3 +12,7 @@ class UserSerializer(serializers.ModelSerializer):
         extra_kwargs = {'password': {'write_only': True, 'required': False}}
 
     memberships = serializers.PrimaryKeyRelatedField(read_only=True, many=True)
+    
+
+class UserSerializer(UserWithoutPermissionsSerializer):
+    permissions = DRYPermissionsField()

@@ -4,7 +4,7 @@ from rest_framework import status
 from rest_framework.test import APITestCase, force_authenticate
 
 from sigma_core.tests.factories import UserFactory, AdminUserFactory
-from sigma_core.serializers.user import UserSerializer
+from sigma_core.serializers.user import UserWithoutPermissionsSerializer as UserSerializer
 
 
 class UserTests(APITestCase):
@@ -60,6 +60,7 @@ class UserTests(APITestCase):
         self.client.force_authenticate(user=self.user)
         response = self.client.get(self.user_url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
+        response.data.pop('permissions', None) # Workaround because DRY rest permissions needs a request 
         self.assertEqual(response.data, self.user_data)
 
 #### "Get my data" requests

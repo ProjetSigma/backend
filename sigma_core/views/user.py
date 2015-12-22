@@ -19,5 +19,5 @@ class UserViewSet(viewsets.ModelViewSet):
         if request.user.__class__.__name__ == 'AnonymousUser':
             return Response(status=status.HTTP_401_UNAUTHORIZED)
         else:
-            serializer = self.serializer_class(request.user)
+            serializer = self.serializer_class(request.user, context={'request': request})
             return Response(serializer.data)
