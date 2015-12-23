@@ -150,8 +150,7 @@ class UserTests(APITestCase):
         user_data = self.user_data.copy()
         user_data['lastname'] = "Daudet"
         response = self.client.put("/user/%d/" % self.user.id, user_data)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data['lastname'], self.user_data['lastname'])
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_edit_lastname_ok(self):
         # Admin wants to change an user's lastname

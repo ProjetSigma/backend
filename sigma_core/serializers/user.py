@@ -22,11 +22,3 @@ class UserSerializer(UserWithoutPermissionsSerializer):
         extra_kwargs = {'password': {'write_only': True, 'required': False}}
 
     permissions = DRYPermissionsField(read_only=True)
-
-
-class UserWithoutNamesSerializer(UserSerializer):
-    class Meta:
-        model = User
-        exclude = ('is_staff', 'is_superuser', )
-        read_only_fields = ('last_login', 'is_active', 'lastname', 'firstname', )
-        extra_kwargs = {'password': {'write_only': True, 'required': False}}
