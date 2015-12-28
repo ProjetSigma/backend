@@ -62,6 +62,8 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.security.SecurityMiddleware',
 )
 
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend' # TODO : adapt for production
+
 ROOT_URLCONF = 'sigma.urls'
 
 TEMPLATES = [
