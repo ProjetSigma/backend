@@ -186,7 +186,7 @@ class UserTests(APITestCase):
         # Client successfully changes his password
         self.user.set_password('old_pwd')
         self.client.force_authenticate(user=self.user)
-        response = self.client.put('/user/change_password/', {'old_password': 'old_pwd', 'password': 'new_pwd'})
+        response = self.client.put('/user/change_password/', {'old_password': 'old_pwd', 'password': 'new_strong_pwd'})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
 #### "Reset password" requests

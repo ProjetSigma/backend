@@ -66,6 +66,8 @@ class UserViewSet(viewsets.ModelViewSet):
             - name: password
               type: string
         """
+        PASSWORD_MIN_LENGTH = 8
+
         if request.user.__class__.__name__ == 'AnonymousUser':
             return Response(status=status.HTTP_401_UNAUTHORIZED)
 
@@ -73,8 +75,8 @@ class UserViewSet(viewsets.ModelViewSet):
         data = request.data
         if not user.check_password(data['old_password']):
             return Response("Wrong password", status=status.HTTP_403_FORBIDDEN)
-        if data['password'] == "":
-            return Response("'password' field cannot be empty", status=status.HTTP_400_BAD_REQUEST)
+        if len(data['password']) < PASSWORD_MIN_LENGTH:
+            return Response("'password' must be at least %d characters long" % PASSWORD_MIN_LENGTH, status=status.HTTP_400_BAD_REQUEST)
 
         user.set_password(data['password'])
         user.save()
