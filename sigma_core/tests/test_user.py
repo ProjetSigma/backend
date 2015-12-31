@@ -1,5 +1,7 @@
 import json
 
+from django.core import mail
+
 from rest_framework import status
 from rest_framework.test import APITestCase, force_authenticate
 
@@ -166,5 +168,44 @@ class UserTests(APITestCase):
 
 
 #### "Change password" requests
+    def test_change_pwd_wrong_pwd(self):
+        # Client gives a wrong old password
+        self.user.set_password('old_pwd')
+        self.client.force_authenticate(user=self.user)
+        response = self.client.put('/user/change_password/', {'old_password': 'wrong', 'password': 'new_pwd'})
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_change_pwd_no_pwd(self):
+        # Client gives no new password
+        self.user.set_password('old_pwd')
+        self.client.force_authenticate(user=self.user)
+        response = self.client.put('/user/change_password/', {'old_password': 'old_pwd', 'password': ''})
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_change_pwd_ok(self):
+        # Client successfully changes his password
+        self.user.set_password('old_pwd')
+        self.client.force_authenticate(user=self.user)
+        response = self.client.put('/user/change_password/', {'old_password': 'old_pwd', 'password': 'new_strong_pwd'})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+#### "Reset password" requests
+    def test_reset_pwd_no_email(self):
+        # Client gives no email
+        response = self.client.post('/user/reset_password/', {'email': ''})
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_reset_pwd_no_user(self):
+        # Client's email is not found
+        response = self.client.post('/user/reset_password/', {'email': 'unknown@email.me'})
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_reset_pwd_ok(self):
+        # Client successfully resets his password
+        response = self.client.post('/user/reset_password/', {'email': self.user.email})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(mail.outbox), 1)
+        from sigma_core.views.user import reset_mail
+        self.assertEqual(mail.outbox[0].subject, reset_mail['subject'])
 
 #### Deletion requests

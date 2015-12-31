@@ -94,6 +94,7 @@ class User(AbstractBaseUser):
     def has_write_permission(request):
         """
         Everybody can edit or create users, but with certain restraints specified in below functions.
+        By the way, everybody can change one's password or reset it.
         """
         return True
 
