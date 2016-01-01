@@ -6,8 +6,8 @@ build:
     tests:
         override:
             -
-            command: 'python manage.py test'
-            coverage:
-                file: '.coverage'
-                config: '.coveragerc'
-                format: 'py-cc'
+                command: 'python manage.py test'
+                coverage:
+                    file: '.coverage'
+                    config: '.coveragerc'
+                    format: 'py-cc'
