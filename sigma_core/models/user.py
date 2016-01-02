@@ -108,7 +108,7 @@ class User(AbstractBaseUser):
 
     def has_object_write_permission(self, request):
         """
-        Nobody has all write permissions on an user (espacially, nobody can delete an user).
+        Nobody has all write permissions on an user (especially, nobody can delete an user).
         """
         return False
 
