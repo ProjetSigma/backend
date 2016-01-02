@@ -9,7 +9,7 @@ from rest_framework.response import Response
 from dry_rest_permissions.generics import DRYPermissions
 
 from sigma_core.models.user import User
-from sigma_core.serializers.user import UserSerializer
+from sigma_core.serializers.user import BasicUserWithPermsSerializer, DetailedUserWithPermsSerializer
 
 
 reset_mail = {
@@ -28,7 +28,16 @@ L'équipe Sigma.
 class UserViewSet(viewsets.ModelViewSet):
     permission_classes = (DRYPermissions, )
     queryset = User.objects.all()
-    serializer_class = UserSerializer
+    serializer_class = BasicUserWithPermsSerializer
+
+    def retrieve(self, request, pk=None):
+        try:
+            user = User.objects.get(pk=pk)
+        except User.DoesNotExist:
+            return Http404()
+
+        serializer = DetailedUserWithPermsSerializer(user, context={'request': request})
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
     def update(self, request, pk=None):
         try:
@@ -49,7 +58,7 @@ class UserViewSet(viewsets.ModelViewSet):
         if request.user.__class__.__name__ == 'AnonymousUser':
             return Response(status=status.HTTP_401_UNAUTHORIZED)
         else:
-            serializer = self.get_serializer_class()(request.user, context={'request': request})
+            serializer = DetailedUserWithPermsSerializer(request.user, context={'request': request})
             return Response(serializer.data)
 
     @decorators.list_route(methods=['put'])

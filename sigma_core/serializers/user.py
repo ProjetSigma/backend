@@ -4,7 +4,25 @@ from dry_rest_permissions.generics import DRYPermissionsField
 from sigma_core.models.user import User
 
 
-class UserWithoutPermissionsSerializer(serializers.ModelSerializer):
+class BasicUserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        exclude = ('is_staff', 'is_superuser', )
+        read_only_fields = ('last_login', 'is_active', )
+        extra_kwargs = {'password': {'write_only': True, 'required': False}}
+
+
+class BasicUserWithPermsSerializer(BasicUserSerializer):
+    class Meta:
+        model = User
+        exclude = ('is_staff', 'is_superuser', )
+        read_only_fields = ('last_login', 'is_active', )
+        extra_kwargs = {'password': {'write_only': True, 'required': False}}
+
+    permissions = DRYPermissionsField(read_only=True)
+
+
+class DetailedUserSerializer(BasicUserSerializer):
     class Meta:
         model = User
         exclude = ('is_staff', 'is_superuser', )
@@ -14,7 +32,7 @@ class UserWithoutPermissionsSerializer(serializers.ModelSerializer):
     memberships = serializers.PrimaryKeyRelatedField(read_only=True, many=True)
 
 
-class UserSerializer(UserWithoutPermissionsSerializer):
+class DetailedUserWithPermsSerializer(DetailedUserSerializer):
     class Meta:
         model = User
         exclude = ('is_staff', 'is_superuser', )
