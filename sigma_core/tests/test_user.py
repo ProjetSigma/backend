@@ -6,7 +6,7 @@ from rest_framework import status
 from rest_framework.test import APITestCase, force_authenticate
 
 from sigma_core.tests.factories import UserFactory, AdminUserFactory
-from sigma_core.serializers.user import UserWithoutPermissionsSerializer as UserSerializer
+from sigma_core.serializers.user import DetailedUserSerializer as UserSerializer
 
 
 class UserTests(APITestCase):
