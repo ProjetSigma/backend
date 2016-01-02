@@ -31,6 +31,11 @@ class UserViewSet(viewsets.ModelViewSet):
     serializer_class = BasicUserWithPermsSerializer # by default, basic data and permissions
 
     def retrieve(self, request, pk=None):
+        """
+        Retrieve an User according to its id (pk).
+        ---
+        response_serializer: DetailedUserWithPermsSerializer
+        """
         try:
             user = User.objects.get(pk=pk)
         except User.DoesNotExist:
@@ -56,6 +61,8 @@ class UserViewSet(viewsets.ModelViewSet):
     def me(self, request):
         """
         Give the data of the current user.
+        ---
+        response_serializer: DetailedUserWithPermsSerializer
         """
         if request.user.__class__.__name__ == 'AnonymousUser':
             return Response(status=status.HTTP_401_UNAUTHORIZED)
