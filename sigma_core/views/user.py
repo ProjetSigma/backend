@@ -28,7 +28,7 @@ L'équipe Sigma.
 class UserViewSet(viewsets.ModelViewSet):
     permission_classes = (DRYPermissions, )
     queryset = User.objects.all()
-    serializer_class = BasicUserWithPermsSerializer
+    serializer_class = BasicUserWithPermsSerializer # by default, basic data and permissions
 
     def retrieve(self, request, pk=None):
         try:
@@ -36,6 +36,7 @@ class UserViewSet(viewsets.ModelViewSet):
         except User.DoesNotExist:
             return Http404()
 
+        # Use DetailedUserWithPermsSerializer to have the groups whom user belongs to
         serializer = DetailedUserWithPermsSerializer(user, context={'request': request})
         return Response(serializer.data, status=status.HTTP_200_OK)
 
@@ -45,6 +46,7 @@ class UserViewSet(viewsets.ModelViewSet):
         except User.DoesNotExist:
             return Http404()
 
+        # Names edition is allowed to Sigma admins only
         if ((request.data['lastname'] != user.lastname or request.data['firstname'] != user.firstname)) and not (request.user.is_staff or request.user.is_superuser):
             return Response('You cannot change your lastname or firstname', status=status.HTTP_400_BAD_REQUEST)
 
@@ -58,6 +60,7 @@ class UserViewSet(viewsets.ModelViewSet):
         if request.user.__class__.__name__ == 'AnonymousUser':
             return Response(status=status.HTTP_401_UNAUTHORIZED)
         else:
+            # Use DetailedUserWithPermsSerializer to have the groups whom user belongs to
             serializer = DetailedUserWithPermsSerializer(request.user, context={'request': request})
             return Response(serializer.data)
 

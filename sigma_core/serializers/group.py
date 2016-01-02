@@ -4,11 +4,17 @@ from sigma_core.models.group import Group
 
 
 class BasicGroupSerializer(serializers.ModelSerializer):
+    """
+    Serialize a Group without its relations with users.
+    """
     class Meta:
         model = Group
 
 
 class GroupSerializer(BasicGroupSerializer):
+    """
+    Serialize a Group and the related memberships.
+    """
     class Meta:
         model = Group
 
