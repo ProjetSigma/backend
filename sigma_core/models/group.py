@@ -42,10 +42,10 @@ class Group(models.Model):
     )
 
     name = models.CharField(max_length=254)
-    visibility = models.SmallIntegerField(choices=VISIBILITY_CHOICES, default=VIS_PRIVATE)
-    membership_policy = models.SmallIntegerField(choices=MEMBERSHIP_CHOICES, default=MEMBER_INVITATION)
-    validation_policy = models.SmallIntegerField(choices=VALIDATION_CHOICES, default=VALID_ADMINS)
-    type = models.SmallIntegerField(choices=TYPE_CHOICES, default=TYPE_BASIC)
+    visibility = models.CharField(max_length=64, choices=VISIBILITY_CHOICES, default=VIS_PRIVATE)
+    membership_policy = models.CharField(max_length=64, choices=MEMBERSHIP_CHOICES, default=MEMBER_INVITATION)
+    validation_policy = models.CharField(max_length=64, choices=VALIDATION_CHOICES, default=VALID_ADMINS)
+    type = models.CharField(max_length=64, choices=TYPE_CHOICES, default=TYPE_BASIC)
 
     def __str__(self):
         return "%s (%s)" % (self.name, self.get_type_display())
