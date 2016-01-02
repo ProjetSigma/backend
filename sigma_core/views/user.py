@@ -9,7 +9,7 @@ from rest_framework.response import Response
 from dry_rest_permissions.generics import DRYPermissions
 
 from sigma_core.models.user import User
-from sigma_core.serializers.user import UserSerializer
+from sigma_core.serializers.user import BasicUserWithPermsSerializer, DetailedUserWithPermsSerializer
 
 
 reset_mail = {
@@ -28,7 +28,17 @@ L'équipe Sigma.
 class UserViewSet(viewsets.ModelViewSet):
     permission_classes = (DRYPermissions, )
     queryset = User.objects.all()
-    serializer_class = UserSerializer
+    serializer_class = BasicUserWithPermsSerializer # by default, basic data and permissions
+
+    def retrieve(self, request, pk=None):
+        try:
+            user = User.objects.get(pk=pk)
+        except User.DoesNotExist:
+            return Http404()
+
+        # Use DetailedUserWithPermsSerializer to have the groups whom user belongs to
+        serializer = DetailedUserWithPermsSerializer(user, context={'request': request})
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
     def update(self, request, pk=None):
         try:
@@ -36,6 +46,7 @@ class UserViewSet(viewsets.ModelViewSet):
         except User.DoesNotExist:
             return Http404()
 
+        # Names edition is allowed to Sigma admins only
         if ((request.data['lastname'] != user.lastname or request.data['firstname'] != user.firstname)) and not (request.user.is_staff or request.user.is_superuser):
             return Response('You cannot change your lastname or firstname', status=status.HTTP_400_BAD_REQUEST)
 
@@ -49,7 +60,8 @@ class UserViewSet(viewsets.ModelViewSet):
         if request.user.__class__.__name__ == 'AnonymousUser':
             return Response(status=status.HTTP_401_UNAUTHORIZED)
         else:
-            serializer = self.get_serializer_class()(request.user, context={'request': request})
+            # Use DetailedUserWithPermsSerializer to have the groups whom user belongs to
+            serializer = DetailedUserWithPermsSerializer(request.user, context={'request': request})
             return Response(serializer.data)
 
     @decorators.list_route(methods=['put'])
