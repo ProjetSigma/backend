@@ -7,6 +7,14 @@ from dry_rest_permissions.generics import allow_staff_or_superuser
 #     def get_queryset(self):
 #         return super(GroupManager, self).get_queryset().prefetch_related('memberships')
 
+from sigma_core.models.custom_field import CustomField
+
+class GroupCustomField(CustomField):
+    class Meta:
+        pass
+    # Generated fields:
+    #   values
+
 
 class Group(models.Model):
     class Meta:
@@ -37,6 +45,7 @@ class Group(models.Model):
     name = models.CharField(max_length=254)
     visibility = models.CharField(max_length=64, choices=VISIBILITY_CHOICES, default=VIS_PRIVATE)
     type = models.CharField(max_length=64, choices=TYPE_CHOICES, default=TYPE_BASIC)
+    custom_fields = models.ManyToManyField(GroupCustomField, related_name = '+')
 
     # The permission a member has upon joining
     # A value of -1 means that no one can join the group.
