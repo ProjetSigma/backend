@@ -3,7 +3,12 @@ from rest_framework import serializers
 from sigma_core.models.group import Group
 
 
-class GroupSerializer(serializers.ModelSerializer):
+class BasicGroupSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Group
+
+
+class GroupSerializer(BasicGroupSerializer):
     class Meta:
         model = Group
 

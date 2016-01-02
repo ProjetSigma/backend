@@ -2,6 +2,7 @@ from rest_framework import serializers
 from dry_rest_permissions.generics import DRYPermissionsField
 
 from sigma_core.models.user import User
+from sigma_core.serializers.user_group import UserGroupSerializer
 
 
 class BasicUserSerializer(serializers.ModelSerializer):
@@ -29,7 +30,7 @@ class DetailedUserSerializer(BasicUserSerializer):
         read_only_fields = ('last_login', 'is_active', )
         extra_kwargs = {'password': {'write_only': True, 'required': False}}
 
-    memberships = serializers.PrimaryKeyRelatedField(read_only=True, many=True)
+    memberships = UserGroupSerializer(read_only=True, many=True)
 
 
 class DetailedUserWithPermsSerializer(DetailedUserSerializer):
