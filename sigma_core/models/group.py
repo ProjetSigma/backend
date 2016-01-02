@@ -5,40 +5,40 @@ class Group(models.Model):
     class Meta:
         pass
 
-    VIS_PUBLIC = 0
-    VIS_PRIVATE = 1
+    VIS_PUBLIC          = 'public'
+    VIS_PRIVATE         = 'private'
     VISIBILITY_CHOICES = (
-        (VIS_PUBLIC, 'PUBLIC'),
-        (VIS_PRIVATE, 'PRIVATE')
+        (VIS_PUBLIC, 'Anyone can see the group'),
+        (VIS_PRIVATE, 'Group is not visible')
     )
 
-    MEMBER_ANYONE = 0
-    MEMBER_REQUEST = 1
-    MEMBER_INVITATION = 2
+    MEMBER_ANYONE       = 'anyone'
+    MEMBER_REQUEST      = 'request'
+    MEMBER_INVITATION   = 'upon_invitation'
     MEMBERSHIP_CHOICES = (
-        (MEMBER_ANYONE, 'ANYONE'),
-        (MEMBER_REQUEST, 'REQUEST'),
-        (MEMBER_INVITATION, 'INVITATION')
+        (MEMBER_ANYONE, 'Anyone can join the group'),
+        (MEMBER_REQUEST, 'Anyone can request to join the group'),
+        (MEMBER_INVITATION, 'Can join the group only upon invitation')
     )
 
-    VALID_ADMINS = 0
-    VALID_MEMBERS = 1
+    VALID_ADMINS        = 'admins'
+    VALID_MEMBERS       = 'members'
     VALIDATION_CHOICES = (
-        (VALID_ADMINS, 'ADMINS'),
-        (VALID_MEMBERS, 'MEMBERS')
+        (VALID_ADMINS, 'Only admins can accept join requests or invite members'),
+        (VALID_MEMBERS, 'Every member can accept join requests or invite members')
     )
 
-    TYPE_BASIC = 0
-    TYPE_CURSUS = 1
-    TYPE_ASSO = 2
-    TYPE_PROMO = 3
-    TYPE_SCHOOL = 4
+    TYPE_BASIC          = 'basic'
+    TYPE_CURSUS         = 'cursus'
+    TYPE_ASSO           = 'association'
+    TYPE_PROMO          = 'school_promotion'
+    TYPE_SCHOOL         = 'school'
     TYPE_CHOICES = (
-        (TYPE_BASIC, 'BASIC'),
-        (TYPE_CURSUS, 'CURSUS/DEPARTMENT'),
-        (TYPE_ASSO, 'ASSOCIATION'),
-        (TYPE_PROMO, 'PROMOTION'),
-        (TYPE_SCHOOL, 'SCHOOL')
+        (TYPE_BASIC, 'Simple group'),
+        (TYPE_CURSUS, 'Cursus or department'),
+        (TYPE_ASSO, 'Association'),
+        (TYPE_PROMO, 'School promotion'),
+        (TYPE_SCHOOL, 'School')
     )
 
     name = models.CharField(max_length=254)
