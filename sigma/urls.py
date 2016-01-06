@@ -16,14 +16,19 @@ Including another URLconf
 from django.conf.urls import include, url
 from django.contrib import admin
 from rest_framework import routers
+from rest_framework_extensions.routers import ExtendedDefaultRouter
 
 from sigma_core.views.user import UserViewSet
 from sigma_core.views.group import GroupViewSet
+from sigma_core.views.user_group import UserGroupViewSet
 
-router = routers.DefaultRouter()
+router = ExtendedDefaultRouter()
 
-router.register(r'user', UserViewSet)
-router.register(r'group', GroupViewSet)
+router.register(r'user', UserViewSet, base_name='user')
+(
+    router.register(r'group', GroupViewSet, base_name='group')
+        .register(r'user', UserGroupViewSet, base_name='group-user', parents_query_lookups=['memberships__group'])
+)
 
 urlpatterns = [
     url(r'^admin/', include(admin.site.urls)),
