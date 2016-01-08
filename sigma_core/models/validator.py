@@ -39,7 +39,11 @@ def get_validator_by_name(name):
 
     # Validators map
     validators_map = {
-        'text': {
+        Validator.VALIDATOR_NONE: {
+            'validate_fields':    lambda f: True,
+            'validate_input':     lambda f,i: True,
+        },
+        Validator.VALIDATOR_TEXT: {
             'validate_fields':    text_validate_fields,
             'validate_input':     text_validate_input
         },
@@ -57,11 +61,19 @@ class Validator(models.Model):
         pass
 
     VALIDATOR_VALUES_DESCRIPTION_MAX_LENGTH     = 1024 # In serialized form
+    VALIDATOR_TEXT = 'text'
+    VALIDATOR_NONE = 'none'
+    VALIDATOR_HTML_CHOICES = (
+        (VALIDATOR_TEXT, 'Text'),
+        (VALIDATOR_NONE, 'None')
+    )
 
     # Displayed validator name
     display_name    = models.CharField(max_length=255)
     # HTML name (<input type="html_name">)
-    html_name       = models.CharField(max_length=255)
+    html_name       = models.CharField(max_length=255,
+                            choices=VALIDATOR_HTML_CHOICES,
+                            default=VALIDATOR_NONE)
     # Serialized JSON array (fieldName => fieldDescription)
     values          = models.CharField(max_length=VALIDATOR_VALUES_DESCRIPTION_MAX_LENGTH)
 
