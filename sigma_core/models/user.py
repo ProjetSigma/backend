@@ -1,8 +1,8 @@
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
-
 from dry_rest_permissions.generics import allow_staff_or_superuser, authenticated_users
 
+from sigma_core.models.group import Group
 
 class UserManager(BaseUserManager):
     def create_user(self, email, lastname, firstname, password=None):
@@ -54,6 +54,8 @@ class User(AbstractBaseUser):
     is_staff = models.BooleanField(default=False)
 
     objects = UserManager()
+
+    invited_to_groups = models.ManyToManyField(Group, blank=True, related_name="invited_users");
 
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['lastname', 'firstname']
