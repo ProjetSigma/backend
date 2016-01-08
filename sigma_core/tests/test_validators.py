@@ -43,3 +43,8 @@ class TextValidatorTests(TestCase):
         self.assertTrue(are_validator_fields_valid('text', fields))
         self.assertTrue(is_validator_input_valid('text', fields, 'file.png'))
         self.assertFalse(is_validator_input_valid('text', fields, 'file.exe'))
+    def test_evil_regex(self):
+        fields = {'regex': "^(([a-z])+.)+[A-Z]([a-z])+$", 'message': 'Err msg' }
+        value = 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa!'
+        self.assertTrue(are_validator_fields_valid('text', fields))
+        self.assertFalse(is_validator_input_valid('text', fields, value))

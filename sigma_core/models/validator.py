@@ -1,3 +1,5 @@
+import timeout_decorator
+
 from django.db import models
 
 from django.core.exceptions import ValidationError
@@ -24,9 +26,16 @@ def get_validator_by_name(name):
         re.compile(fields['regex']) # TODO: Is it safe to call re.compile with user input ? Possible infinite loops ... ?
         fields['message']
         return True
+    # Protection against Evil Regex. Only 50ms to evaluate regex - should be enough.
+    @timeout_decorator.timeout(0.05, use_signals=False)
+    def regex_check_timeout(regex, error_message, input):
+        RegexValidator(regex, error_message)(input)
     def text_validate_input(fields, input):
         if (fields['regex']):
-            RegexValidator(fields['regex'], fields['message'])(input) # TODO: Timeout ?
+            try:
+                regex_check_timeout(fields['regex'], fields['message'], input)
+            except timeout_decorator.TimeoutError:
+                raise ValidationError(fields['message'])
 
     # Validators map
     validators_map = {
@@ -34,7 +43,7 @@ def get_validator_by_name(name):
             'validate_fields':    text_validate_fields,
             'validate_input':     text_validate_input
         },
-        # TODO: Add validators here
+        # TODO: Register validators here
     }
 
     # Find matching validator
