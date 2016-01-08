@@ -43,7 +43,6 @@ INSTALLED_APPS = (
     'corsheaders',
     'debug_toolbar',
     'rest_framework_swagger',
-    'rest_framework_extensions',
     'oauth2_provider',
     'django_nose',
 
