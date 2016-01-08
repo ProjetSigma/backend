@@ -8,7 +8,7 @@ from sigma_core.serializers.user_group import UserGroupSerializer
 class BasicUserSerializerMeta:
     model = User
     exclude = ('is_staff', 'is_superuser', )
-    read_only_fields = ('last_login', 'is_active', )
+    read_only_fields = ('last_login', 'is_active', 'invited_to_groups', )
     extra_kwargs = {'password': {'write_only': True, 'required': False}}
 
 class BasicUserSerializer(serializers.ModelSerializer):
