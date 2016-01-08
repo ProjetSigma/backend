@@ -4,7 +4,7 @@ djangorestframework==3.3.2
 djangorestframework-jwt==1.7.2
 django-rest-swagger==0.3.4
 dry-rest-permissions==0.1.5
-git+ssh://git@github.com/chibisov/drf-extensions.git
+git+https://github.com/chibisov/drf-extensions@master
 
 django-cors-headers==1.1.0
 django-extensions==1.5.9
