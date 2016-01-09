@@ -39,7 +39,7 @@ class UserViewSet(viewsets.ModelViewSet):
         try:
             user = User.objects.get(pk=pk)
         except User.DoesNotExist:
-            return Http404()
+            raise Http404()
 
         # Use DetailedUserWithPermsSerializer to have the groups whom user belongs to
         serializer = DetailedUserWithPermsSerializer(user, context={'request': request})
@@ -49,7 +49,7 @@ class UserViewSet(viewsets.ModelViewSet):
         try:
             user = User.objects.get(pk=pk)
         except User.DoesNotExist:
-            return Http404()
+            raise Http404()
 
         # Names edition is allowed to Sigma admins only
         if ((request.data['lastname'] != user.lastname or request.data['firstname'] != user.firstname)) and not (request.user.is_sigma_admin()):
