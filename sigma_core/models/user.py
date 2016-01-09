@@ -69,6 +69,9 @@ class User(AbstractBaseUser):
     def get_short_name(self):
         return self.email
 
+    def is_sigma_admin(self):
+        return self.is_staff or self.is_superuser
+
     # Perms for admin site
     def has_perm(self, perm, obj=None):
         return True

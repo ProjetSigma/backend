@@ -52,7 +52,7 @@ class UserViewSet(viewsets.ModelViewSet):
             return Http404()
 
         # Names edition is allowed to Sigma admins only
-        if ((request.data['lastname'] != user.lastname or request.data['firstname'] != user.firstname)) and not (request.user.is_staff or request.user.is_superuser):
+        if ((request.data['lastname'] != user.lastname or request.data['firstname'] != user.firstname)) and not (request.user.is_sigma_admin()):
             return Response('You cannot change your lastname or firstname', status=status.HTTP_400_BAD_REQUEST)
 
         return super(UserViewSet, self).update(request, pk)
