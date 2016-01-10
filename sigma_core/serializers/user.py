@@ -2,7 +2,7 @@ from rest_framework import serializers
 from dry_rest_permissions.generics import DRYPermissionsField
 
 from sigma_core.models.user import User
-from sigma_core.serializers.user_group import UserGroupSerializer
+from sigma_core.serializers.group_member import GroupMemberSerializer
 
 
 class BasicUserSerializerMeta:
@@ -36,7 +36,7 @@ class DetailedUserSerializer(BasicUserSerializer):
     class Meta(BasicUserSerializerMeta):
         pass
 
-    memberships = UserGroupSerializer(read_only=True, many=True)
+    memberships = GroupMemberSerializer(read_only=True, many=True)
 
 
 class DetailedUserWithPermsSerializer(DetailedUserSerializer):

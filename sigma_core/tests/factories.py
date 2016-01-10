@@ -30,7 +30,7 @@ class GroupFactory(factory.django.DjangoModelFactory):
     name = factory.Sequence(lambda n: 'Group %d' % n)
 
 
-class UserGroupFactory(factory.django.DjangoModelFactory):
+class GroupMemberFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = UserGroup
 

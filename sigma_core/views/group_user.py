@@ -10,9 +10,8 @@ from rest_framework_extensions.mixins import NestedViewSetMixin, DetailSerialize
 from dry_rest_permissions.generics import DRYPermissions
 
 from sigma_core.models.user import User
-from sigma_core.models.user_group import UserGroup
+from sigma_core.models.group_member import GroupMember
 from sigma_core.serializers.user import BasicUserWithPermsSerializer, DetailedUserWithPermsSerializer, DetailedUserSerializer
-from sigma_core.serializers.user_group import UserGroupSerializer
 
 class GroupUserViewSet(NestedViewSetMixin,
                     DetailSerializerMixin,

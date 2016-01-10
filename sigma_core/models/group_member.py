@@ -3,7 +3,7 @@ from django.db import models
 from sigma_core.models.user import User
 from sigma_core.models.group import Group
 
-class UserGroup(models.Model):
+class GroupMember(models.Model):
     """
     Modelize a membership relation between an User and a Group.
     """
