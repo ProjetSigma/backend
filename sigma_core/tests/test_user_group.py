@@ -31,6 +31,28 @@ class UserGroupTests(APITestCase):
 
 
 #### List requests
+    def test_list_user_unauthed(self):
+        # Client is not authenticated
+        response = self.client.get('/group/%d/user/' % (self.group12.id))
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    def test_list_user_forbidden_client_not_in_group(self):
+        # Client authenticated but is not in Group
+        self.client.force_authenticate(user=self.user4)
+        response = self.client.get('/group/%d/user/' % (self.group12.id))
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_list_user_forbidden_join_request_not_confirmed(self):
+        # Client authenticated, in Group, but not accepted in Group
+        self.client.force_authenticate(user=self.user3)
+        response = self.client.get('/group/%d/user/' % (self.group12.id))
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_list_user_ok(self):
+        # Client has permissions
+        self.client.force_authenticate(user=self.user2)
+        response = self.client.get('/group/%d/user/' % (self.group12.id))
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
 
 #### Get requests
     def test_get_user_unauthed(self):

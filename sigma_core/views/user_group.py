@@ -31,8 +31,9 @@ class UserGroupViewSet(NestedViewSetMixin, DetailSerializerMixin, viewsets.Model
         return func_wrapper
 
     # API calls
-    def list(self, request):
-        pass
+    @require_group_member
+    def list(self, request, *args, **kwargs):
+        return super().list(self, request, *args, **kwargs)
 
     def create(self, request):
         pass
