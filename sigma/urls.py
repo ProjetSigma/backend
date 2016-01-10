@@ -26,8 +26,13 @@ router = ExtendedDefaultRouter()
 
 router.register(r'user', UserViewSet, base_name='user')
 (
-    router.register(r'group', GroupViewSet, base_name='group')
-        .register(r'user', UserGroupViewSet, base_name='group-user', parents_query_lookups=['memberships__group'])
+    router.register(r'group',
+            GroupViewSet,
+            base_name='group')
+        .register(r'user',
+            UserGroupViewSet,
+            base_name='group-user',
+            parents_query_lookups=['memberships__group'])
 )
 
 urlpatterns = [

@@ -20,11 +20,11 @@ class UserGroup(models.Model):
     perm_rank = models.SmallIntegerField(blank=False, default=1)
 
     def can_invite(self):
-        return perm_rank >= group.req_rank_invite
+        return self.perm_rank >= self.group.req_rank_invite
     def can_kick(self):
-        return perm_rank >= group.req_rank_kick
+        return self.perm_rank >= self.group.req_rank_kick
 
     def is_accepted(self):
-        return perm_rank > 0
+        return self.perm_rank > 0
     def __str__(self):
         return "User \"%s\" r%d in Group \"%s\"" % (self.user.__str__(), self.perm_rank, self.group.__str__())
