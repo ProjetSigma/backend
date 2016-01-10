@@ -20,7 +20,7 @@ from rest_framework_extensions.routers import ExtendedDefaultRouter
 
 from sigma_core.views.user import UserViewSet
 from sigma_core.views.group import GroupViewSet
-from sigma_core.views.user_group import UserGroupViewSet
+from sigma_core.views.group_user import GroupUserViewSet
 
 router = ExtendedDefaultRouter()
 
@@ -30,7 +30,7 @@ router.register(r'user', UserViewSet, base_name='user')
             GroupViewSet,
             base_name='group')
         .register(r'user',
-            UserGroupViewSet,
+            GroupUserViewSet,
             base_name='group-user',
             parents_query_lookups=['memberships__group'])
 )

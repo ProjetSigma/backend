@@ -75,6 +75,14 @@ class User(AbstractBaseUser):
     def is_sigma_admin(self):
         return self.is_staff or self.is_superuser
 
+    def is_group_member(self, g):
+        user_group_relation = self.memberships.filter(group=g)
+        if not user_group_relation:
+            return False
+        if not user_group_relation[0].is_accepted():
+            return False
+        return True
+
     # Perms for admin site
     def has_perm(self, perm, obj=None):
         return True

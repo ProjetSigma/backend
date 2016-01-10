@@ -9,7 +9,6 @@ from sigma_core.serializers.group import BasicGroupSerializer
 class UserGroupSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserGroup
-        read_only_fields = ('perm_rank', )
 
     user = serializers.PrimaryKeyRelatedField(queryset=User.objects.all())
     group = BasicGroupSerializer()
