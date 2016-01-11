@@ -5,7 +5,7 @@ from django.utils.text import slugify
 
 from sigma_core.models.user import User
 from sigma_core.models.group import Group
-from sigma_core.models.user_group import UserGroup
+from sigma_core.models.group_member import GroupMember
 
 faker = FakerFactory.create('fr_FR')
 
@@ -32,7 +32,7 @@ class GroupFactory(factory.django.DjangoModelFactory):
 
 class GroupMemberFactory(factory.django.DjangoModelFactory):
     class Meta:
-        model = UserGroup
+        model = GroupMember
 
     user = factory.SubFactory(UserFactory)
     group = factory.SubFactory(GroupFactory)
