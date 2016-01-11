@@ -1,8 +1,4 @@
 from django.http import Http404
-try:
-    from django.utils import six
-except ImportError:
-    from rest_framework import six
 
 from rest_framework import viewsets, decorators, status, mixins
 from rest_framework.response import Response
@@ -13,14 +9,7 @@ from sigma_core.models.user import User
 from sigma_core.models.group_member import GroupMember
 from sigma_core.serializers.user import BasicUserWithPermsSerializer, DetailedUserWithPermsSerializer, DetailedUserSerializer
 
-class GroupUserViewSet(NestedViewSetMixin,
-                    DetailSerializerMixin,
-                    #mixins.CreateModelMixin,
-                    mixins.RetrieveModelMixin,
-                    #mixins.UpdateModelMixin,
-                    #mixins.DestroyModelMixin,
-                    mixins.ListModelMixin,
-                    viewsets.GenericViewSet):
+class GroupUserViewSet(NestedViewSetMixin, DetailSerializerMixin, viewsets.ReadOnlyModelViewSet):
     permission_classes = (DRYPermissions, )
     queryset = User.objects.all()
     serializer_class = DetailedUserSerializer
@@ -29,14 +18,16 @@ class GroupUserViewSet(NestedViewSetMixin,
 
     # Decorators
     def require_group_member(func):
+        """
+        Let the user see the data if he is member of the requested group or if he is admin.
+        """
         def func_wrapper(self, request, parent_lookup_memberships__group=None, *args, **kwargs):
             # Need to be authed
-            #import pdb; pdb.set_trace()
             if request.user.__class__.__name__ == 'AnonymousUser':
                 return Response(status=status.HTTP_401_UNAUTHORIZED)
             # Need to be part of the group you want to see the members of
             if not request.user.is_sigma_admin() and not request.user.is_group_member(parent_lookup_memberships__group):
-                return Response(status=status.HTTP_403_FORBIDDEN)
+                parent_lookup_memberships__group = None
             return func(self, request, group=parent_lookup_memberships__group, *args, **kwargs)
         return func_wrapper
 

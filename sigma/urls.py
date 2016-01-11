@@ -21,6 +21,7 @@ from rest_framework_extensions.routers import ExtendedDefaultRouter
 from sigma_core.views.user import UserViewSet
 from sigma_core.views.group import GroupViewSet
 from sigma_core.views.group_user import GroupUserViewSet
+from sigma_core.views.group_member import GroupMemberViewSet
 
 router = ExtendedDefaultRouter()
 
@@ -33,6 +34,15 @@ router.register(r'user', UserViewSet, base_name='user')
             GroupUserViewSet,
             base_name='group-user',
             parents_query_lookups=['memberships__group'])
+)
+(
+    router.register(r'group',
+            None,
+            base_name='group')
+        .register(r'member',
+            GroupMemberViewSet,
+            base_name='group-member',
+            parents_query_lookups=['group'])
 )
 
 urlpatterns = [
