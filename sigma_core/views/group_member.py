@@ -23,16 +23,6 @@ class GroupMemberViewSet(NestedViewSetMixin,
     queryset_detail = queryset
     serializer_detail_class = GroupMemberSerializer_WithUser
 
-    def get_serializer(self, *args, **kwargs):
-        """
-        Return the serializer instance that should be used for validating and
-        deserializing input, and for serializing output.
-        """
-        serializer_class    = self.get_serializer_class()
-        kwargs['context']   = self.get_serializer_context()
-        #kwargs['group']     = self.kwargs['parent_lookup_group']
-        return serializer_class(*args, **kwargs)
-
     # Decorators
     def require_group_member(func):
         """
