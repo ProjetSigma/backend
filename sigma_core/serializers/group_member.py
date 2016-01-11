@@ -19,5 +19,5 @@ class DetailedGroupMemberSerializer(serializers.ModelSerializer):
     class Meta:
         model = GroupMember
 
-    user = serializers.PrimaryKeyRelatedField(queryset=User.objects.all())
+    user = BasicUserSerializer()
     group = BasicGroupSerializer()

@@ -11,7 +11,7 @@ from sigma_core.serializers.user import BasicUserWithPermsSerializer, DetailedUs
 from sigma_core.serializers.group_member import GroupMemberSerializer
 
 class GroupMemberViewSet(NestedViewSetMixin, DetailSerializerMixin, viewsets.ReadOnlyModelViewSet):
-    permission_classes = (DRYPermissions, )
+    #permission_classes = (DRYPermissions, )
     queryset = GroupMember.objects.all()
     serializer_class = GroupMemberSerializer
     queryset_detail = queryset
@@ -45,10 +45,10 @@ class GroupMemberViewSet(NestedViewSetMixin, DetailSerializerMixin, viewsets.Rea
         response_serializer: DetailedUserWithPermsSerializer
         """
         try:
-            member = self.queryset.filter(user=pk).get(memberships__group=parent_lookup_group)
+            member = self.queryset.filter(user=pk).get(group=parent_lookup_group)
         except GroupMember.DoesNotExist:
             raise Http404()
 
         # Use DetailedUserWithPermsSerializer to have the groups whom user belongs to
-        serializer = self.get_serializer()(member, context={'request': request})
+        serializer = GroupMemberSerializer(member, context={'request': request})
         return Response(serializer.data, status=status.HTTP_200_OK)

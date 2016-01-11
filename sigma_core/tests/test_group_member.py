@@ -10,10 +10,10 @@ from sigma_core.serializers.user import DetailedUserSerializer as UserSerializer
 from sigma_core.models.user import User
 from sigma_core.models.group import Group
 
-class GroupUserTests(APITestCase):
+class GroupMemberTests(APITestCase):
     @classmethod
     def setUpTestData(self):
-        super(GroupUserTests, self).setUpTestData()
+        super(GroupMemberTests, self).setUpTestData()
         self.user1 = UserFactory()
         self.user2 = UserFactory()
         self.user3 = UserFactory()
@@ -33,55 +33,55 @@ class GroupUserTests(APITestCase):
 #### List requests
     def test_list_user_unauthed(self):
         # Client is not authenticated
-        response = self.client.get('/group/%d/user/' % (self.group12.id))
+        response = self.client.get('/group/%d/member/' % (self.group12.id))
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
     def test_list_user_forbidden_client_not_in_group(self):
         # Client authenticated but is not in Group
         self.client.force_authenticate(user=self.user4)
-        response = self.client.get('/group/%d/user/' % (self.group12.id))
+        response = self.client.get('/group/%d/member/' % (self.group12.id))
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_list_user_forbidden_join_request_not_confirmed(self):
         # Client authenticated, in Group, but not accepted in Group
         self.client.force_authenticate(user=self.user3)
-        response = self.client.get('/group/%d/user/' % (self.group12.id))
+        response = self.client.get('/group/%d/member/' % (self.group12.id))
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_list_user_ok(self):
         # Client has permissions
         self.client.force_authenticate(user=self.user2)
-        response = self.client.get('/group/%d/user/' % (self.group12.id))
+        response = self.client.get('/group/%d/member/' % (self.group12.id))
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
 #### Get requests
     def test_get_user_unauthed(self):
         # Client is not authenticated
-        response = self.client.get('/group/%d/user/%d/' % (self.group12.id, self.user1.id))
+        response = self.client.get('/group/%d/member/%d/' % (self.group12.id, self.user1.id))
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
     def test_get_user_forbidden_client_not_in_group(self):
         # Client authenticated but is not in Group
         self.client.force_authenticate(user=self.user4)
-        response = self.client.get('/group/%d/user/%d/' % (self.group12.id, self.user1.id))
+        response = self.client.get('/group/%d/member/%d/' % (self.group12.id, self.user1.id))
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_get_user_forbidden_join_request_not_confirmed(self):
         # Client authenticated, in Group, but not accepted in Group
         self.client.force_authenticate(user=self.user3)
-        response = self.client.get('/group/%d/user/%d/' % (self.group12.id, self.user1.id))
+        response = self.client.get('/group/%d/member/%d/' % (self.group12.id, self.user1.id))
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_get_user_forbidden_user_not_in_group(self):
         # Client authenticated and in group, but requesting a user not in group
         self.client.force_authenticate(user=self.user2)
-        response = self.client.get('/group/%d/user/%d/' % (self.group12.id, self.user4.id))
+        response = self.client.get('/group/%d/member/%d/' % (self.group12.id, self.user4.id))
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_get_user_ok(self):
         # Client has permissions
         self.client.force_authenticate(user=self.user2)
-        response = self.client.get('/group/%d/user/%d/' % (self.group12.id, self.user1.id))
+        response = self.client.get('/group/%d/member/%d/' % (self.group12.id, self.user1.id))
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 #### "Get my data" requests
 
