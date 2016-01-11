@@ -8,14 +8,30 @@ from dry_rest_permissions.generics import DRYPermissions
 from sigma_core.models.user import User
 from sigma_core.models.group_member import GroupMember
 from sigma_core.serializers.user import BasicUserWithPermsSerializer, DetailedUserWithPermsSerializer, DetailedUserSerializer
-from sigma_core.serializers.group_member import GroupMemberSerializer
+from sigma_core.serializers.group_member import GroupMemberSerializer_WithUser
 
-class GroupMemberViewSet(NestedViewSetMixin, DetailSerializerMixin, viewsets.ReadOnlyModelViewSet):
-    #permission_classes = (DRYPermissions, )
+class GroupMemberViewSet(NestedViewSetMixin,
+            DetailSerializerMixin,
+            mixins.CreateModelMixin,
+            mixins.RetrieveModelMixin,
+            #mixins.UpdateModelMixin,
+            #mixins.DestroyModelMixin,
+            mixins.ListModelMixin,
+            viewsets.GenericViewSet):
     queryset = GroupMember.objects.all()
-    serializer_class = GroupMemberSerializer
+    serializer_class = GroupMemberSerializer_WithUser
     queryset_detail = queryset
-    serializer_detail_class = GroupMemberSerializer
+    serializer_detail_class = GroupMemberSerializer_WithUser
+
+    def get_serializer(self, *args, **kwargs):
+        """
+        Return the serializer instance that should be used for validating and
+        deserializing input, and for serializing output.
+        """
+        serializer_class    = self.get_serializer_class()
+        kwargs['context']   = self.get_serializer_context()
+        #kwargs['group']     = self.kwargs['parent_lookup_group']
+        return serializer_class(*args, **kwargs)
 
     # Decorators
     def require_group_member(func):
@@ -50,5 +66,9 @@ class GroupMemberViewSet(NestedViewSetMixin, DetailSerializerMixin, viewsets.Rea
             raise Http404()
 
         # Use DetailedUserWithPermsSerializer to have the groups whom user belongs to
-        serializer = GroupMemberSerializer(member, context={'request': request})
+        serializer = GroupMemberSerializer_WithUser(member, context={'request': request})
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+    @require_group_member
+    def create(self, request, parent_lookup_group, *args, **kwargs):
+        return super().create(self, request, parent_lookup_group, *args, **kwargs)

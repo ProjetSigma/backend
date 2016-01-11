@@ -22,12 +22,12 @@ class GroupSubRoutesGroupMembershipTests():
         self.admin_user = AdminUserFactory()
 
         # Create a group for 1, 2 and 3
-        self.group12 = GroupFactory()
         # 1 is admin
-        self.user1group12 = GroupMemberFactory(user=self.user1, group=self.group12, perm_rank=Group.ADMINISTRATOR_RANK)
         # 2 is member
-        self.user2group12 = GroupMemberFactory(user=self.user2, group=self.group12, perm_rank=1)
         # 3 requests a join
+        self.group12 = GroupFactory()
+        self.user1group12 = GroupMemberFactory(user=self.user1, group=self.group12, perm_rank=Group.ADMINISTRATOR_RANK)
+        self.user2group12 = GroupMemberFactory(user=self.user2, group=self.group12, perm_rank=1)
         self.user3group12 = GroupMemberFactory(user=self.user3, group=self.group12, perm_rank=0)
 
 

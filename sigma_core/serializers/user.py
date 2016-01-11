@@ -3,7 +3,6 @@ from dry_rest_permissions.generics import DRYPermissionsField
 
 from sigma_core.models.user import User
 
-
 class BasicUserSerializerMeta:
     model = User
     exclude = ('is_staff', 'is_superuser', )
@@ -18,7 +17,7 @@ class BasicUserSerializer(serializers.ModelSerializer):
         pass
 
 
-from sigma_core.serializers.group_member import DetailedGroupMemberSerializer
+from sigma_core.serializers.group_member import GroupMemberSerializer_WithGroup
 
 class BasicUserWithPermsSerializer(BasicUserSerializer):
     """
@@ -37,7 +36,7 @@ class DetailedUserSerializer(BasicUserSerializer):
     class Meta(BasicUserSerializerMeta):
         pass
 
-    memberships = DetailedGroupMemberSerializer(read_only=True, many=True)
+    memberships = GroupMemberSerializer_WithGroup(read_only=True, many=True)
 
 
 class DetailedUserWithPermsSerializer(DetailedUserSerializer):
