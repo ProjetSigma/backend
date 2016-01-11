@@ -5,6 +5,9 @@ from dry_rest_permissions.generics import allow_staff_or_superuser, authenticate
 from sigma_core.models.group import Group
 
 class UserManager(BaseUserManager):
+    def get_queryset(self):
+        return super(UserManager, self).get_queryset().prefetch_related('invited_to_groups')
+
     def create_user(self, email, lastname, firstname, password=None):
         """
         Creates and saves a User with the given email, lastname, firstname and password

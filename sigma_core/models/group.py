@@ -1,6 +1,11 @@
 from django.db import models
 
 
+class GroupManager(models.Manager):
+    def get_queryset(self):
+        return super(GroupManager, self).get_queryset().prefetch_related('memberships')
+
+
 class Group(models.Model):
     class Meta:
         pass
@@ -51,6 +56,8 @@ class Group(models.Model):
     # Related fields:
     #   - invited_users (model User)
     #   - memberships (model UserGroup)
+
+    objects = GroupManager()
 
     def can_anyone_join(self):
         return default_member_rank >= 0
