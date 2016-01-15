@@ -9,7 +9,7 @@ from sigma_core.models.user import User
 from sigma_core.models.group_member import GroupMember
 from sigma_core.serializers.user import BasicUserWithPermsSerializer, DetailedUserWithPermsSerializer, DetailedUserSerializer
 
-class GroupUserViewSet(NestedViewSetMixin, DetailSerializerMixin, viewsets.ReadOnlyModelViewSet):
+class GroupUserViewSet(DetailSerializerMixin, viewsets.ReadOnlyModelViewSet):
     permission_classes = (DRYPermissions, )
     queryset = User.objects.all()
     serializer_class = DetailedUserSerializer

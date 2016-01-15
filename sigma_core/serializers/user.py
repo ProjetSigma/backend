@@ -3,10 +3,10 @@ from dry_rest_permissions.generics import DRYPermissionsField
 
 from sigma_core.models.user import User
 
-class BasicUserSerializerMeta:
+class BasicUserSerializerMeta(object):
     model = User
-    exclude = ('is_staff', 'is_superuser', )
-    read_only_fields = ('last_login', 'is_active', 'invited_to_groups', )
+    exclude = ('is_staff', 'is_superuser', 'invited_to_groups', )
+    read_only_fields = ('last_login', 'is_active', ) # TODO: serialize invited_to_groups correctly
     extra_kwargs = {'password': {'write_only': True, 'required': False}}
 
 class BasicUserSerializer(serializers.ModelSerializer):
@@ -34,7 +34,8 @@ class DetailedUserSerializer(BasicUserSerializer):
     Serialize full data about an User.
     """
     class Meta(BasicUserSerializerMeta):
-        pass
+        exclude = ('is_staff', 'is_superuser', )
+        read_only_fields = BasicUserSerializerMeta.read_only_fields + ('invited_to_groups', )
 
     memberships = GroupMemberSerializer_WithGroup(read_only=True, many=True)
 
@@ -44,6 +45,7 @@ class DetailedUserWithPermsSerializer(DetailedUserSerializer):
     Serialize full data about an User and add current user's permissions on the serialized User.
     """
     class Meta(BasicUserSerializerMeta):
-        pass
+        exclude = ('is_staff', 'is_superuser', )
+        read_only_fields = BasicUserSerializerMeta.read_only_fields + ('invited_to_groups', )
 
     permissions = DRYPermissionsField(read_only=True)

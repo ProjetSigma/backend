@@ -1,9 +1,9 @@
 from django.db import models
 
 
-class GroupManager(models.Manager):
-    def get_queryset(self):
-        return super(GroupManager, self).get_queryset().prefetch_related('memberships')
+# class GroupManager(models.Manager):
+#     def get_queryset(self):
+#         return super(GroupManager, self).get_queryset().prefetch_related('memberships')
 
 
 class Group(models.Model):
@@ -57,9 +57,10 @@ class Group(models.Model):
     #   - invited_users (model User)
     #   - memberships (model UserGroup)
 
-    objects = GroupManager()
+    # objects = GroupManager()
 
     def can_anyone_join(self):
         return default_member_rank >= 0
+
     def __str__(self):
         return "%s (%s)" % (self.name, self.get_type_display())

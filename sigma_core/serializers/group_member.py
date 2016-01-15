@@ -11,8 +11,15 @@ class GroupMemberSerializer(serializers.ModelSerializer):
     class Meta:
         model = GroupMember
 
+    user = serializers.PrimaryKeyRelatedField(queryset=User.objects.all())
+    group = serializers.PrimaryKeyRelatedField(queryset=Group.objects.all())
+
 class GroupMemberSerializer_WithUser(GroupMemberSerializer):
     user = BasicUserSerializer()
 
 class GroupMemberSerializer_WithGroup(GroupMemberSerializer):
+    group = BasicGroupSerializer()
+
+class GroupMemberSerializer_WithUserAndGroup(GroupMemberSerializer):
+    user = BasicUserSerializer()
     group = BasicGroupSerializer()
