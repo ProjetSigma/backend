@@ -1,17 +1,18 @@
-Django==1.9
+Django == 1.9
 
-djangorestframework==3.3.2
-djangorestframework-jwt==1.7.2
-django-rest-swagger==0.3.4
-dry-rest-permissions==0.1.5
+djangorestframework == 3.3.2
+djangorestframework-jwt == 1.7.2
+django-rest-swagger == 0.3.4
+dry-rest-permissions == 0.1.6
 git+https://github.com/chibisov/drf-extensions@master
 
-django-cors-headers==1.1.0
-django-extensions==1.5.9
-django-filter==0.10.0
+# django-cors-headers == 1.1.0
+django-cors-middleware # Fork of django-cors-header with Django 1.9 support
+django-extensions >= 1.5.9
+django-filter == 0.10.0
 
-django-oauth-toolkit==0.9.0
+django-oauth-toolkit == 0.10.0
 
-markdown==2.6.2
-Pillow==3.0.0
-mysqlclient==1.3.7
+markdown >= 2.6.5
+Pillow >= 3.1.0
+mysqlclient >= 1.3.7
