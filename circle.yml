@@ -8,5 +8,5 @@ dependencies:
     - pip install -r requirements/dev.txt
 
 checkout:
-    post:
-        cp ./sigma/settings_default.py ./sigma/settings.py
+  post:
+    - cp ./sigma/settings_default.py ./sigma/settings.py
