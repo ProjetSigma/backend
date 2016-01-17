@@ -60,7 +60,7 @@ class Group(models.Model):
     # objects = GroupManager()
 
     def can_anyone_join(self):
-        return default_member_rank >= 0
+        return self.default_member_rank >= 0
 
     def __str__(self):
         return "%s (%s)" % (self.name, self.get_type_display())

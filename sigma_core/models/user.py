@@ -86,6 +86,14 @@ class User(AbstractBaseUser):
             return False
         return True
 
+    def can_invite(self, group):
+        from sigma_core.models.group_member import GroupMember
+        try:
+            mem = GroupMember.objects.get(user=self, group=group)
+        except GroupMember.DoesNotExist:
+            return False
+        return mem.perm_rank >= group.req_rank_invite
+
     # Perms for admin site
     def has_perm(self, perm, obj=None):
         return True
