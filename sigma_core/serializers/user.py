@@ -17,8 +17,7 @@ class BasicUserSerializer(serializers.ModelSerializer):
         pass
 
 
-from sigma_core.serializers.group_member import GroupMemberSerializer_WithGroup
-
+from sigma_core.serializers.group_member import GroupMemberSerializer
 class BasicUserWithPermsSerializer(BasicUserSerializer):
     """
     Serialize an User without relations and add current user's permissions on the serialized User.
@@ -37,7 +36,7 @@ class DetailedUserSerializer(BasicUserSerializer):
         exclude = ('is_staff', 'is_superuser', )
         read_only_fields = BasicUserSerializerMeta.read_only_fields + ('invited_to_groups', )
 
-    memberships = GroupMemberSerializer_WithGroup(read_only=True, many=True)
+    memberships = serializers.PrimaryKeyRelatedField(read_only=True, many=True)
 
 
 class DetailedUserWithPermsSerializer(DetailedUserSerializer):

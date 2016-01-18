@@ -22,7 +22,6 @@ class GroupMember(models.Model):
     leave_date = models.DateField(blank=True, null=True)
     perm_rank = models.SmallIntegerField(blank=False, default=1)
 
-
     def can_invite(self):
         return self.perm_rank >= self.group.req_rank_invite
 
@@ -57,19 +56,16 @@ class GroupMember(models.Model):
     @staticmethod
     @allow_staff_or_superuser
     def has_create_permission(request):
-        try:
-            # Not optimal. IDEA: pass group and user object through request? 
-            group = Group.objects.get(pk=request.data.get('group', None))
-            user = User.objects.get(pk=request.data.get('user', None))
-        except (Group.DoesNotExist, User.DoesNotExist):
-            raise Http404()
-
-        if request.user == user:
-            return group.can_anyone_join()
-        if group.can_anyone_join():
-            # To prevent abusive addition of people to an open group
+        if request.data.get('user') and request.user.id != request.data.get('user'):
             return False
-        return request.user.can_invite(group)
+        try:
+            group_id = request.data.get('group', None)
+            if group_id:
+                request.group = Group.objects.get(pk=group_id)
+                return request.group.can_anyone_join()
+            return True
+        except Group.DoesNotExist:
+            raise Http404()
 
     @allow_staff_or_superuser
     def has_object_write_permission(self, request):
