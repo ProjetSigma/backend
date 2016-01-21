@@ -5,3 +5,5 @@
 /htmlcov
 /secret.key
 env/
+sigma/settings.py
+
