@@ -73,3 +73,7 @@ class GroupMember(models.Model):
         TODO: implement that.
         """
         return True
+
+    @allow_staff_or_superuser
+    def has_object_accept_join_request_permission(self, request):
+        return request.user.can_accept_join_requests(self.group)

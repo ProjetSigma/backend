@@ -34,11 +34,22 @@ class GroupMemberViewSet(viewsets.ModelViewSet):
     # @decorators.detail_route(methods=['put'])
     # def demote(self, request, pk=None):
     #     pass
-    #
-    # @decorators.detail_route(methods=['put'])
-    # def accept_join_request(self, request, pk=None):
-    #     pass
-    #
+
+    @decorators.detail_route(methods=['put'])
+    def accept_join_request(self, request, pk=None):
+        try:
+            gm = GroupMember.objects.select_related('group').get(pk=pk)
+        except GroupMember.DoesNotExist:
+            raise Http404()
+
+        gm.perm_rank = 1 # default_perm_rank should be 0, so validation is to set perm_rank to 1
+        gm.save()
+
+        # TODO: notify user of that change
+
+        s = GroupMemberSerializer(gm)
+        return Response(s.data, status=status.HTTP_200_OK)
+
     # @decorators.detail_route(methods=['put'])
     # def kick(self, request, pk=None):
     #     pass
