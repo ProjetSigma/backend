@@ -122,3 +122,22 @@ class InvitationGroupMemberCreationTests(APITestCase):
 
         # Group with invitation only
         self.group = GroupFactory()
+        self.group.req_rank_invite = 5
+        self.group.save()
+
+        # Testing user
+        self.user = UserFactory()
+
+        # Misc
+        self.new_membership_data = {"user": self.user.id, "group": self.group.id}
+
+        def test_create_not_authed(self):
+            self.client.force_authenticate(user=None)
+            response = self.client.post(self.members_url, self.new_membership_data)
+            self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+        def test_create_forbidden(self):
+            # Attempt to get group membership
+            self.client.force_authenticate(user=self.user)
+            response = self.client.post(self.members_url, self.new_membership_data)
+            self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
