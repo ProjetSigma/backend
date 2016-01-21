@@ -6,6 +6,7 @@ from django.http import Http404
 
 from rest_framework import viewsets, decorators, status
 from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from dry_rest_permissions.generics import DRYPermissions
 
 from sigma_core.models.user import User
@@ -26,7 +27,7 @@ L'équipe Sigma.
 
 # TODO: use DetailSerializerMixin
 class UserViewSet(viewsets.ModelViewSet):
-    permission_classes = (DRYPermissions, )
+    permission_classes = [IsAuthenticated, DRYPermissions, ]
     queryset = User.objects.all()
     serializer_class = BasicUserWithPermsSerializer # by default, basic data and permissions
 
@@ -101,7 +102,7 @@ class UserViewSet(viewsets.ModelViewSet):
         user.save()
         return Response('Password successfully changed', status=status.HTTP_200_OK)
 
-    @decorators.list_route(methods=['post'])
+    @decorators.list_route(methods=['post'], permission_classes=[AllowAny])
     def reset_password(self, request):
         """
         Reset current user's password and send him an email with the new one.

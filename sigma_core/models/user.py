@@ -1,6 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
-from dry_rest_permissions.generics import allow_staff_or_superuser, authenticated_users
+from dry_rest_permissions.generics import allow_staff_or_superuser
 
 from sigma_core.models.group import Group
 
@@ -87,20 +87,28 @@ class User(AbstractBaseUser):
         return True
 
     def can_invite(self, group):
-        from sigma_core.models.group_member import GroupMember
+        # from sigma_core.models.group_member import GroupMember
         try:
-            mem = GroupMember.objects.get(user=self, group=group)
+            mem = self.memberships.get(group=group)
         except GroupMember.DoesNotExist:
             return False
         return mem.perm_rank >= group.req_rank_invite
 
     def can_accept_join_requests(self, group):
-        from sigma_core.models.group_member import GroupMember
+        # from sigma_core.models.group_member import GroupMember
         try:
-            mem = GroupMember.objects.get(user=self, group=group)
+            mem = self.memberships.get(group=group)
         except GroupMember.DoesNotExist:
             return False
         return mem.perm_rank >= group.req_rank_accept_join_requests
+
+    def can_modify_group_infos(self, group):
+        from sigma_core.models.group_member import GroupMember
+        try:
+            mem = self.memberships.get(group=group)
+        except GroupMember.DoesNotExist:
+            return False
+        return mem.perm_rank >= group.req_rank_modify_group_infos
 
 
     # Perms for admin site
@@ -112,14 +120,12 @@ class User(AbstractBaseUser):
 
     # Permissions
     @staticmethod
-    @authenticated_users
     def has_read_permission(request):
         """
         Only authenticated users can retrieve an users list.
         """
         return True
 
-    @authenticated_users
     def has_object_read_permission(self, request):
         """
         Only authenticated users can retrieve an user.

@@ -1,5 +1,6 @@
 from django.db import models
 
+from dry_rest_permissions.generics import allow_staff_or_superuser
 
 # class GroupManager(models.Manager):
 #     def get_queryset(self):
@@ -64,3 +65,54 @@ class Group(models.Model):
 
     def __str__(self):
         return "%s (%s)" % (self.name, self.get_type_display())
+
+    # Perms for admin site
+    def has_perm(self, perm, obj=None):
+        return True
+
+    def has_module_perms(self, app_label):
+        return True
+
+    # Permissions
+    @staticmethod
+    def has_read_permission(request):
+        """
+        All groups are visible by default.
+        """
+        return True
+
+    def has_object_read_permission(self, request):
+        """
+        Public groups are visible by everybody. Private groups are only visible by members.
+        """
+        return self.visibility == Group.VIS_PUBLIC or request.user.is_group_member(self)
+
+    @staticmethod
+    def has_write_permission(request):
+        return True
+
+    @staticmethod
+    @allow_staff_or_superuser
+    def has_create_permission(request):
+        """
+        Everybody can create a private. For other types, user must be school admin or sigma admin.
+        """
+        #TODO: Adapt after School model implementation.
+        group_type = request.data.get('type', None)
+        if group_type is not None:
+            return group_type == Group.TYPE_BASIC
+        return True
+
+    def has_object_write_permission(self, request):
+        return False
+
+    @allow_staff_or_superuser
+    def has_object_update_permission(self, request):
+        """
+        Only group's admins and Sigma admins can edit a group.
+        """
+        return request.user.can_modify_group_infos(self)
+
+    @allow_staff_or_superuser
+    def has_object_invite_permission(self, request):
+        return request.user.can_invite(self)

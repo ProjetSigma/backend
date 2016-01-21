@@ -72,7 +72,7 @@ class RequestGroupMemberCreationTests(APITestCase):
         self.group.save()
 
         # Users already in group
-        self.users = [UserFactory.batch_create(3)]
+        self.users = UserFactory.create_batch(3)
         # Associated GroupMember
         self.group_member1 = GroupMember(user=self.users[0], group=self.group, perm_rank=Group.ADMINISTRATOR_RANK) # can validate requests
         self.group_member2 = GroupMember(user=self.users[1], group=self.group, perm_rank=1) # cannot validate requests
