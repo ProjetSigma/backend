@@ -80,6 +80,7 @@ class User(AbstractBaseUser):
         return self.is_staff or self.is_superuser
 
     def is_group_member(self, g):
+        from sigma_core.models.group_member import GroupMember
         try:
             mem = self.memberships.get(group=g)
         except GroupMember.DoesNotExist:
@@ -87,6 +88,7 @@ class User(AbstractBaseUser):
         return mem.is_accepted()
 
     def can_invite(self, group):
+        from sigma_core.models.group_member import GroupMember
         try:
             mem = self.memberships.get(group=group)
         except GroupMember.DoesNotExist:
@@ -94,6 +96,7 @@ class User(AbstractBaseUser):
         return mem.perm_rank >= group.req_rank_invite
 
     def can_accept_join_requests(self, group):
+        from sigma_core.models.group_member import GroupMember
         try:
             mem = self.memberships.get(group=group)
         except GroupMember.DoesNotExist:
@@ -101,6 +104,7 @@ class User(AbstractBaseUser):
         return mem.perm_rank >= group.req_rank_accept_join_requests
 
     def can_modify_group_infos(self, group):
+        from sigma_core.models.group_member import GroupMember
         try:
             mem = self.memberships.get(group=group)
         except GroupMember.DoesNotExist:
