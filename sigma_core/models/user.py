@@ -5,8 +5,9 @@ from dry_rest_permissions.generics import allow_staff_or_superuser
 from sigma_core.models.group import Group
 
 class UserManager(BaseUserManager):
+    # TODO: Determine whether 'memberships' fields needs to be retrieved every time or not...
     # def get_queryset(self):
-    #     return super(UserManager, self).get_queryset().prefetch_related('invited_to_groups')
+    #     return super(UserManager, self).get_queryset().prefetch_related('memberships', 'invited_to_groups')
 
     def create_user(self, email, lastname, firstname, password=None):
         """
@@ -79,15 +80,13 @@ class User(AbstractBaseUser):
         return self.is_staff or self.is_superuser
 
     def is_group_member(self, g):
-        user_group_relation = self.memberships.filter(group=g)
-        if not user_group_relation:
+        try:
+            mem = self.memberships.get(group=g)
+        except GroupMember.DoesNotExist:
             return False
-        if not user_group_relation[0].is_accepted():
-            return False
-        return True
+        return mem.is_accepted()
 
     def can_invite(self, group):
-        # from sigma_core.models.group_member import GroupMember
         try:
             mem = self.memberships.get(group=group)
         except GroupMember.DoesNotExist:
@@ -95,7 +94,6 @@ class User(AbstractBaseUser):
         return mem.perm_rank >= group.req_rank_invite
 
     def can_accept_join_requests(self, group):
-        # from sigma_core.models.group_member import GroupMember
         try:
             mem = self.memberships.get(group=group)
         except GroupMember.DoesNotExist:
@@ -103,7 +101,6 @@ class User(AbstractBaseUser):
         return mem.perm_rank >= group.req_rank_accept_join_requests
 
     def can_modify_group_infos(self, group):
-        from sigma_core.models.group_member import GroupMember
         try:
             mem = self.memberships.get(group=group)
         except GroupMember.DoesNotExist:

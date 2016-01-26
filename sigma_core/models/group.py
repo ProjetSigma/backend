@@ -3,6 +3,7 @@ from django.db import models
 from dry_rest_permissions.generics import allow_staff_or_superuser
 
 # class GroupManager(models.Manager):
+#     # TODO: Determine whether 'memberships' fields needs to be retrieved every time or not...
 #     def get_queryset(self):
 #         return super(GroupManager, self).get_queryset().prefetch_related('memberships')
 
@@ -95,13 +96,11 @@ class Group(models.Model):
     @allow_staff_or_superuser
     def has_create_permission(request):
         """
-        Everybody can create a private. For other types, user must be school admin or sigma admin.
+        Everybody can create a private group. For other types, user must be school admin or sigma admin.
         """
         #TODO: Adapt after School model implementation.
         group_type = request.data.get('type', None)
-        if group_type is not None:
-            return group_type == Group.TYPE_BASIC
-        return True
+        return group_type == Group.TYPE_BASIC
 
     def has_object_write_permission(self, request):
         return False
