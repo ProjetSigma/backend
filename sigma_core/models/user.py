@@ -78,42 +78,38 @@ class User(AbstractBaseUser):
     def is_sigma_admin(self):
         return self.is_staff or self.is_superuser
 
-    def is_group_member(self, g):
+    def get_group_membership(self, group):
         from sigma_core.models.group_member import GroupMember
         from sigma_core.models.group import Group
         try:
-            mem = self.memberships.get(group=g)
+            return self.memberships.get(group=group)
         except GroupMember.DoesNotExist:
-            return False
-        return mem.is_accepted()
+            return None
+
+    def is_group_member(self, g):
+        from sigma_core.models.group_member import GroupMember
+        mem = self.get_group_membership(g)
+        return mem is not None and mem.is_accepted()
 
     def can_invite(self, group):
         from sigma_core.models.group_member import GroupMember
-        from sigma_core.models.group import Group
-        try:
-            mem = self.memberships.get(group=group)
-        except GroupMember.DoesNotExist:
-            return False
-        return mem.perm_rank >= group.req_rank_invite
+        mem = self.get_group_membership(group)
+        return mem is not None and mem.perm_rank >= group.req_rank_invite
 
     def can_accept_join_requests(self, group):
         from sigma_core.models.group_member import GroupMember
-        from sigma_core.models.group import Group
-        try:
-            mem = self.memberships.get(group=group)
-        except GroupMember.DoesNotExist:
-            return False
-        return mem.perm_rank >= group.req_rank_accept_join_requests
+        mem = self.get_group_membership(group)
+        return mem is not None and mem.perm_rank >= group.req_rank_accept_join_requests
 
     def can_modify_group_infos(self, group):
         from sigma_core.models.group_member import GroupMember
-        from sigma_core.models.group import Group
-        try:
-            mem = self.memberships.get(group=group)
-        except GroupMember.DoesNotExist:
-            return False
-        return mem.perm_rank >= group.req_rank_modify_group_infos
+        mem = self.get_group_membership(group)
+        return mem is not None and mem.perm_rank >= group.req_rank_modify_group_infos
 
+
+    ################################################################
+    # PERMISSIONS                                                  #
+    ################################################################
 
     # Perms for admin site
     def has_perm(self, perm, obj=None):
@@ -121,8 +117,8 @@ class User(AbstractBaseUser):
 
     def has_module_perms(self, app_label):
         return True
+    # End of admin site permissions
 
-    # Permissions
     @staticmethod
     def has_read_permission(request):
         """
