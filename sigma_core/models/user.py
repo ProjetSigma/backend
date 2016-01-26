@@ -1,10 +1,14 @@
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
+from dry_rest_permissions.generics import allow_staff_or_superuser
 
-from dry_rest_permissions.generics import allow_staff_or_superuser, authenticated_users
-
+from sigma_core.models.group import Group
 
 class UserManager(BaseUserManager):
+    # TODO: Determine whether 'memberships' fields needs to be retrieved every time or not...
+    # def get_queryset(self):
+    #     return super(UserManager, self).get_queryset().prefetch_related('memberships', 'invited_to_groups')
+
     def create_user(self, email, lastname, firstname, password=None):
         """
         Creates and saves a User with the given email, lastname, firstname and password
@@ -55,6 +59,11 @@ class User(AbstractBaseUser):
 
     objects = UserManager()
 
+    invited_to_groups = models.ManyToManyField(Group, blank=True, related_name="invited_users");
+
+    # Related fields:
+    #   - memberships (model UserGroup)
+
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['lastname', 'firstname']
 
@@ -67,6 +76,42 @@ class User(AbstractBaseUser):
     def get_short_name(self):
         return self.email
 
+    def is_sigma_admin(self):
+        return self.is_staff or self.is_superuser
+
+    def is_group_member(self, g):
+        from sigma_core.models.group_member import GroupMember
+        try:
+            mem = self.memberships.get(group=g)
+        except GroupMember.DoesNotExist:
+            return False
+        return mem.is_accepted()
+
+    def can_invite(self, group):
+        from sigma_core.models.group_member import GroupMember
+        try:
+            mem = self.memberships.get(group=group)
+        except GroupMember.DoesNotExist:
+            return False
+        return mem.perm_rank >= group.req_rank_invite
+
+    def can_accept_join_requests(self, group):
+        from sigma_core.models.group_member import GroupMember
+        try:
+            mem = self.memberships.get(group=group)
+        except GroupMember.DoesNotExist:
+            return False
+        return mem.perm_rank >= group.req_rank_accept_join_requests
+
+    def can_modify_group_infos(self, group):
+        from sigma_core.models.group_member import GroupMember
+        try:
+            mem = self.memberships.get(group=group)
+        except GroupMember.DoesNotExist:
+            return False
+        return mem.perm_rank >= group.req_rank_modify_group_infos
+
+
     # Perms for admin site
     def has_perm(self, perm, obj=None):
         return True
@@ -76,14 +121,12 @@ class User(AbstractBaseUser):
 
     # Permissions
     @staticmethod
-    @authenticated_users
     def has_read_permission(request):
         """
         Only authenticated users can retrieve an users list.
         """
         return True
 
-    @authenticated_users
     def has_object_read_permission(self, request):
         """
         Only authenticated users can retrieve an user.

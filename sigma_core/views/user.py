@@ -6,6 +6,7 @@ from django.http import Http404
 
 from rest_framework import viewsets, decorators, status
 from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from dry_rest_permissions.generics import DRYPermissions
 
 from sigma_core.models.user import User
@@ -26,7 +27,7 @@ L'équipe Sigma.
 
 # TODO: use DetailSerializerMixin
 class UserViewSet(viewsets.ModelViewSet):
-    permission_classes = (DRYPermissions, )
+    permission_classes = [IsAuthenticated, DRYPermissions, ]
     queryset = User.objects.all()
     serializer_class = BasicUserWithPermsSerializer # by default, basic data and permissions
 
@@ -39,7 +40,7 @@ class UserViewSet(viewsets.ModelViewSet):
         try:
             user = User.objects.get(pk=pk)
         except User.DoesNotExist:
-            return Http404()
+            raise Http404()
 
         # Use DetailedUserWithPermsSerializer to have the groups whom user belongs to
         serializer = DetailedUserWithPermsSerializer(user, context={'request': request})
@@ -49,10 +50,10 @@ class UserViewSet(viewsets.ModelViewSet):
         try:
             user = User.objects.get(pk=pk)
         except User.DoesNotExist:
-            return Http404()
+            raise Http404()
 
         # Names edition is allowed to Sigma admins only
-        if ((request.data['lastname'] != user.lastname or request.data['firstname'] != user.firstname)) and not (request.user.is_staff or request.user.is_superuser):
+        if ((request.data['lastname'] != user.lastname or request.data['firstname'] != user.firstname)) and not (request.user.is_sigma_admin()):
             return Response('You cannot change your lastname or firstname', status=status.HTTP_400_BAD_REQUEST)
 
         return super(UserViewSet, self).update(request, pk)
@@ -101,7 +102,7 @@ class UserViewSet(viewsets.ModelViewSet):
         user.save()
         return Response('Password successfully changed', status=status.HTTP_200_OK)
 
-    @decorators.list_route(methods=['post'])
+    @decorators.list_route(methods=['post'], permission_classes=[AllowAny])
     def reset_password(self, request):
         """
         Reset current user's password and send him an email with the new one.

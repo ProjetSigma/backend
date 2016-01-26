@@ -106,6 +106,14 @@ class UserTests(APITestCase):
         response = self.client.put("/user/%d/" % self.user2.id, user_data)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
+    def test_edit_is_superuser_no_permission(self):
+        # Client can't set himself as administrator !
+        self.client.force_authenticate(user=self.user)
+        user_data = UserSerializer(self.user).data
+        user_data['is_superuser'] = True
+        response = self.client.put("/user/%d/" % self.user.id, user_data)
+        self.assertFalse(self.user.is_superuser);
+
     def test_edit_email_nonvalid_email(self):
         # Client wants to change his email with a non valid value
         self.client.force_authenticate(user=self.user)
