@@ -2,18 +2,8 @@ from django.db import models
 
 from dry_rest_permissions.generics import allow_staff_or_superuser
 
-# class GroupManager(models.Manager):
-#     # TODO: Determine whether 'memberships' fields needs to be retrieved every time or not...
-#     def get_queryset(self):
-#         return super(GroupManager, self).get_queryset().prefetch_related('memberships')
-
 from sigma_core.models.custom_field import CustomField
-
-class GroupCustomField(CustomField):
-    class Meta:
-        pass
-    # Generated fields:
-    #   values
+from sigma_core.models.group_field import GroupField
 
 
 class Group(models.Model):
@@ -45,7 +35,6 @@ class Group(models.Model):
     name = models.CharField(max_length=254)
     visibility = models.CharField(max_length=64, choices=VISIBILITY_CHOICES, default=VIS_PRIVATE)
     type = models.CharField(max_length=64, choices=TYPE_CHOICES, default=TYPE_BASIC)
-    custom_fields = models.ManyToManyField(GroupCustomField, related_name = '+')
 
     # The permission a member has upon joining
     # A value of -1 means that no one can join the group.
@@ -67,14 +56,18 @@ class Group(models.Model):
     # Related fields:
     #   - invited_users (model User)
     #   - memberships (model UserGroup)
-
-    # objects = GroupManager()
+    #   - fields (model GroupField)
+    # TODO: Determine whether 'memberships' fields needs to be retrieved every time or not...
 
     def can_anyone_join(self):
         return self.default_member_rank >= 0
 
     def __str__(self):
         return "%s (%s)" % (self.name, self.get_type_display())
+
+    ################################################################
+    # PERMISSIONS                                                  #
+    ################################################################
 
     # Perms for admin site
     def has_perm(self, perm, obj=None):

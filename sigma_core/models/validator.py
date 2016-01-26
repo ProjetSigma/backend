@@ -9,6 +9,7 @@ import re # regex
 
 from django.core.validators import validate_email
 
+
 def get_validator_by_name(name):
     """
     For given validator name, returns associated functions array:
@@ -21,15 +22,19 @@ def get_validator_by_name(name):
 
     Returns None if there is no validator matching that name.
     """
+
     # Validators functions
     def text_validate_fields(fields):
-        re.compile(fields['regex']) # TODO: Is it safe to call re.compile with user input ? Possible infinite loops ... ?
+        # TODO: Is it safe to call re.compile with user input ? Possible infinite loops ... ?
+        re.compile(fields['regex'])
         fields['message']
         return True
+
     # Protection against Evil Regex. Only 50ms to evaluate regex - should be enough.
     @timeout_decorator.timeout(0.05, use_signals=False)
     def regex_check_timeout(regex, error_message, input):
         RegexValidator(regex, error_message)(input)
+
     def text_validate_input(fields, input):
         if (fields['regex']):
             try:
@@ -55,6 +60,7 @@ def get_validator_by_name(name):
         return validators_map[name]
     except KeyError:
         return None
+
 
 class Validator(models.Model):
     class Meta:
