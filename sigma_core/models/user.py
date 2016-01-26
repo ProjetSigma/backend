@@ -2,7 +2,6 @@ from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 from dry_rest_permissions.generics import allow_staff_or_superuser
 
-from sigma_core.models.group import Group
 
 class UserManager(BaseUserManager):
     # TODO: Determine whether 'memberships' fields needs to be retrieved every time or not...
@@ -59,7 +58,7 @@ class User(AbstractBaseUser):
 
     objects = UserManager()
 
-    invited_to_groups = models.ManyToManyField(Group, blank=True, related_name="invited_users");
+    invited_to_groups = models.ManyToManyField('Group', blank=True, related_name="invited_users");
 
     # Related fields:
     #   - memberships (model UserGroup)
@@ -81,6 +80,7 @@ class User(AbstractBaseUser):
 
     def is_group_member(self, g):
         from sigma_core.models.group_member import GroupMember
+        from sigma_core.models.group import Group
         try:
             mem = self.memberships.get(group=g)
         except GroupMember.DoesNotExist:
@@ -89,6 +89,7 @@ class User(AbstractBaseUser):
 
     def can_invite(self, group):
         from sigma_core.models.group_member import GroupMember
+        from sigma_core.models.group import Group
         try:
             mem = self.memberships.get(group=group)
         except GroupMember.DoesNotExist:
@@ -97,6 +98,7 @@ class User(AbstractBaseUser):
 
     def can_accept_join_requests(self, group):
         from sigma_core.models.group_member import GroupMember
+        from sigma_core.models.group import Group
         try:
             mem = self.memberships.get(group=group)
         except GroupMember.DoesNotExist:
@@ -105,6 +107,7 @@ class User(AbstractBaseUser):
 
     def can_modify_group_infos(self, group):
         from sigma_core.models.group_member import GroupMember
+        from sigma_core.models.group import Group
         try:
             mem = self.memberships.get(group=group)
         except GroupMember.DoesNotExist:
