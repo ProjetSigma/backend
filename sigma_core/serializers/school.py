@@ -10,6 +10,8 @@ class BasicSchoolSerializer(serializers.ModelSerializer):
     class Meta:
         model = School
 
+    acknowledged_groups = serializers.PrimaryKeyRelatedField(read_only=True, many=True)
+
 
 class SchoolSerializer(BasicSchoolSerializer):
     """

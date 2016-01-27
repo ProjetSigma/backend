@@ -24,6 +24,14 @@ class School(Group):
 
         return super(School, self).save(*args, **kwargs)
 
+    @property
+    def acknowledged_groups(self):
+        return self.school_groups.filter(validated=True)
+
+    @property
+    def awaiting_groups(self):
+        return self.school_groups.filter(validated=False)
+
     # Permissions
     @staticmethod
     def has_read_permission(request):
@@ -45,3 +53,17 @@ class School(Group):
         Schools can be created by Sigma admin only.
         """
         return False
+
+
+class SchoolGroup(models.Model):
+    school = models.ForeignKey(School, related_name='school_groups')
+    group = models.ForeignKey(Group, related_name='group_schools')
+    validated = models.BooleanField(default=False)
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        if self.validated:
+            return "Group %s acknowledged by %s" % (self.group.__str__(), self.school.__str__())
+        else:
+            return "Group %s awaiting for acknowledgment by %s since %s" % (self.group.__str__(), self.school.__str__(), self.created.strftime("%Y-%m-%d %H:%M"))
