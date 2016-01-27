@@ -9,9 +9,9 @@ from dry_rest_permissions.generics import allow_staff_or_superuser
 
 
 class Group(models.Model):
-    class Meta:
-        pass
-
+    #########################
+    # Constants and choices #
+    #########################
     ADMINISTRATOR_RANK  = 10
 
     VIS_PUBLIC          = 'public'
@@ -34,9 +34,15 @@ class Group(models.Model):
         (TYPE_SCHOOL, 'School')
     )
 
+    ##########
+    # Fields #
+    ##########
     name = models.CharField(max_length=254)
     visibility = models.CharField(max_length=64, choices=VISIBILITY_CHOICES, default=VIS_PRIVATE)
     type = models.CharField(max_length=64, choices=TYPE_CHOICES, default=TYPE_BASIC)
+
+    # The school responsible of the group in case of admin conflict (can be null for non-school-related groups)
+    resp_school = models.ForeignKey('School', null=True, blank=True, on_delete=models.SET_NULL)
 
     # The permission a member has upon joining
     # A value of -1 means that no one can join the group.
@@ -61,11 +67,22 @@ class Group(models.Model):
 
     # objects = GroupManager()
 
+    @property
+    def acknowledged_groups(self):
+        return self.group_acknowledgments.filter(validated=True).value('asking_group')
+
+    #################
+    # Model methods #
+    #################
     def can_anyone_join(self):
         return self.default_member_rank >= 0
 
     def __str__(self):
         return "%s (%s)" % (self.name, self.get_type_display())
+
+    ###############
+    # Permissions #
+    ###############
 
     # Perms for admin site
     def has_perm(self, perm, obj=None):
@@ -74,7 +91,7 @@ class Group(models.Model):
     def has_module_perms(self, app_label):
         return True
 
-    # Permissions
+    # DRY Permissions
     @staticmethod
     def has_read_permission(request):
         """
@@ -115,3 +132,17 @@ class Group(models.Model):
     @allow_staff_or_superuser
     def has_object_invite_permission(self, request):
         return request.user.can_invite(self)
+
+
+class GroupAcknowledgment(models.Model):
+    asking_group = models.ForeignKey(Group, related_name='group_recognizers')
+    validator_group = models.ForeignKey(Group, related_name='group_acknowledgments')
+    validated = models.BooleanField(default=False)
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        if self.validated:
+            return "Group %s acknowledged by Group %s" % (self.asking_group.__str__(), self.validator_group.__str__())
+        else:
+            return "Group %s awaiting for acknowledgment by Group %s since %s" % (self.asking_group.__str__(), self.validator_group.__str__(), self.created.strftime("%Y-%m-%d %H:%M"))
