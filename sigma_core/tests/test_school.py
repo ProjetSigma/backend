@@ -64,7 +64,7 @@ class SchoolTests(APITestCase):
 
     def test_get_school_ok(self):
         # Client wants to see a school to which he belongs
-        self.client.force_authenticate(user=self.users[0])
+        self.client.force_authenticate(user=self.users[1])
         response = self.client.get(self.school_url % self.schools[0].id)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data, self.school_data)

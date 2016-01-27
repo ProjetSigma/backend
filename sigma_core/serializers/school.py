@@ -3,7 +3,6 @@ from rest_framework import serializers
 from sigma_core.models.school import School
 
 
-
 class BasicSchoolSerializer(serializers.ModelSerializer):
     """
     Serialize School model without memberships.
