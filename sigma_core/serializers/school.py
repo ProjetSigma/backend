@@ -18,4 +18,5 @@ class SchoolSerializer(BasicSchoolSerializer):
     class Meta:
         model = School
 
+    acknowledged_groups = serializers.PrimaryKeyRelatedField(read_only=True, many=True)
     memberships = serializers.PrimaryKeyRelatedField(read_only=True, many=True)

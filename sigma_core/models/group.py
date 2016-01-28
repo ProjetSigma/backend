@@ -69,7 +69,7 @@ class Group(models.Model):
 
     @property
     def acknowledged_groups(self):
-        return self.group_acknowledgments.filter(validated=True).value('asking_group')
+        return [ga.asking_group for ga in self.group_acknowledgments.filter(validated=True).select_related('asking_group')]
 
     #################
     # Model methods #
