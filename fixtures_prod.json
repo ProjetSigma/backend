@@ -1,0 +1,18 @@
+[
+  {
+    "model": "sigma_core.validator",
+    "fields": {
+      "display_name": "Text",
+      "html_name": "text",
+      "values": "{ 'message' : 'Error message', 'regex' : 'Regex'}"
+    }
+  },
+  {
+    "model": "sigma_core.validator",
+    "fields": {
+      "display_name": "No validation",
+      "html_name": "none",
+      "values": "{}"
+    }
+  }
+]
