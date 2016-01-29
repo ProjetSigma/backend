@@ -85,6 +85,9 @@ class GroupFieldTests(APITestCase):
     def test_create_group_field_mismatch(self):
         self.try_create(2, self.group2_user2.id, self.group_fields[0].id, "ABC", status.HTTP_400_BAD_REQUEST)
 
+    def test_create_group_field_validation_fail(self):
+        self.try_create(2, self.group_member[2].id, self.group_fields[1].id, "ABC", status.HTTP_400_BAD_REQUEST)
+
     # Create OK cases
     def test_create_group_member_not_accepted(self):
         self.try_create(1, self.group_member[1].id, self.group_fields[0].id, "ABC", status.HTTP_201_CREATED)
@@ -94,3 +97,6 @@ class GroupFieldTests(APITestCase):
 
     def test_create_group_admin(self):
         self.try_create(3, self.group_member[3].id, self.group_fields[0].id, "ABC", status.HTTP_201_CREATED)
+
+    def test_create_group_field_validation_ok(self):
+        self.try_create(2, self.group_member[2].id, self.group_fields[1].id, "some@email.com", status.HTTP_201_CREATED)
