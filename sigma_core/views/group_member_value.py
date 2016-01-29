@@ -1,5 +1,6 @@
 from django.http import Http404, HttpResponseForbidden
 from django.core.exceptions import ValidationError
+from django.db.models import Q
 
 from rest_framework import viewsets, decorators, status, mixins
 from rest_framework.response import Response
@@ -17,7 +18,9 @@ class GroupMemberValueViewSet(
         # and the group and customfield should match
         # ie membership.user = request.user && membership.group == field.group
                 mixins.CreateModelMixin,
-                mixins.RetrieveModelMixin,       # All accepted group members
+        # Only *accepted* group members can see other members custom fields
+        # But you can always see your own custom fields
+                mixins.RetrieveModelMixin,
                 mixins.UpdateModelMixin,         # TODO
                 mixins.DestroyModelMixin,        # TODO
                 mixins.ListModelMixin,           # TODO
@@ -26,8 +29,9 @@ class GroupMemberValueViewSet(
     available_memberships = GroupMember.objects.all()
     serializer_class = GroupMemberValueSerializer
     permission_classes = [IsAuthenticated, DRYPermissions, ]
-    filter_fields = ('name', )
+    filter_fields = ('membership__user', 'membership__group', 'membership', 'field', 'value')
 
+    # HERE we handle permissions filtering
     # You will never see fields for groups you are not a member of
     def get_queryset(self):
         from sigma_core.models.group_member import GroupMember
@@ -36,10 +40,10 @@ class GroupMemberValueViewSet(
         if self.request.user.is_sigma_admin():
             return self.queryset
         # @sqlperf: Find which one is the most efficient
-        my_groups = self.available_memberships.filter(user=self.request.user.id).values_list('pk', flat=True)
+        my_groups = self.available_memberships.filter(user=self.request.user.id).values_list('group', flat=True)
         #my_groups = GroupMember.objects.filter(user=self.request.user.id)
-        return self.queryset.filter(membership__in=my_groups)
-
+        # But can always see your own custom fields
+        return self.queryset.filter(Q(membership__group__in=my_groups) | Q(membership__user=self.request.user.id))
 
     def create(self, request):
         serializer = GroupMemberValueSerializer(data=request.data)
@@ -51,3 +55,7 @@ class GroupMemberValueViewSet(
 
         serializer.save()
         return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+    def list(self, request):
+        self.available_memberships = self.available_memberships.filter(perm_rank__gte=1)
+        return super().list(request)

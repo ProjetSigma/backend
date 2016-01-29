@@ -11,7 +11,7 @@ from sigma_core.models.group_member import GroupMember
 from sigma_core.models.group_member_value import GroupMemberValue
 from sigma_core.models.group_field import GroupField
 from sigma_core.models.validator import Validator
-from sigma_core.tests.factories import UserFactory, GroupFieldFactory, GroupFactory, GroupMemberFactory
+from sigma_core.tests.factories import UserFactory, GroupFieldFactory, GroupFactory, GroupMemberFactory, GroupMemberValueFactory
 
 
 class GroupFieldTests(APITestCase):
@@ -31,13 +31,15 @@ class GroupFieldTests(APITestCase):
         # User[1]: Requested join, not accepted
         # User[2]: Group member
         # User[3]: Group admin
-        self.users = [UserFactory(), UserFactory(), UserFactory(), UserFactory()]
+        self.users = [UserFactory(), UserFactory(), UserFactory(), UserFactory(), UserFactory()]
+
         # Associated GroupMember
         self.group_member = [
             None,
             GroupMemberFactory(user=self.users[1], group=self.group, perm_rank=0),
             GroupMemberFactory(user=self.users[2], group=self.group, perm_rank=1),
-            GroupMemberFactory(user=self.users[3], group=self.group, perm_rank=Group.ADMINISTRATOR_RANK)
+            GroupMemberFactory(user=self.users[3], group=self.group, perm_rank=Group.ADMINISTRATOR_RANK),
+            GroupMemberFactory(user=self.users[4], group=self.group, perm_rank=0)
         ]
         # Let's add some custom fields to this Group
         self.validator_none = Validator.objects.all().get(html_name=Validator.VALIDATOR_NONE)
@@ -48,12 +50,28 @@ class GroupFieldTests(APITestCase):
             # Second field must be in the email format
             GroupFieldFactory(group=self.group,
                 validator=self.validator_text,
-                validator_values={"regex": "[^@]+@[^@]+\.[^@]+", "message": "Invalid email"})
+                validator_values={"regex": "[^@]+@[^@]+\.[^@]+", "message": "Invalid email"}),
+            GroupFieldFactory(group=self.group, validator=self.validator_none, validator_values={}),
         ]
 
         # And we need a second group
         self.group2 = GroupFactory()
-        self.group2_user2 = GroupMemberFactory(user=self.users[2], group=self.group2, perm_rank=1)
+        self.group2_user2 = GroupMemberFactory(user=self.users[4], group=self.group2, perm_rank=1)
+        self.group2_fields = [
+            # First field does not require any validation
+            GroupFieldFactory(group=self.group2, validator=self.validator_none, validator_values={}),
+            # Second field must be in the email format
+            GroupFieldFactory(group=self.group2,
+                validator=self.validator_text,
+                validator_values={"regex": "[^@]+@[^@]+\.[^@]+", "message": "Invalid email"}),
+            GroupFieldFactory(group=self.group2, validator=self.validator_none, validator_values={}),
+        ]
+
+        # Create some values
+        GroupMemberValueFactory(field=self.group2_fields[0], membership=self.group2_user2, value="TextFieldValue1")
+        GroupMemberValueFactory(field=self.group2_fields[1], membership=self.group2_user2, value="my@email.com")
+        GroupMemberValueFactory(field=self.group_fields[2], membership=self.group_member[2], value="Field3Value__user2")
+        GroupMemberValueFactory(field=self.group_fields[2], membership=self.group_member[3], value="Field3Value__user3")
 
 
     #################### TEST GROUP MEMBER VALUE CREATION ######################
@@ -100,3 +118,34 @@ class GroupFieldTests(APITestCase):
 
     def test_create_group_field_validation_ok(self):
         self.try_create(2, self.group_member[2].id, self.group_fields[1].id, "some@email.com", status.HTTP_201_CREATED)
+
+    #################### TEST GROUP MEMBER VALUE LISTING #######################
+    def try_list(self, userIdx, expectedHttpResponse):
+        if userIdx >= 0:
+            self.client.force_authenticate(user=self.users[userIdx])
+        resp = self.client.get(self.group_field_url)
+        self.assertEqual(resp.status_code, expectedHttpResponse)
+        return resp.data
+
+    # Basic permission checks
+    def test_list_not_authed(self):
+        self.try_list(-1, status.HTTP_401_UNAUTHORIZED)
+
+    def test_list_not_group_member(self):
+        r = self.try_list(0, status.HTTP_200_OK)
+        self.assertEqual(len(r), 0)
+
+    def test_list_not_accepted(self):
+        r = self.try_list(1, status.HTTP_200_OK)
+        self.assertEqual(len(r), GroupMemberValue.objects.all().filter(membership=self.group_member[1]).count())
+
+    def test_list_group_member(self):
+        r = self.try_list(2, status.HTTP_200_OK)
+        #import pdb; pdb.set_trace()
+        self.assertEqual(len(r), GroupMemberValue.objects.all().filter(membership__group=self.group.id).count())
+
+    def test_list_group_member2(self):
+        # User4 is in a different group.
+        r = self.try_list(4, status.HTTP_200_OK)
+        self.assertEqual(len(r), GroupMemberValue.objects.all().filter(membership__group=self.group2.id).count())
+        self.assertEqual(len(r), 2)
