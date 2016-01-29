@@ -27,4 +27,4 @@ class GroupField(CustomField):
         return request.user.is_authenticated()
 
     def has_object_write_permission(self, request):
-        return request.user.is_authenticated() and request.user.is_group_admin(self.group)
+        return request.user.is_authenticated() and request.user.has_group_admin_perm(self.group)

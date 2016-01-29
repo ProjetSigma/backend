@@ -82,7 +82,7 @@ class GroupFieldTests(APITestCase):
         self.assertTrue(GroupField.objects.all().filter(id=self.group_field.id).exists())
 
     def test_delete_not_group_member(self):
-        self.assertEqual(self.try_delete(self.users[0]), status.HTTP_403_FORBIDDEN)
+        self.assertEqual(self.try_delete(self.users[0]), status.HTTP_404_NOT_FOUND)
         self.assertTrue(GroupField.objects.all().filter(id=self.group_field.id).exists())
 
     def test_delete_not_group_accepted(self):
@@ -96,3 +96,22 @@ class GroupFieldTests(APITestCase):
     def test_delete_ok(self):
         self.assertEqual(self.try_delete(self.users[3]), status.HTTP_204_NO_CONTENT)
         self.assertFalse(GroupField.objects.all().filter(id=self.group_field.id).exists())
+
+    #################### TEST GROUP FIELD LIST    ########################
+    def test_list_not_authed(self):
+        resp = self.client.get(self.group_field_url)
+        self.assertEqual(resp.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    def test_list_no_group(self):
+        self.client.force_authenticate(user=self.users[0])
+        resp = self.client.get(self.group_field_url)
+        self.assertEqual(resp.status_code, status.HTTP_200_OK)
+        self.assertFalse(any(resp.data))
+
+    def test_list_in_group(self):
+        from sigma_core.serializers.group_field import GroupFieldSerializer
+        self.client.force_authenticate(user=self.users[2])
+        resp = self.client.get(self.group_field_url)
+        self.assertEqual(resp.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(resp.data), 1)
+        self.assertEqual(resp.data[0], GroupFieldSerializer(self.group_field).data)

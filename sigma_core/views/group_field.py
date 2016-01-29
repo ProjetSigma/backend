@@ -8,24 +8,46 @@ from dry_rest_permissions.generics import DRYPermissions
 from sigma_core.models.group_field import GroupField
 from sigma_core.serializers.group_field import GroupFieldSerializer, GroupFieldCreateSerializer
 
-
 class GroupFieldViewSet(mixins.CreateModelMixin,    # Only Group admin
                    mixins.RetrieveModelMixin,       # TODO
                    mixins.UpdateModelMixin,         # TODO
                    mixins.DestroyModelMixin,        # Only Group admin
-                   mixins.ListModelMixin,           # TODO
+                   mixins.ListModelMixin,           # Every Group member (including not accepted group members - for "open" groups)
                    viewsets.GenericViewSet):
     queryset = GroupField.objects.all()
     serializer_class = GroupFieldSerializer
     permission_classes = [IsAuthenticated, DRYPermissions, ]
     filter_fields = ('name', )
 
+    # You will never see fields for groups you are not a member of
+    def get_queryset(self):
+        from sigma_core.models.group_member import GroupMember
+        if not self.request.user.is_authenticated():
+            return self.queryset.none()
+        if self.request.user.is_sigma_admin():
+            return self.queryset
+        # @sqlperf: Find which one is the most efficient
+        my_groups = GroupMember.objects.filter(user=self.request.user.id).values_list('group', flat=True)
+        #my_groups = Group.objects.filter(memberships__user=self.request.user.id)
+        return self.queryset.filter(group__in=my_groups)
+
     def create(self, request):
         serializer = GroupFieldCreateSerializer(data=request.data)
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        if not request.user.is_group_admin(serializer.validated_data.get('group')):
+        if not request.user.has_group_admin_perm(serializer.validated_data.get('group')):
             return Response('Not group administrator', status=status.HTTP_403_FORBIDDEN)
 
         serializer.save()
         return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+    def list(self, request, *args, **kwargs):
+        queryset = self.filter_queryset(self.get_queryset())
+
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)

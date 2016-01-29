@@ -106,9 +106,11 @@ class User(AbstractBaseUser):
         mem = self.get_group_membership(group)
         return mem is not None and mem.perm_rank >= group.req_rank_modify_group_infos
 
-    def is_group_admin(self, group):
+    def has_group_admin_perm(self, group):
         from sigma_core.models.group_member import GroupMember
         from sigma_core.models.group import Group
+        if self.is_sigma_admin():
+            return True
         mem = self.get_group_membership(group)
         return mem is not None and mem.perm_rank == Group.ADMINISTRATOR_RANK
 
