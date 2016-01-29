@@ -35,9 +35,9 @@ class GroupFieldTests(APITestCase):
         # Associated GroupMember
         self.group_member = [
                 None,
-                GroupMember(user=self.users[1], group=self.group, perm_rank=0),
-                GroupMember(user=self.users[2], group=self.group, perm_rank=1),
-                GroupMember(user=self.users[3], group=self.group, perm_rank=Group.ADMINISTRATOR_RANK)
+                GroupMemberFactory(user=self.users[1], group=self.group, perm_rank=0),
+                GroupMemberFactory(user=self.users[2], group=self.group, perm_rank=1),
+                GroupMemberFactory(user=self.users[3], group=self.group, perm_rank=Group.ADMINISTRATOR_RANK)
             ]
 
         # Misc

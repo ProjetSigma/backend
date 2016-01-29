@@ -1,4 +1,4 @@
-from django.http import Http404
+from django.http import Http404, HttpResponseForbidden
 
 from rest_framework import viewsets, decorators, status, mixins
 from rest_framework.response import Response
@@ -18,8 +18,9 @@ class GroupFieldViewSet(viewsets.ModelViewSet):
     def create(self, request):
         serializer = GroupFieldCreateSerializer(data=request.data)
         if not serializer.is_valid():
-            print(serializer.errors)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        if not request.user.is_group_admin(serializer.validated_data.get('group')):
+            return Response('Not group administrator', status=status.HTTP_403_FORBIDDEN)
 
-        mem = serializer.save()
+        serializer.save()
         return Response(serializer.data, status=status.HTTP_201_CREATED)
