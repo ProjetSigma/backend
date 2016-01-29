@@ -21,7 +21,7 @@ class GroupMember(models.Model):
     perm_rank = models.SmallIntegerField(blank=False, default=1)
 
     # Related fields:
-    #   - values (model GroupMemberField)
+    #   - values (model GroupMemberValue)
 
     def can_invite(self):
         return self.perm_rank >= self.group.req_rank_invite

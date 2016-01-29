@@ -78,13 +78,13 @@ def are_validator_fields_valid(validator, fields):
     except ValidationError:
         return False
 
-def validate_validator_input(validator, fields, value):
+def validate_validator_input(validator, validator_values, value):
     v = get_validator_by_name(validator)
-    v['validate_input'](fields, value)
+    v['validate_input'](validator_values, value)
 
-def is_validator_input_valid(validator, fields, value):
+def is_validator_input_valid(validator, validator_values, value):
     try:
-        validate_validator_input(validator, fields, value)
+        validate_validator_input(validator, validator_values, value)
         return True
     except ValidationError:
         return False
@@ -116,5 +116,5 @@ class Validator(models.Model):
     def validate_fields(self, fields):
         return validate_validator_fields(self.html_name, fields)
 
-    def validate_input(self, fields, client_input):
-        return validate_validator_input(self.html_name, fields, client_input)
+    def validate_input(self, validator_values, client_input):
+        return validate_validator_input(self.html_name, validator_values, client_input)

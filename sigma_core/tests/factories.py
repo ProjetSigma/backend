@@ -6,6 +6,7 @@ from django.utils.text import slugify
 from sigma_core.models.user import User
 from sigma_core.models.group import Group
 from sigma_core.models.group_member import GroupMember
+from sigma_core.models.group_member_value import GroupMemberValue
 from sigma_core.models.group_field import GroupField
 
 faker = FakerFactory.create('fr_FR')
@@ -45,3 +46,7 @@ class GroupMemberFactory(factory.django.DjangoModelFactory):
     user = factory.SubFactory(UserFactory)
     group = factory.SubFactory(GroupFactory)
     join_date = factory.LazyAttribute(lambda obj: faker.date())
+
+class GroupMemberValueFactory(factory.django.DjangoModelFactory):
+    class Meta:
+        model = GroupMemberValue
