@@ -7,16 +7,23 @@ from rest_framework.permissions import IsAuthenticated
 from dry_rest_permissions.generics import DRYPermissions
 
 from sigma_core.models.group_field import GroupField
+from sigma_core.models.group_member import GroupMember
 from sigma_core.models.group_member_value import GroupMemberValue
 from sigma_core.serializers.group_member_value import GroupMemberValueSerializer
 
-class GroupMemberValueViewSet(mixins.CreateModelMixin,    # TODO
-                   mixins.RetrieveModelMixin,       # TODO
-                   mixins.UpdateModelMixin,         # TODO
-                   mixins.DestroyModelMixin,        # TODO
-                   mixins.ListModelMixin,           # TODO
-                   viewsets.GenericViewSet):
+class GroupMemberValueViewSet(
+        # You can only create a customfield for yourself
+        # and you should be member of the group
+        # and the group and customfield should match
+        # ie membership.user = request.user && membership.group == field.group
+                mixins.CreateModelMixin,
+                mixins.RetrieveModelMixin,       # All accepted group members
+                mixins.UpdateModelMixin,         # TODO
+                mixins.DestroyModelMixin,        # TODO
+                mixins.ListModelMixin,           # TODO
+                viewsets.GenericViewSet):
     queryset = GroupMemberValue.objects.all()
+    available_memberships = GroupMember.objects.all()
     serializer_class = GroupMemberValueSerializer
     permission_classes = [IsAuthenticated, DRYPermissions, ]
     filter_fields = ('name', )
@@ -29,7 +36,7 @@ class GroupMemberValueViewSet(mixins.CreateModelMixin,    # TODO
         if self.request.user.is_sigma_admin():
             return self.queryset
         # @sqlperf: Find which one is the most efficient
-        my_groups = GroupMember.objects.filter(user=self.request.user.id).values_list('pk', flat=True)
+        my_groups = self.available_memberships.filter(user=self.request.user.id).values_list('pk', flat=True)
         #my_groups = GroupMember.objects.filter(user=self.request.user.id)
         return self.queryset.filter(membership__in=my_groups)
 
