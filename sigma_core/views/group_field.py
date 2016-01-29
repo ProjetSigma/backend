@@ -9,7 +9,12 @@ from sigma_core.models.group_field import GroupField
 from sigma_core.serializers.group_field import GroupFieldSerializer, GroupFieldCreateSerializer
 
 
-class GroupFieldViewSet(viewsets.ModelViewSet):
+class GroupFieldViewSet(mixins.CreateModelMixin,    # Only Group admin
+                   mixins.RetrieveModelMixin,       # TODO
+                   mixins.UpdateModelMixin,         # TODO
+                   mixins.DestroyModelMixin,        # Only Group admin
+                   mixins.ListModelMixin,           # TODO
+                   viewsets.GenericViewSet):
     queryset = GroupField.objects.all()
     serializer_class = GroupFieldSerializer
     permission_classes = [IsAuthenticated, DRYPermissions, ]

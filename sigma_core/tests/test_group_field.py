@@ -10,7 +10,7 @@ from sigma_core.models.group import Group
 from sigma_core.models.group_member import GroupMember
 from sigma_core.models.group_field import GroupField
 from sigma_core.models.validator import Validator
-from sigma_core.tests.factories import UserFactory, AdminUserFactory, GroupFactory, GroupMemberFactory
+from sigma_core.tests.factories import UserFactory, GroupFieldFactory, GroupFactory, GroupMemberFactory
 
 
 class GroupFieldTests(APITestCase):
@@ -39,6 +39,7 @@ class GroupFieldTests(APITestCase):
                 GroupMemberFactory(user=self.users[2], group=self.group, perm_rank=1),
                 GroupMemberFactory(user=self.users[3], group=self.group, perm_rank=Group.ADMINISTRATOR_RANK)
             ]
+        self.group_field = GroupFieldFactory(group=self.group, validator=Validator.objects.all().get(html_name=Validator.VALIDATOR_NONE), validator_values="{}")
 
         # Misc
         self.new_field_data = {"group": self.group.id,
@@ -69,3 +70,29 @@ class GroupFieldTests(APITestCase):
 
     def test_create_ok(self):
         self.assertEqual(self.try_create(self.users[3]), status.HTTP_201_CREATED)
+
+    #################### TEST GROUP FIELD DELETION ########################
+    def try_delete(self, user):
+        self.client.force_authenticate(user=user)
+        resp = self.client.delete(self.group_field_url + str(self.group_field.id) + "/")
+        return resp.status_code
+
+    def test_delete_not_authed(self):
+        self.assertEqual(self.try_delete(None), status.HTTP_401_UNAUTHORIZED)
+        self.assertTrue(GroupField.objects.all().filter(id=self.group_field.id).exists())
+
+    def test_delete_not_group_member(self):
+        self.assertEqual(self.try_delete(self.users[0]), status.HTTP_403_FORBIDDEN)
+        self.assertTrue(GroupField.objects.all().filter(id=self.group_field.id).exists())
+
+    def test_delete_not_group_accepted(self):
+        self.assertEqual(self.try_delete(self.users[1]), status.HTTP_403_FORBIDDEN)
+        self.assertTrue(GroupField.objects.all().filter(id=self.group_field.id).exists())
+
+    def test_delete_not_group_admin(self):
+        self.assertEqual(self.try_delete(self.users[2]), status.HTTP_403_FORBIDDEN)
+        self.assertTrue(GroupField.objects.all().filter(id=self.group_field.id).exists())
+
+    def test_delete_ok(self):
+        self.assertEqual(self.try_delete(self.users[3]), status.HTTP_204_NO_CONTENT)
+        self.assertFalse(GroupField.objects.all().filter(id=self.group_field.id).exists())
