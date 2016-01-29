@@ -1,4 +1,5 @@
 from django.http import Http404, HttpResponseForbidden
+from django.core.exceptions import ValidationError
 
 from rest_framework import viewsets, decorators, status, mixins
 from rest_framework.response import Response
@@ -40,3 +41,27 @@ class GroupFieldViewSet(mixins.CreateModelMixin,    # Only Group admin
 
         serializer.save()
         return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+    @decorators.detail_route(methods=['post'])
+    def validate(self, request, pk):
+        """
+        For given custom field $pk, we check if the client input passes the Validation
+        """
+        from sigma_core.models.group_field import GroupField
+        if not request.user.is_authenticated():
+            return Response(status=status.HTTP_401_UNAUTHORIZED)
+        client_input = request.data.get('value')
+        if client_input is None:
+            return Response("No value given", status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            gf = self.get_queryset().get(id=pk)
+            try:
+                gf.validator.validate_input(gf.validator_values, client_input)
+                return Response({"status": "ok"}, status=status.HTTP_200_OK)
+            except ValidationError as err:
+                return Response({"status": "ko", "message": err.messages}, status=status.HTTP_200_OK)
+            except:
+                return Response({"status": "ko", "message": "Invalid input"}, status=status.HTTP_200_OK)
+        except:
+            return Response(status=status.HTTP_404_NOT_FOUND)

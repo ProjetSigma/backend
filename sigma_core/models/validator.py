@@ -17,7 +17,7 @@ def get_validator_by_name(name):
     validator = { validate_fields: vf, validate_input: vi }
     Where:
         - vf(fields)
-            returns True iif the specified fields are valid - or returns False/raises exceptions
+            Raises a ValidationError if given fields are not valid for this validator
         - vi(fields, user_input)
             Throws a ValidationError if given input is not valid for this validator
 
@@ -30,7 +30,7 @@ def get_validator_by_name(name):
         try:
             re.compile(fields['regex'])
         except re.error:
-            raise ValidationError("Invalid Regex syntax")
+            raise ValidationError(fields['message'] + " (invalid Regex syntax)")
 
     # Protection against Evil Regex. Only 50ms to evaluate regex - should be enough.
     @timeout_decorator.timeout(0.05, use_signals=False)

@@ -39,6 +39,7 @@ class GroupFieldTests(APITestCase):
                 GroupMemberFactory(user=self.users[3], group=self.group, perm_rank=Group.ADMINISTRATOR_RANK)
             ]
         self.validator_none = Validator.objects.all().get(html_name=Validator.VALIDATOR_NONE)
+        self.validator_text = Validator.objects.all().get(html_name=Validator.VALIDATOR_TEXT)
         self.group_field = GroupFieldFactory(group=self.group, validator=self.validator_none, validator_values={})
 
         # Misc
@@ -181,3 +182,69 @@ class GroupFieldTests(APITestCase):
     def test_create_valid_regex(self):
         self.assertEqual(self.try_create(self.users[3], self.new_field_data_email_validator),
             status.HTTP_201_CREATED)
+
+
+class GroupFieldValidatorTests(APITestCase):
+    fixtures = ['fixtures_prod.json']
+    @classmethod
+    def setUpTestData(self):
+        super(APITestCase, self).setUpTestData()
+
+        # Routes
+        self.group_field_url = "/group-field/"
+
+        # Group open to anyone
+        self.group = GroupFactory()
+
+        # Users already in group
+        # User[0]: Not in Group
+        # User[1]: Requested join, not accepted
+        # User[2]: Group member
+        # User[3]: Group admin
+        self.users = [UserFactory(), UserFactory(), UserFactory(), UserFactory()]
+        # Associated GroupMember
+        self.group_member = [
+                None,
+                GroupMemberFactory(user=self.users[1], group=self.group, perm_rank=0),
+                GroupMemberFactory(user=self.users[2], group=self.group, perm_rank=1),
+                GroupMemberFactory(user=self.users[3], group=self.group, perm_rank=Group.ADMINISTRATOR_RANK)
+            ]
+        self.validator_none = Validator.objects.all().get(html_name=Validator.VALIDATOR_NONE)
+
+        # If you need to test validators more in deep, see test_validators.py
+        self.validator_text = Validator.objects.all().get(html_name=Validator.VALIDATOR_TEXT)
+        self.email_vdtor = GroupFieldFactory(group=self.group,
+                validator=self.validator_text,
+                validator_values={"regex": "[a-z0-9]*@[a-z0-9]*.[a-z]{2,3}", "message": "Invalid email"})
+
+    #################### ../{pk}/validate ########################
+    def _test_validate_input(self, user, validatorId, input, expectHttp, isInputValid):
+        self.client.force_authenticate(user=user)
+        resp = self.client.post("%s%d/validate/" % (self.group_field_url, validatorId), {"value": input})
+        self.assertEqual(resp.status_code, expectHttp)
+        if resp.status_code == status.HTTP_200_OK:
+            if isInputValid:
+                self.assertEqual(resp.data['status'], "ok")
+            else:
+                self.assertEqual(resp.data['status'], "ko")
+
+    def test_validate_route_not_authed(self):
+        self._test_validate_input(None, self.email_vdtor.id, "input@lol.fr", status.HTTP_401_UNAUTHORIZED, True)
+
+    def test_validate_route_not_group_member(self):
+        self._test_validate_input(self.users[0], self.email_vdtor.id, "input@lol.fr", status.HTTP_404_NOT_FOUND, True)
+
+    def test_validate_route_not_accepted_ok(self):
+        self._test_validate_input(self.users[1], self.email_vdtor.id, "input@lol.fr", status.HTTP_200_OK, True)
+
+    def test_validate_route_not_admin_ok(self):
+        self._test_validate_input(self.users[2], self.email_vdtor.id, "input@lol.fr", status.HTTP_200_OK, True)
+
+    def test_validate_route_admin_ok(self):
+        self._test_validate_input(self.users[3], self.email_vdtor.id, "input@lol.fr", status.HTTP_200_OK, True)
+
+    def test_validate_route_bad_email(self):
+        self._test_validate_input(self.users[3], self.email_vdtor.id, "ThisIsNoAnEmail", status.HTTP_200_OK, False)
+
+    def test_validate_route_bad_validator(self):
+        self._test_validate_input(self.users[3], -1, "input@lol.fr", status.HTTP_404_NOT_FOUND, True)
