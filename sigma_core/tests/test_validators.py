@@ -2,23 +2,8 @@ from django.test import TestCase
 
 from django.core.exceptions import ValidationError
 
-from sigma_core.models.validator import get_validator_by_name
+from sigma_core.models.validator import get_validator_by_name, are_validator_fields_valid, is_validator_input_valid
 from sigma_core.models.validator import Validator
-
-def are_validator_fields_valid(validator, fields):
-    try:
-        v = get_validator_by_name(validator)
-        return v['validate_fields'](fields)
-    except ValidationError:
-        return False
-
-def is_validator_input_valid(validator, fields, value):
-    try:
-        v = get_validator_by_name(validator)
-        v['validate_input'](fields, value)
-        return True
-    except ValidationError:
-        return False
 
 class ValidatorTests(TestCase):
     @classmethod

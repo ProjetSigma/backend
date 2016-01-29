@@ -6,7 +6,7 @@ from rest_framework.permissions import IsAuthenticated
 from dry_rest_permissions.generics import DRYPermissions
 
 from sigma_core.models.group_field import GroupField
-from sigma_core.serializers.group_field import GroupFieldSerializer, GroupFieldCreateSerializer
+from sigma_core.serializers.group_field import GroupFieldSerializer
 
 class GroupFieldViewSet(mixins.CreateModelMixin,    # Only Group admin
                    mixins.RetrieveModelMixin,       # Every Group member (including not accepted group members - for "open" groups)
@@ -32,7 +32,7 @@ class GroupFieldViewSet(mixins.CreateModelMixin,    # Only Group admin
         return self.queryset.filter(group__in=my_groups)
 
     def create(self, request):
-        serializer = GroupFieldCreateSerializer(data=request.data)
+        serializer = GroupFieldSerializer(data=request.data)
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         if not request.user.has_group_admin_perm(serializer.validated_data.get('group')):

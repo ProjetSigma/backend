@@ -42,18 +42,29 @@ class GroupFieldTests(APITestCase):
         self.group_field = GroupFieldFactory(group=self.group, validator=self.validator_none, validator_values={})
 
         # Misc
+        # If you need to test validators more in deep, see test_validators.py
         self.new_field_data = {"group": self.group.id,
             "name": "Example Group Field",
             "validator": Validator.VALIDATOR_NONE,
             "validator_values": {}}
+        self.new_field_data_invalid = {"group": self.group.id,
+            "name": "I am invaliiiid !",
+            "validator": Validator.VALIDATOR_TEXT,
+            "validator_values": {"regex": "zek$er$z$)!~", "message": ""}}
+        self.new_field_data_email_validator = {"group": self.group.id,
+            "name": "Email verification",
+            "validator": Validator.VALIDATOR_TEXT,
+            "validator_values": {"regex": "[^@]+@[^@]+\.[^@]+", "message": "Invalid email"}}
 
     def test_imported_validators(self):
         self.assertTrue(Validator.objects.all().filter(html_name=Validator.VALIDATOR_NONE).exists())
 
     #################### TEST GROUP FIELD CREATION ########################
-    def try_create(self, user):
+    def try_create(self, user, data=None):
+        if data is None:
+            data = self.new_field_data
         self.client.force_authenticate(user=user)
-        resp = self.client.post(self.group_field_url, self.new_field_data)
+        resp = self.client.post(self.group_field_url, data)
         return resp.status_code
 
     def test_create_not_authed(self):
@@ -160,3 +171,13 @@ class GroupFieldTests(APITestCase):
     def test_update_ok(self):
         r = self.try_update(self.users[3], True)
         self.assertEqual(r.status_code, status.HTTP_200_OK)
+
+
+    #################### A FEW TESTS FOR VALIDATION ########################
+    def test_create_invalid_regex(self):
+        self.assertEqual(self.try_create(self.users[3], self.new_field_data_invalid),
+            status.HTTP_400_BAD_REQUEST)
+
+    def test_create_valid_regex(self):
+        self.assertEqual(self.try_create(self.users[3], self.new_field_data_email_validator),
+            status.HTTP_201_CREATED)
