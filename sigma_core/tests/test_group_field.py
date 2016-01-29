@@ -38,7 +38,8 @@ class GroupFieldTests(APITestCase):
                 GroupMemberFactory(user=self.users[2], group=self.group, perm_rank=1),
                 GroupMemberFactory(user=self.users[3], group=self.group, perm_rank=Group.ADMINISTRATOR_RANK)
             ]
-        self.group_field = GroupFieldFactory(group=self.group, validator=Validator.objects.all().get(html_name=Validator.VALIDATOR_NONE), validator_values="{}")
+        self.validator_none = Validator.objects.all().get(html_name=Validator.VALIDATOR_NONE)
+        self.group_field = GroupFieldFactory(group=self.group, validator=self.validator_none, validator_values={})
 
         # Misc
         self.new_field_data = {"group": self.group.id,
@@ -107,6 +108,14 @@ class GroupFieldTests(APITestCase):
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
         self.assertFalse(any(resp.data))
 
+    def test_list_in_group_not_accepted(self):
+        from sigma_core.serializers.group_field import GroupFieldSerializer
+        self.client.force_authenticate(user=self.users[1])
+        resp = self.client.get(self.group_field_url)
+        self.assertEqual(resp.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(resp.data), 1)
+        self.assertEqual(resp.data[0], GroupFieldSerializer(self.group_field).data)
+
     def test_list_in_group(self):
         from sigma_core.serializers.group_field import GroupFieldSerializer
         self.client.force_authenticate(user=self.users[2])
@@ -114,3 +123,40 @@ class GroupFieldTests(APITestCase):
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
         self.assertEqual(len(resp.data), 1)
         self.assertEqual(resp.data[0], GroupFieldSerializer(self.group_field).data)
+
+    #################### TEST GROUP FIELD UPDATE ########################
+    def try_update(self, user, allow):
+        from sigma_core.serializers.group_field import GroupFieldSerializer
+        group_field = GroupFieldFactory(group=self.group, validator=self.validator_none, validator_values={}, name="AAA")
+        group_field_old = GroupFieldSerializer(group_field).data
+        group_field_new = GroupFieldSerializer(group_field).data
+        group_field_new["name"] = "BBB"
+
+        self.client.force_authenticate(user=user)
+        resp = self.client.put("%s%d/" % (self.group_field_url, group_field.id), group_field_new)
+        group_field = GroupField.objects.all().get(id=group_field.id)
+        if allow:
+            self.assertEqual(GroupFieldSerializer(group_field).data, group_field_new)
+        else:
+            self.assertEqual(GroupFieldSerializer(group_field).data, group_field_old)
+        return resp
+
+    def test_update_not_authed(self):
+        r = self.try_update(None, False)
+        self.assertEqual(r.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    def test_update_not_group_member(self):
+        r = self.try_update(self.users[0], False)
+        self.assertEqual(r.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_update_not_accepted(self):
+        r = self.try_update(self.users[1], False)
+        self.assertEqual(r.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_update_not_admin(self):
+        r = self.try_update(self.users[2], False)
+        self.assertEqual(r.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_update_ok(self):
+        r = self.try_update(self.users[3], True)
+        self.assertEqual(r.status_code, status.HTTP_200_OK)
