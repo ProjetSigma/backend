@@ -14,6 +14,7 @@ from sigma_core.tests.factories import UserFactory, AdminUserFactory, GroupFacto
 
 
 class GroupFieldTests(APITestCase):
+    fixtures = ['fixtures_prod.json']
     @classmethod
     def setUpTestData(self):
         super(APITestCase, self).setUpTestData()
@@ -44,6 +45,9 @@ class GroupFieldTests(APITestCase):
             "name": "Example Group Field",
             "validator": Validator.VALIDATOR_NONE,
             "validator_values": {}}
+
+    def test_imported_validators(self):
+        self.assertTrue(Validator.objects.all().filter(html_name=Validator.VALIDATOR_NONE).exists())
 
     #################### TEST GROUP FIELD CREATION ########################
     def try_create(self, user):

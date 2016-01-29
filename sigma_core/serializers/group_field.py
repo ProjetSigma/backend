@@ -9,6 +9,9 @@ class GroupFieldSerializer(serializers.ModelSerializer):
         model = GroupField
 
     group = serializers.PrimaryKeyRelatedField(queryset=Group.objects.all())
+    validator_values = serializers.JSONField(binary=False)
 
 class GroupFieldCreateSerializer(GroupFieldSerializer):
+    class Meta:
+        model = GroupField
     pass

@@ -4,6 +4,7 @@ from django.db import models
 
 from django.core.exceptions import ValidationError
 from django.core.validators import RegexValidator
+from jsonfield import JSONField
 
 import re # regex
 
@@ -66,7 +67,6 @@ class Validator(models.Model):
     class Meta:
         pass
 
-    VALIDATOR_VALUES_DESCRIPTION_MAX_LENGTH     = 1024 # In serialized form
     VALIDATOR_TEXT = 'text'
     VALIDATOR_NONE = 'none'
     VALIDATOR_HTML_CHOICES = (
@@ -79,9 +79,10 @@ class Validator(models.Model):
     # HTML name (<input type="html_name">)
     html_name       = models.CharField(max_length=255,
                             choices=VALIDATOR_HTML_CHOICES,
-                            default=VALIDATOR_NONE)
+                            default=VALIDATOR_NONE,
+                            primary_key=True)
     # Serialized JSON array (fieldName => fieldDescription)
-    values          = models.CharField(max_length=VALIDATOR_VALUES_DESCRIPTION_MAX_LENGTH)
+    values          = JSONField()
 
     def __str__(self):
         return "Validator \"%s\" (\"%s\" with values=\"%s\")" % (self.display_name, self.html_name, self.values)
