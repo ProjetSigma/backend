@@ -24,7 +24,6 @@ class GroupFieldTests(APITestCase):
 
         # Group open to anyone
         self.group = GroupFactory()
-        self.group.save()
 
         # Users already in group
         # User[0]: Not in Group
