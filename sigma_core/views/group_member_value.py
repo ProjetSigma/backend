@@ -40,7 +40,7 @@ class GroupMemberValueViewSet(
         if self.request.user.is_sigma_admin():
             return self.queryset
         # @sqlperf: Find which one is the most efficient
-        my_groups = self.available_memberships.filter(user=self.request.user.id).values_list('group', flat=True)
+        my_groups = self.available_memberships.filter(user=self.request.user.id).filter(perm_rank__gte=1).values_list('group', flat=True)
         #my_groups = GroupMember.objects.filter(user=self.request.user.id)
         # But can always see your own custom fields
         return self.queryset.filter(Q(membership__group__in=my_groups) | Q(membership__user=self.request.user.id))
@@ -55,15 +55,3 @@ class GroupMemberValueViewSet(
 
         serializer.save()
         return Response(serializer.data, status=status.HTTP_201_CREATED)
-
-    def retrieve(self, request, pk):
-        self.available_memberships = self.available_memberships.filter(perm_rank__gte=1)
-        return super().retrieve(request, pk)
-
-    def destroy(self, request, pk):
-        self.available_memberships = self.available_memberships.filter(perm_rank__gte=1)
-        return super().destroy(request, pk)
-
-    def list(self, request):
-        self.available_memberships = self.available_memberships.filter(perm_rank__gte=1)
-        return super().list(request)
