@@ -11,7 +11,7 @@ from sigma_core.models.group_member import GroupMember
 from sigma_core.models.group_member_value import GroupMemberValue
 from sigma_core.models.group_field import GroupField
 from sigma_core.models.validator import Validator
-from sigma_core.tests.factories import UserFactory, GroupFieldFactory, GroupFactory, GroupMemberFactory, GroupMemberValueFactory
+from sigma_core.tests.factories import AdminUserFactory, UserFactory, GroupFieldFactory, GroupFactory, GroupMemberFactory, GroupMemberValueFactory
 from sigma_core.serializers.group_member_value import GroupMemberValueSerializer
 
 
@@ -32,7 +32,7 @@ class GroupFieldTests(APITestCase):
         # User[1]: Requested join, not accepted
         # User[2]: Group member
         # User[3]: Group admin
-        self.users = [UserFactory(), UserFactory(), UserFactory(), UserFactory(), UserFactory()]
+        self.users = [UserFactory(), UserFactory(), UserFactory(), UserFactory(), UserFactory(), AdminUserFactory()]
 
         # Associated GroupMember
         self.group_member = [
@@ -117,6 +117,9 @@ class GroupFieldTests(APITestCase):
     def test_create_group_admin(self):
         self.try_create(3, self.group_member[3].id, self.group_fields[0].id, "ABC", status.HTTP_201_CREATED)
 
+    def test_create_sigma_admin(self):
+        self.try_create(5, self.group_member[3].id, self.group_fields[0].id, "ABC", status.HTTP_201_CREATED)
+
     def test_create_group_field_validation_ok(self):
         self.try_create(2, self.group_member[2].id, self.group_fields[1].id, "some@email.com", status.HTTP_201_CREATED)
 
@@ -155,6 +158,10 @@ class GroupFieldTests(APITestCase):
         self.assertEqual(len(r), GroupMemberValue.objects.all().filter(membership__group=self.group2.id).count())
         self.assertEqual(len(r), 2)
 
+    def test_list_sigma_admin(self):
+        r = self.try_list(5, status.HTTP_200_OK)
+        self.assertEqual(len(r), GroupMemberValue.objects.all().count())
+
     #################### TEST GROUP MEMBER VALUE LISTING #######################
     def try_update(self, userIdx, memberValue, fieldNewValue, expectedHttpResponse):
         if userIdx >= 0:
@@ -185,6 +192,9 @@ class GroupFieldTests(APITestCase):
     def test_update_self_ok(self):
         self.try_update(1, GroupMemberValueFactory(field=self.group_fields[0], value="Blah", membership=self.group_member[1]), "ABC", status.HTTP_200_OK)
 
+    def test_update_sigma_admin(self):
+        self.try_update(5, GroupMemberValueFactory(field=self.group_fields[0], value="Blah", membership=self.group_member[1]), "ABC", status.HTTP_200_OK)
+
     #################### TEST GROUP MEMBER VALUE RETRIEVE ######################
     def try_retrieve(self, userIdx, memberValue, expectedHttpResponse):
         if userIdx >= 0:
@@ -207,6 +217,9 @@ class GroupFieldTests(APITestCase):
     def test_retrieve_other_member_ok(self):
         self.try_retrieve(2, GroupMemberValueFactory(field=self.group_fields[0], value="Blah", membership=self.group_member[1]), status.HTTP_200_OK)
 
+    def test_retrieve_sigma_admin(self):
+        self.try_retrieve(5, GroupMemberValueFactory(field=self.group_fields[0], value="Blah", membership=self.group_member[1]), status.HTTP_200_OK)
+
     #################### TEST GROUP MEMBER VALUE DESTROY #######################
     def try_delete(self, userIdx, memberValue, expectedHttpResponse):
         if userIdx >= 0:
@@ -228,6 +241,9 @@ class GroupFieldTests(APITestCase):
 
     def test_delete_self_value_not_accepted(self):
         self.try_delete(1, GroupMemberValueFactory(field=self.group_fields[0], value="Blah", membership=self.group_member[1]), status.HTTP_204_NO_CONTENT)
+
+    def test_delete_sigma_admin(self):
+        self.try_delete(5, GroupMemberValueFactory(field=self.group_fields[0], value="Blah", membership=self.group_member[1]), status.HTTP_204_NO_CONTENT)
 
     def test_delete_other_member(self):
         self.try_delete(2, GroupMemberValueFactory(field=self.group_fields[0], value="Blah", membership=self.group_member[1]), status.HTTP_403_FORBIDDEN)

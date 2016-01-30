@@ -50,7 +50,8 @@ class GroupMemberValueViewSet(
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         mship = serializer.validated_data.get('membership')
-        if mship.user != request.user:
+        # Only Sigma admins can create values for other members
+        if mship.user != request.user and not request.user.is_sigma_admin():
             return Response(status=status.HTTP_400_BAD_REQUEST)
 
         serializer.save()

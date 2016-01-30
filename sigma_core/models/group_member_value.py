@@ -28,4 +28,4 @@ class GroupMemberValue(models.Model):
         return request.user.is_authenticated()
 
     def has_object_write_permission(self, request):
-        return request.user.is_authenticated() and self.membership.user == request.user
+        return request.user.is_authenticated() and (self.membership.user == request.user or request.user.is_sigma_admin())
