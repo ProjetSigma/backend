@@ -21,9 +21,9 @@ class GroupMemberValueViewSet(
         # Only *accepted* group members can see other members custom fields
         # But you can always see your own custom fields
                 mixins.RetrieveModelMixin,
-                mixins.UpdateModelMixin,         # TODO
-                mixins.DestroyModelMixin,        # TODO
-                mixins.ListModelMixin,           # TODO
+                mixins.UpdateModelMixin,         # Only your own fields
+                mixins.DestroyModelMixin,        # Only your own fields
+                mixins.ListModelMixin,           # Same as "Retrieve"
                 viewsets.GenericViewSet):
     queryset = GroupMemberValue.objects.all()
     available_memberships = GroupMember.objects.all()
@@ -55,6 +55,10 @@ class GroupMemberValueViewSet(
 
         serializer.save()
         return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+    def retrieve(self, request, pk):
+        self.available_memberships = self.available_memberships.filter(perm_rank__gte=1)
+        return super().retrieve(request, pk)
 
     def list(self, request):
         self.available_memberships = self.available_memberships.filter(perm_rank__gte=1)

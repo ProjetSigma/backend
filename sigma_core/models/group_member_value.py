@@ -20,8 +20,8 @@ class GroupMemberValue(models.Model):
         return request.user.is_authenticated()
 
     # Object-level permissions are handled on GroupMemberValueViewSet
-    #def has_object_read_permission(self, request):
-    #    return request.user.is_authenticated() and request.user.is_group_member(self.membership.group)
+    def has_object_read_permission(self, request):
+        return True
 
     @staticmethod
     def has_write_permission(request):
