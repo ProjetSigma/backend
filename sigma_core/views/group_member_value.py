@@ -60,6 +60,10 @@ class GroupMemberValueViewSet(
         self.available_memberships = self.available_memberships.filter(perm_rank__gte=1)
         return super().retrieve(request, pk)
 
+    def destroy(self, request, pk):
+        self.available_memberships = self.available_memberships.filter(perm_rank__gte=1)
+        return super().destroy(request, pk)
+
     def list(self, request):
         self.available_memberships = self.available_memberships.filter(perm_rank__gte=1)
         return super().list(request)

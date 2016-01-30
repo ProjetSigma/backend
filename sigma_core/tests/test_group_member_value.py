@@ -208,3 +208,26 @@ class GroupFieldTests(APITestCase):
         self.try_retrieve(2, GroupMemberValueFactory(field=self.group_fields[0], value="Blah", membership=self.group_member[1]), status.HTTP_200_OK)
 
     #################### TEST GROUP MEMBER VALUE DESTROY #######################
+    def try_delete(self, userIdx, memberValue, expectedHttpResponse):
+        if userIdx >= 0:
+            self.client.force_authenticate(user=self.users[userIdx])
+        resp = self.client.delete("%s%d/" % (self.group_field_url, memberValue.id))
+        self.assertEqual(resp.status_code, expectedHttpResponse)
+
+    def test_delete_not_authed(self):
+        self.try_delete(-1, GroupMemberValueFactory(field=self.group_fields[0], value="Blah", membership=self.group_member[2]), status.HTTP_401_UNAUTHORIZED)
+
+    def test_delete_not_group_member(self):
+        self.try_delete(0, GroupMemberValueFactory(field=self.group_fields[0], value="Blah", membership=self.group_member[2]), status.HTTP_404_NOT_FOUND)
+
+    def test_delete_other_member_but_not_accepted(self):
+        self.try_delete(1, GroupMemberValueFactory(field=self.group_fields[0], value="Blah", membership=self.group_member[2]), status.HTTP_404_NOT_FOUND)
+
+    def test_delete_other_member(self):
+        self.try_delete(3, GroupMemberValueFactory(field=self.group_fields[0], value="Blah", membership=self.group_member[2]), status.HTTP_403_FORBIDDEN)
+
+    def test_delete_self_value_not_accepted(self):
+        self.try_delete(1, GroupMemberValueFactory(field=self.group_fields[0], value="Blah", membership=self.group_member[1]), status.HTTP_204_NO_CONTENT)
+
+    def test_delete_other_member(self):
+        self.try_delete(2, GroupMemberValueFactory(field=self.group_fields[0], value="Blah", membership=self.group_member[1]), status.HTTP_403_FORBIDDEN)
