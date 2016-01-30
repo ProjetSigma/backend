@@ -1,11 +1,8 @@
 import json
 
-from django.core import mail
-
 from rest_framework import status
 from rest_framework.test import APITestCase
 
-from sigma_core.models.user import User
 from sigma_core.models.group import Group
 from sigma_core.models.group_member import GroupMember
 from sigma_core.models.group_member_value import GroupMemberValue

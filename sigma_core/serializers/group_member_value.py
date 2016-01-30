@@ -3,7 +3,6 @@ from rest_framework import serializers
 from sigma_core.models.group_member_value import GroupMemberValue
 from sigma_core.models.group_member import GroupMember
 from sigma_core.models.group_field import GroupField
-from sigma_core.models.validator import Validator
 
 class GroupMemberValueSerializer(serializers.ModelSerializer):
     class Meta:

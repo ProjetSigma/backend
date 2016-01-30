@@ -1,6 +1,6 @@
 from django.db import models
 
-from sigma_core.models.custom_field import CustomField
+from sigma_core.models.group_field import GroupField
 from sigma_core.models.user import User
 
 class GroupMemberValue(models.Model):
@@ -9,7 +9,7 @@ class GroupMemberValue(models.Model):
 
     membership = models.ForeignKey('GroupMember', related_name='values')
     field = models.ForeignKey('GroupField', related_name='+')
-    value = models.CharField(max_length=CustomField.FIELD_VALUE_MAX_LENGTH)
+    value = models.CharField(max_length=GroupField.FIELD_VALUE_MAX_LENGTH)
 
     ################################################################
     # PERMISSIONS                                                  #
