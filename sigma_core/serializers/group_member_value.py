@@ -8,6 +8,7 @@ from sigma_core.models.validator import Validator
 class GroupMemberValueSerializer(serializers.ModelSerializer):
     class Meta:
         model = GroupMemberValue
+        read_only_fields = ('membership', 'field')
 
     membership = serializers.PrimaryKeyRelatedField(queryset=GroupMember.objects.all())
     field = serializers.PrimaryKeyRelatedField(queryset=GroupField.objects.all())

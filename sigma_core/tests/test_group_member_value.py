@@ -12,6 +12,7 @@ from sigma_core.models.group_member_value import GroupMemberValue
 from sigma_core.models.group_field import GroupField
 from sigma_core.models.validator import Validator
 from sigma_core.tests.factories import UserFactory, GroupFieldFactory, GroupFactory, GroupMemberFactory, GroupMemberValueFactory
+from sigma_core.serializers.group_member_value import GroupMemberValueSerializer
 
 
 class GroupFieldTests(APITestCase):
@@ -119,6 +120,10 @@ class GroupFieldTests(APITestCase):
     def test_create_group_field_validation_ok(self):
         self.try_create(2, self.group_member[2].id, self.group_fields[1].id, "some@email.com", status.HTTP_201_CREATED)
 
+    def test_create_group_field_duplicate(self):
+        self.try_create(2, self.group_member[2].id, self.group_fields[1].id, "some@email.com", status.HTTP_201_CREATED)
+        self.try_create(2, self.group_member[2].id, self.group_fields[1].id, "some@email2.com", status.HTTP_400_BAD_REQUEST)
+
     #################### TEST GROUP MEMBER VALUE LISTING #######################
     def try_list(self, userIdx, expectedHttpResponse):
         if userIdx >= 0:
@@ -149,3 +154,35 @@ class GroupFieldTests(APITestCase):
         r = self.try_list(4, status.HTTP_200_OK)
         self.assertEqual(len(r), GroupMemberValue.objects.all().filter(membership__group=self.group2.id).count())
         self.assertEqual(len(r), 2)
+
+    #################### TEST GROUP MEMBER VALUE LISTING #######################
+    def try_update(self, userIdx, memberValue, fieldNewValue, expectedHttpResponse):
+        if userIdx >= 0:
+            self.client.force_authenticate(user=self.users[userIdx])
+        memberValue.value = fieldNewValue
+        field_value = GroupMemberValueSerializer(memberValue).data
+        resp = self.client.put("%s%d/" % (self.group_field_url, memberValue.id), field_value)
+        self.assertEqual(resp.status_code, expectedHttpResponse)
+
+    def test_update_not_authed(self):
+        self.try_update(-1, GroupMemberValueFactory(field=self.group_fields[0], value="Blah", membership=self.group_member[2]), "ABC", status.HTTP_401_UNAUTHORIZED)
+
+    def test_update_not_group_member(self):
+        self.try_update(0, GroupMemberValueFactory(field=self.group_fields[0], value="Blah", membership=self.group_member[2]), "ABC", status.HTTP_404_NOT_FOUND)
+
+    def test_update_self_invalid(self):
+        self.try_update(1, GroupMemberValueFactory(field=self.group_fields[1], value="email@domain.com", membership=self.group_member[1]), "Not_A_Valid_Email", status.HTTP_400_BAD_REQUEST)
+
+    def test_update_membership(self):
+        self.client.force_authenticate(user=self.users[1])
+        memberValue = GroupMemberValueFactory(field=self.group_fields[1], value="email@domain.com", membership=self.group_member[1])
+        memberShip2 = GroupMemberFactory(user=self.users[1], group=self.group2, perm_rank=1)
+        memberValue.membership = memberShip2
+        field_value = GroupMemberValueSerializer(memberValue).data
+        resp = self.client.put("%s%d/" % (self.group_field_url, memberValue.id), field_value)
+        self.assertEqual(resp.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_update_self_ok(self):
+        self.try_update(1, GroupMemberValueFactory(field=self.group_fields[0], value="Blah", membership=self.group_member[1]), "ABC", status.HTTP_200_OK)
+
+    #################### TEST GROUP MEMBER VALUE RETRIEVE ######################
