@@ -115,12 +115,18 @@ class Group(models.Model):
         """
         Everybody can create a private group. For other types, user must be school admin or sigma admin.
         """
-        #TODO: Adapt after School model implementation.
+        from sigma_core.models.school import School
         group_type = request.data.get('type', None)
-        return group_type == Group.TYPE_BASIC
+        resp_school = request.data.get('resp_school', None)
+        try:
+            school = School.objects.get(pk=resp_school)
+        except School.DoesNotExist:
+            school = None
+        return group_type == Group.TYPE_BASIC or (school is not None and request.user.has_group_admin_perm(school))
 
+    @allow_staff_or_superuser
     def has_object_write_permission(self, request):
-        return False
+        return request.user.has_group_admin_perm(self)
 
     @allow_staff_or_superuser
     def has_object_update_permission(self, request):
