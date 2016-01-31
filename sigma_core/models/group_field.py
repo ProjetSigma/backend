@@ -17,15 +17,15 @@ class GroupField(CustomField):
 
     @staticmethod
     def has_read_permission(request):
-        return request.user.is_authenticated()
+        return True
 
     # Object-level permissions are handled on GroupFieldViewSet
     #def has_object_read_permission(self, request):
-    #    return request.user.is_authenticated() and request.user.is_group_member(self.group)
+    #    return request.user.is_group_member(self.group)
 
     @staticmethod
     def has_write_permission(request):
-        return request.user.is_authenticated()
+        return True
 
     def has_object_write_permission(self, request):
-        return request.user.is_authenticated() and request.user.has_group_admin_perm(self.group)
+        return request.user.has_group_admin_perm(self.group)
