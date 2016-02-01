@@ -46,7 +46,8 @@ INSTALLED_APPS = (
     'oauth2_provider',
     'django_nose',
 
-    'sigma_core',
+    'sigma_core.apps.SigmaCoreConfig',
+    'sigma_files.apps.SigmaFilesConfig',
 )
 
 MIDDLEWARE_CLASSES = (
