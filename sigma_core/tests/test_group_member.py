@@ -115,6 +115,7 @@ class InvitationGroupMemberCreationTests(APITestCase):
         # Routes
         self.members_url = "/group-member/"
         self.group_invite_url = "/group/%d/invite/";
+        self.group_invite_accept_url = "/group/%d/invite_accept/";
 
         # Group with invitation only
         self.group = GroupFactory(req_rank_invite=5, default_member_rank=-1)
@@ -125,9 +126,6 @@ class InvitationGroupMemberCreationTests(APITestCase):
             None,
             GroupMemberFactory(user=self.users[1], group=self.group, perm_rank=self.group.req_rank_invite)
         ]
-
-        # Misc
-        self.new_membership_data = {"user": self.users[0].id, "group": self.group.id}
 
     def test_invite_not_authed(self):
         self.client.force_authenticate(user=None)
@@ -140,6 +138,12 @@ class InvitationGroupMemberCreationTests(APITestCase):
         response = self.client.put(self.group_invite_url % (self.group.id), {"user": self.users[0].id} )
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
+    def test_invite_already_group_member(self):
+        # Attempt to get group membership
+        self.client.force_authenticate(user=self.users[1])
+        response = self.client.put(self.group_invite_url % (self.group.id), {"user": self.users[1].id} )
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
     def test_invite_ok(self):
         # User0 invites User1 to group
         self.client.force_authenticate(user=self.users[1])
@@ -149,3 +153,5 @@ class InvitationGroupMemberCreationTests(APITestCase):
     def test_invite_accept(self):
         self.test_invite_ok()
         self.client.force_authenticate(user=self.users[0])
+        response = self.client.post(self.members_url, {"user": self.users[0].id, "group": self.group.id})
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)

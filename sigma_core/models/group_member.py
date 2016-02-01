@@ -64,7 +64,7 @@ class GroupMember(models.Model):
             group_id = request.data.get('group', None)
             if group_id:
                 request.group = Group.objects.get(pk=group_id)
-                return request.group.can_anyone_join()
+                return request.group.can_anyone_join() or request.user.is_invited_to_group_id(group_id)
             return True
         except Group.DoesNotExist:
             raise Http404()

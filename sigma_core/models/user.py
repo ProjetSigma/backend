@@ -116,6 +116,9 @@ class User(AbstractBaseUser):
         mem = self.get_group_membership(group)
         return mem is not None and mem.perm_rank == Group.ADMINISTRATOR_RANK
 
+    def is_invited_to_group_id(self, groupId):
+        return self.invited_to_groups.filter(pk=groupId).exists()
+
     ###############
     # Permissions #
     ###############
