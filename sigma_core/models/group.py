@@ -117,12 +117,15 @@ class Group(models.Model):
         """
         from sigma_core.models.school import School
         group_type = request.data.get('type', None)
+        if group_type == Group.TYPE_BASIC:
+            return True
+
         resp_school = request.data.get('resp_school', None)
         try:
             school = School.objects.get(pk=resp_school)
         except School.DoesNotExist:
             school = None
-        return group_type == Group.TYPE_BASIC or (school is not None and request.user.has_group_admin_perm(school))
+        return school is not None and request.user.has_group_admin_perm(school)
 
     @allow_staff_or_superuser
     def has_object_write_permission(self, request):
