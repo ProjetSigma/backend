@@ -98,6 +98,8 @@ class User(AbstractBaseUser):
 
     def can_accept_join_requests(self, group):
         from sigma_core.models.group_member import GroupMember
+        if self.is_sigma_admin():
+            return True
         mem = self.get_group_membership(group)
         return mem is not None and mem.perm_rank >= group.req_rank_accept_join_requests
 
