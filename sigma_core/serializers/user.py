@@ -18,7 +18,7 @@ class BasicUserSerializer(serializers.ModelSerializer):
     class Meta(BasicUserSerializerMeta):
         pass
 
-    photo = serializers.PrimaryKeyRelatedField(queryset=ProfileImage.objects.all(), allow_null=True)
+    photo = serializers.PrimaryKeyRelatedField(queryset=ProfileImage.objects.all(), allow_null=True, required=False)
 
 
 from sigma_core.serializers.group_member import GroupMemberSerializer
