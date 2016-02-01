@@ -79,6 +79,14 @@ class User(AbstractBaseUser):
     def is_sigma_admin(self):
         return self.is_staff or self.is_superuser
 
+    def get_group_membership(self, group):
+        from sigma_core.models.group_member import GroupMember
+        from sigma_core.models.group import Group
+        try:
+            return self.memberships.get(group=group)
+        except GroupMember.DoesNotExist:
+            return None
+
     def is_group_member(self, g):
         from sigma_core.models.group_member import GroupMember
         try:
@@ -110,6 +118,14 @@ class User(AbstractBaseUser):
         except GroupMember.DoesNotExist:
             return False
         return mem.perm_rank >= group.req_rank_modify_group_infos
+
+    def has_group_admin_perm(self, group):
+        from sigma_core.models.group_member import GroupMember
+        from sigma_core.models.group import Group
+        if self.is_sigma_admin():
+            return True
+        mem = self.get_group_membership(group)
+        return mem is not None and mem.perm_rank == Group.ADMINISTRATOR_RANK
 
 
     # Perms for admin site

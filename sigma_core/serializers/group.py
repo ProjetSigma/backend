@@ -18,4 +18,5 @@ class GroupSerializer(BasicGroupSerializer):
     class Meta:
         model = Group
 
+    acknowledged_groups = serializers.PrimaryKeyRelatedField(read_only=True, many=True)
     memberships = serializers.PrimaryKeyRelatedField(read_only=True, many=True)

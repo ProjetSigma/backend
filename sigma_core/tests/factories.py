@@ -5,6 +5,7 @@ from django.utils.text import slugify
 
 from sigma_core.models.user import User
 from sigma_core.models.group import Group
+from sigma_core.models.school import School
 from sigma_core.models.group_member import GroupMember
 
 faker = FakerFactory.create('fr_FR')
@@ -28,6 +29,14 @@ class GroupFactory(factory.django.DjangoModelFactory):
         model = Group
 
     name = factory.Sequence(lambda n: 'Group %d' % n)
+
+
+class SchoolFactory(factory.django.DjangoModelFactory):
+    class Meta:
+        model = School
+
+    name = factory.Sequence(lambda n: 'School %d' % n)
+    design = "default"
 
 
 class GroupMemberFactory(factory.django.DjangoModelFactory):

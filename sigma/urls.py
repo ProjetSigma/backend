@@ -19,6 +19,7 @@ from rest_framework import routers
 
 from sigma_core.views.user import UserViewSet
 from sigma_core.views.group import GroupViewSet
+from sigma_core.views.school import SchoolViewSet
 from sigma_core.views.group_user import GroupUserViewSet
 from sigma_core.views.group_member import GroupMemberViewSet
 
@@ -26,6 +27,7 @@ router = routers.DefaultRouter()
 
 router.register(r'user', UserViewSet)
 router.register(r'group', GroupViewSet)
+router.register(r'school', SchoolViewSet)
 router.register(r'group-member', GroupMemberViewSet)
 
 urlpatterns = [
