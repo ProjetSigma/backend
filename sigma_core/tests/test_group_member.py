@@ -114,6 +114,7 @@ class InvitationGroupMemberCreationTests(APITestCase):
 
         # Routes
         self.members_url = "/group-member/"
+        self.group_invite_url = "/group/%d/invite/";
 
         # Group with invitation only
         self.group = GroupFactory(req_rank_invite=5, default_member_rank=-1)
@@ -128,21 +129,21 @@ class InvitationGroupMemberCreationTests(APITestCase):
         # Misc
         self.new_membership_data = {"user": self.users[0].id, "group": self.group.id}
 
-    def test_create_not_authed(self):
+    def test_invite_not_authed(self):
         self.client.force_authenticate(user=None)
-        response = self.client.post(self.members_url, self.new_membership_data)
+        response = self.client.put(self.group_invite_url % (self.group.id), {"user": self.users[0].id} )
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
-    def test_create_forbidden(self):
+    def test_invite_forbidden(self):
         # Attempt to get group membership
         self.client.force_authenticate(user=self.users[0])
-        response = self.client.post(self.members_url, self.new_membership_data)
+        response = self.client.put(self.group_invite_url % (self.group.id), {"user": self.users[0].id} )
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_invite_ok(self):
         # User0 invites User1 to group
         self.client.force_authenticate(user=self.users[1])
-        response = self.client.put("/group/%d/invite/" % (self.group.id), {"user": self.users[0].id} )
+        response = self.client.put(self.group_invite_url % (self.group.id), {"user": self.users[0].id} )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_invite_accept(self):
