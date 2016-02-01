@@ -1,2 +1,24 @@
+[run]
+omit =
+    */tests*
+    */migrations/*
+    *__init__.py*
+    */settings/*
+    *wsgi.py*
+    *admin.py*
+    *apps.py*
+
 [report]
-omit = */migrations/*
+omit =
+    */tests*
+    */migrations/*
+    *__init__.py*
+    */settings*
+    *urls.py*
+    *wsgi.py*
+    *admin.py*
+    *apps.py*
+exclude_lines =
+    import
+    from
+    def __str__(self)
