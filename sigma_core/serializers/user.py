@@ -2,6 +2,8 @@ from rest_framework import serializers
 from dry_rest_permissions.generics import DRYPermissionsField
 
 from sigma_core.models.user import User
+from sigma_files.models import ProfileImage
+
 
 class BasicUserSerializerMeta(object):
     model = User
@@ -15,6 +17,8 @@ class BasicUserSerializer(serializers.ModelSerializer):
     """
     class Meta(BasicUserSerializerMeta):
         pass
+
+    photo = serializers.PrimaryKeyRelatedField(queryset=ProfileImage.objects.all(), allow_null=True)
 
 
 from sigma_core.serializers.group_member import GroupMemberSerializer
