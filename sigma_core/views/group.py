@@ -8,6 +8,7 @@ from dry_rest_permissions.generics import DRYPermissions, DRYPermissionFiltersBa
 
 from sigma_core.models.user import User
 from sigma_core.models.group import Group
+from sigma_core.models.group_member import GroupMember
 from sigma_core.serializers.group import GroupSerializer
 
 
@@ -30,13 +31,22 @@ class GroupViewSet(viewsets.ModelViewSet):
         try:
             group = Group.objects.get(pk=pk)
             user = User.objects.get(pk=request.data.get('user', None))
+            if not request.user.can_invite(group):
+                return Response(status=status.HTTP_403_FORBIDDEN)
+
+            # Already group member ?
+            try:
+                GroupMember.objects.get(user=user.id, group=group.id)
+                return Response("Already Group member", status=status.HTTP_400_BAD_REQUEST)
+            except GroupMember.DoesNotExist:
+                pass
+
+            group.invited_users.add(user)
+            # user.notify() # TODO: Notification
+            s = GroupSerializer(group)
+            return Response(s.data, status=status.HTTP_200_OK)
+
         except Group.DoesNotExist:
             raise Http404("Group %d not found" % pk)
         except User.DoesNotExist:
             raise Http404("User %d not found" % request.data.get('user', None))
-
-        group.invited_users.add(user)
-        # TODO: notify user of this invitation
-
-        s = GroupSerializer(group)
-        return Response(s.data, status=status.HTTP_200_OK)

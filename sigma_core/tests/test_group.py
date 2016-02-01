@@ -95,11 +95,11 @@ class GroupTests(APITestCase):
         response = self.client.put((self.group_url + "invite/") % self.groups[1].id, self.invite_data)
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
-    # def test_invite_forbidden(self):
-    #     # Client has not perms to invite
-    #     self.client.force_authenticate(user=self.users[1])
-    #     response = self.client.put((self.group_url + "invite/") % self.groups[1].id, self.invite_data)
-    #     self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+    def test_invite_forbidden(self):
+        # Client has not perms to invite
+        self.client.force_authenticate(user=self.users[1])
+        response = self.client.put((self.group_url + "invite/") % self.groups[1].id, self.invite_data)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_invite_ok(self):
         # Client has perms to invite
@@ -107,6 +107,11 @@ class GroupTests(APITestCase):
         response = self.client.put((self.group_url + "invite/") % self.groups[1].id, self.invite_data)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertIn(self.groups[1], reload(self.users[0]).invited_to_groups.all())
+
+    def test_invite_duplicate(self):
+        self.test_invite_ok()
+        response = self.client.put((self.group_url + "invite/") % self.groups[1].id, self.invite_data)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     #### Create requests
     def test_create_unauthed(self):
