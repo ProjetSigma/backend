@@ -136,10 +136,6 @@ class Group(models.Model):
         """
         return request.user.can_modify_group_infos(self)
 
-    @allow_staff_or_superuser
-    def has_object_invite_permission(self, request):
-        return request.user.can_invite(self)
-
 
 class GroupAcknowledgment(models.Model):
     subgroup = models.ForeignKey(Group, related_name='group_parents')
