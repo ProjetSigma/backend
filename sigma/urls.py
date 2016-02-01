@@ -19,6 +19,7 @@ from rest_framework import routers
 
 from sigma_core.views.user import UserViewSet
 from sigma_core.views.group import GroupViewSet
+from sigma_core.views.school import SchoolViewSet
 from sigma_core.views.group_user import GroupUserViewSet
 from sigma_core.views.group_member import GroupMemberViewSet
 from sigma_core.views.group_member_value import GroupMemberValueViewSet
@@ -27,11 +28,12 @@ from sigma_core.views.validator import ValidatorViewSet
 
 router = routers.DefaultRouter()
 
-router.register(r'user', UserViewSet)
 router.register(r'group', GroupViewSet)
 router.register(r'group-field', GroupFieldViewSet)
 router.register(r'group-member', GroupMemberViewSet)
 router.register(r'group-member-value', GroupMemberValueViewSet)
+router.register(r'school', SchoolViewSet)
+router.register(r'user', UserViewSet)
 router.register(r'validator', ValidatorViewSet)
 
 urlpatterns = [

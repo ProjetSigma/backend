@@ -5,7 +5,7 @@ from rest_framework.test import APITestCase, force_authenticate
 
 from sigma_core.models.group import Group
 from sigma_core.serializers.group import GroupSerializer
-from sigma_core.tests.factories import UserFactory, GroupFactory, GroupMemberFactory
+from sigma_core.tests.factories import UserFactory, GroupFactory, GroupMemberFactory, SchoolFactory
 
 
 def reload(obj):
@@ -16,6 +16,9 @@ class GroupTests(APITestCase):
     @classmethod
     def setUpTestData(self):
         super(GroupTests, self).setUpTestData()
+
+        # Schools
+        self.schools = SchoolFactory.create_batch(1)
 
         # Groups
         self.groups = GroupFactory.create_batch(2)
@@ -31,13 +34,19 @@ class GroupTests(APITestCase):
         # Memberships
         self.member1 = GroupMemberFactory(user=self.users[1], group=self.groups[1], perm_rank=1)
         self.member2 = GroupMemberFactory(user=self.users[2], group=self.groups[1], perm_rank=Group.ADMINISTRATOR_RANK)
+        self.student1 = GroupMemberFactory(user=self.users[0], group=self.schools[0], perm_rank=1)
+        self.student2 = GroupMemberFactory(user=self.users[1], group=self.schools[0], perm_rank=Group.ADMINISTRATOR_RANK) # School admin
+        self.student3 = GroupMemberFactory(user=self.users[2], group=self.schools[0], perm_rank=1)
 
         serializer = GroupSerializer(self.groups[0])
         self.group_data = serializer.data
+        self.update_group_data = self.group_data.copy()
+        self.update_group_data['name'] = "Another name"
         self.groups_url = "/group/"
         self.group_url = self.groups_url + "%d/"
 
-        self.new_group_data = {"name": "New group"}
+        self.new_private_group_data = {"name": "New group", "type": Group.TYPE_BASIC, "visibility": Group.VIS_PRIVATE}
+        self.new_association_group_data = {"name": "New group", "type": Group.TYPE_ASSO, "visibility": Group.VIS_PUBLIC, "resp_school": self.schools[0].id}
         self.invite_data = {"user": self.users[0].id}
 
     #### List requests
@@ -46,18 +55,21 @@ class GroupTests(APITestCase):
         response = self.client.get(self.groups_url)
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
-    # def test_get_groups_list_forbidden(self):
-    #     # Client authenticated but has no permission
-    #     self.client.force_authenticate(group=self.users[0])
-    #     response = self.client.get(self.group_url % self.groups[1].id)
-    #     self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
-
-    def test_get_groups_list_ok(self):
-        # Client has permissions
+    def test_get_groups_list_limited(self):
+        # Client authenticated and can see public groups
         self.client.force_authenticate(user=self.users[0])
         response = self.client.get(self.groups_url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(response.data), len(self.groups))
+        self.assertIn(self.groups[0].id, [d['id'] for d in response.data]) # User can only see groups[0]
+        self.assertNotIn(self.groups[1].id, [d['id'] for d in response.data])
+
+    def test_get_groups_list_ok(self):
+        # Client has permissions
+        self.client.force_authenticate(user=self.users[1])
+        response = self.client.get(self.groups_url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertIn(self.groups[0].id, [d['id'] for d in response.data]) # groups[0] is public and user is member of groups[1]
+        self.assertIn(self.groups[1].id, [d['id'] for d in response.data])
 
     #### Get requests
     def test_get_group_unauthed(self):
@@ -97,7 +109,49 @@ class GroupTests(APITestCase):
         self.assertIn(self.groups[1], reload(self.users[0]).invited_to_groups.all())
 
     #### Create requests
+    def test_create_unauthed(self):
+        # Client is not authenticated
+        response = self.client.post(self.groups_url, self.new_private_group_data)
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    def test_create_private_group(self):
+        # Everybody can create a private group
+        self.client.force_authenticate(user=self.users[0])
+        response = self.client.post(self.groups_url, self.new_private_group_data)
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(response.data['name'], self.new_private_group_data['name'])
+        self.assertEqual(response.data['visibility'], Group.VIS_PRIVATE)
+        Group.objects.get(pk=response.data['id']).delete()
+
+    def test_create_association_group_forbidden(self):
+        # Only school andmins and Sigma admins can create association groups
+        self.client.force_authenticate(user=self.users[0])
+        response = self.client.post(self.groups_url, self.new_association_group_data)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_create_association_group_ok(self):
+        # Only school andmins and Sigma admins can create association groups
+        self.client.force_authenticate(user=self.users[1])
+        response = self.client.post(self.groups_url, self.new_association_group_data)
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(response.data['type'], Group.TYPE_ASSO)
+        self.assertEqual(response.data['visibility'], Group.VIS_PUBLIC)
+        Group.objects.get(pk=response.data['id']).delete()
 
     #### Modification requests
+    def test_update_unauthed(self):
+        response = self.client.put(self.group_url % self.groups[1].id, self.update_group_data)
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    def test_update_forbidden(self):
+        self.client.force_authenticate(user=self.users[1])
+        response = self.client.put(self.group_url % self.groups[1].id, self.update_group_data)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_update_ok(self):
+        self.client.force_authenticate(user=self.users[2])
+        response = self.client.put(self.group_url % self.groups[1].id, self.update_group_data)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(reload(self.groups[1]).name, self.update_group_data['name'])
 
     #### Deletion requests

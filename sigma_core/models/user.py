@@ -114,10 +114,9 @@ class User(AbstractBaseUser):
         mem = self.get_group_membership(group)
         return mem is not None and mem.perm_rank == Group.ADMINISTRATOR_RANK
 
-
-    ################################################################
-    # PERMISSIONS                                                  #
-    ################################################################
+    ###############
+    # Permissions #
+    ###############
 
     # Perms for admin site
     def has_perm(self, perm, obj=None):
