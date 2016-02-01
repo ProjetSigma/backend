@@ -42,6 +42,9 @@ class GroupMemberViewSet(viewsets.ModelViewSet):
         except GroupMember.DoesNotExist:
             raise Http404()
 
+        if not request.user.can_accept_join_requests(gm.group):
+            return Response(status=status.HTTP_403_FORBIDDEN)
+
         gm.perm_rank = 1 # default_perm_rank should be 0, so validation is to set perm_rank to 1
         gm.save()
 
