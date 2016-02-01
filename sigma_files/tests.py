@@ -1,6 +1,4 @@
 import json
-import tempfile
-from mock import Mock
 from PIL import Image
 
 from django.core.files.uploadedfile import SimpleUploadedFile
