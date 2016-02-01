@@ -4,8 +4,6 @@ from django.http import Http404
 from dry_rest_permissions.generics import allow_staff_or_superuser
 
 from sigma_core.models.user import User
-from sigma_core.models.group import Group
-
 
 class GroupMember(models.Model):
     """
@@ -15,12 +13,15 @@ class GroupMember(models.Model):
         # TODO: Make a primary key once Django supports it
         unique_together = (("user", "group"),)
 
-    user = models.ForeignKey(User, related_name='memberships')
-    group = models.ForeignKey(Group, related_name='memberships')
+    user = models.ForeignKey('User', related_name='memberships')
+    group = models.ForeignKey('Group', related_name='memberships')
     created = models.DateTimeField(auto_now_add=True)
     join_date = models.DateField(blank=True, null=True)
     leave_date = models.DateField(blank=True, null=True)
     perm_rank = models.SmallIntegerField(blank=False, default=1)
+
+    # Related fields:
+    #   - values (model GroupMemberValue)
 
     def can_invite(self):
         return self.perm_rank >= self.group.req_rank_invite
@@ -56,6 +57,7 @@ class GroupMember(models.Model):
     @staticmethod
     @allow_staff_or_superuser
     def has_create_permission(request):
+        from sigma_core.models.group import Group
         if request.data.get('user') and request.user.id != request.data.get('user'):
             return False
         try:

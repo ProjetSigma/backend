@@ -2,7 +2,6 @@ from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 from dry_rest_permissions.generics import allow_staff_or_superuser
 
-from sigma_core.models.group import Group
 
 class UserManager(BaseUserManager):
     # TODO: Determine whether 'memberships' fields needs to be retrieved every time or not...
@@ -59,7 +58,7 @@ class User(AbstractBaseUser):
 
     objects = UserManager()
 
-    invited_to_groups = models.ManyToManyField(Group, blank=True, related_name="invited_users");
+    invited_to_groups = models.ManyToManyField('Group', blank=True, related_name="invited_users");
 
     # Related fields:
     #   - memberships (model UserGroup)
@@ -89,35 +88,23 @@ class User(AbstractBaseUser):
 
     def is_group_member(self, g):
         from sigma_core.models.group_member import GroupMember
-        try:
-            mem = self.memberships.get(group=g)
-        except GroupMember.DoesNotExist:
-            return False
-        return mem.is_accepted()
+        mem = self.get_group_membership(g)
+        return mem is not None and mem.is_accepted()
 
     def can_invite(self, group):
         from sigma_core.models.group_member import GroupMember
-        try:
-            mem = self.memberships.get(group=group)
-        except GroupMember.DoesNotExist:
-            return False
-        return mem.perm_rank >= group.req_rank_invite
+        mem = self.get_group_membership(group)
+        return mem is not None and mem.perm_rank >= group.req_rank_invite
 
     def can_accept_join_requests(self, group):
         from sigma_core.models.group_member import GroupMember
-        try:
-            mem = self.memberships.get(group=group)
-        except GroupMember.DoesNotExist:
-            return False
-        return mem.perm_rank >= group.req_rank_accept_join_requests
+        mem = self.get_group_membership(group)
+        return mem is not None and mem.perm_rank >= group.req_rank_accept_join_requests
 
     def can_modify_group_infos(self, group):
         from sigma_core.models.group_member import GroupMember
-        try:
-            mem = self.memberships.get(group=group)
-        except GroupMember.DoesNotExist:
-            return False
-        return mem.perm_rank >= group.req_rank_modify_group_infos
+        mem = self.get_group_membership(group)
+        return mem is not None and mem.perm_rank >= group.req_rank_modify_group_infos
 
     def has_group_admin_perm(self, group):
         from sigma_core.models.group_member import GroupMember
@@ -127,6 +114,9 @@ class User(AbstractBaseUser):
         mem = self.get_group_membership(group)
         return mem is not None and mem.perm_rank == Group.ADMINISTRATOR_RANK
 
+    ###############
+    # Permissions #
+    ###############
 
     # Perms for admin site
     def has_perm(self, perm, obj=None):
@@ -134,8 +124,8 @@ class User(AbstractBaseUser):
 
     def has_module_perms(self, app_label):
         return True
+    # End of admin site permissions
 
-    # Permissions
     @staticmethod
     def has_read_permission(request):
         """

@@ -2,10 +2,8 @@ from django.db import models
 
 from dry_rest_permissions.generics import allow_staff_or_superuser
 
-# class GroupManager(models.Manager):
-#     # TODO: Determine whether 'memberships' fields needs to be retrieved every time or not...
-#     def get_queryset(self):
-#         return super(GroupManager, self).get_queryset().prefetch_related('memberships')
+from sigma_core.models.custom_field import CustomField
+from sigma_core.models.group_field import GroupField
 
 
 class Group(models.Model):
@@ -64,8 +62,8 @@ class Group(models.Model):
     # Related fields:
     #   - invited_users (model User)
     #   - memberships (model UserGroup)
-
-    # objects = GroupManager()
+    #   - fields (model GroupField)
+    # TODO: Determine whether 'memberships' fields needs to be retrieved every time or not...
 
     @property
     def subgroups(self):
