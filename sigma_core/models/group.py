@@ -68,8 +68,8 @@ class Group(models.Model):
     # objects = GroupManager()
 
     @property
-    def acknowledged_groups(self):
-        return [ga.asking_group for ga in self.group_acknowledgments.filter(validated=True).select_related('asking_group')]
+    def subgroups(self):
+        return [ga.subgroup for ga in self.subgroups.filter(validated=True).select_related('subgroup')]
 
     #################
     # Model methods #
