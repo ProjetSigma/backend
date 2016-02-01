@@ -114,6 +114,49 @@ class InvitationGroupMemberCreationTests(APITestCase):
 
         # Routes
         self.members_url = "/group-member/"
+
+        # Group with invitation only
+        self.group = GroupFactory(req_rank_invite=5, default_member_rank=-1, visibility=Group.VIS_PRIVATE)
+
+        # Testing user
+        self.users = UserFactory.create_batch(2)
+        self.memberships = [
+            None,
+            GroupMemberFactory(user=self.users[1], group=self.group, perm_rank=self.group.req_rank_invite)
+        ]
+
+        # Misc
+        self.new_membership_data = {"group": self.group.id, "user": self.users[0].id}
+
+    def test_create_not_authed(self):
+        self.client.force_authenticate(user=None)
+        response = self.client.post(self.members_url, self.new_membership_data)
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    def test_create_forbidden(self):
+        # Can't join this Group
+        self.client.force_authenticate(user=self.users[0])
+        response = self.client.post(self.members_url, self.new_membership_data)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_create_already_group_member(self):
+        self.client.force_authenticate(user=self.users[1])
+        response = self.client.post(self.members_url, self.new_membership_data)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_create_self_forbidden(self):
+        self.client.force_authenticate(user=self.users[1])
+        response = self.client.post(self.members_url, self.new_membership_data)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+
+class InvitationGroupMemberInvitationWorkflowTests(APITestCase):
+    @classmethod
+    def setUpTestData(self):
+        super(APITestCase, self).setUpTestData()
+
+        # Routes
+        self.members_url = "/group-member/"
         self.group_invite_url = "/group/%d/invite/";
         self.group_invite_accept_url = "/group/%d/invite_accept/";
 
