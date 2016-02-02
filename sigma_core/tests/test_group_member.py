@@ -30,12 +30,22 @@ class GroupMemberPermissionTests(APITestCase):
         ]
 
     def try_rank(self, userId, targetId, newPermRank, expectedHttpResponseCode):
+        """
+        This function attempts to set $targetId membership rank to $newPermRank
+        using $userId permissions
+        PUT /group-member/{targetId}/rank with perm_rank=newPermRank
+        """
         if userId >= 0:
             self.client.force_authenticate(user=self.users[userId])
         response = self.client.put(self.member_rank_url % (self.mships[targetId].id), {"perm_rank": newPermRank})
         self.assertEqual(response.status_code, expectedHttpResponseCode)
 
     def try_delete(self, userId, targetId, expectedHttpResponseCode):
+        """
+        This function attempts to remove $targetId membership from Group
+        using $userId permissions
+        DELETE /group-member/{targetId}/
+        """
         if userId >= 0:
             self.client.force_authenticate(user=self.users[userId])
         response = self.client.delete(self.member_url % targetId)

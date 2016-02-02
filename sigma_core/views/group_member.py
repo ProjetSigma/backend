@@ -28,9 +28,8 @@ class GroupMemberViewSet(viewsets.ModelViewSet):
         from sigma_core.models.group import Group
         try:
             modified_mship = GroupMember.objects.all().select_related('group').get(pk=pk)
-            group_id = modified_mship.group.id;
             group = modified_mship.group
-            my_mship = GroupMember.objects.all().get(group=group_id, user=request.user.id)
+            my_mship = GroupMember.objects.all().get(group=group, user=request.user)
         except GroupMember.DoesNotExist:
             raise Http404()
 
@@ -50,9 +49,8 @@ class GroupMemberViewSet(viewsets.ModelViewSet):
         from sigma_core.models.group import Group
         try:
             modified_mship = GroupMember.objects.all().select_related('group').get(pk=pk)
-            group_id = modified_mship.group.id;
             group = modified_mship.group
-            my_mship = GroupMember.objects.all().get(group=group_id, user=request.user.id)
+            my_mship = GroupMember.objects.all().get(group=group, user=request.user)
         except GroupMember.DoesNotExist:
             raise Http404()
 
