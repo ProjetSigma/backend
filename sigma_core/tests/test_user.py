@@ -216,4 +216,11 @@ class UserTests(APITestCase):
         from sigma_core.views.user import reset_mail
         self.assertEqual(mail.outbox[0].subject, reset_mail['subject'])
 
+#### "Add photo" requests
+    def test_addphoto_ok(self):
+        self.client.force_authenticate(user=self.user)
+        with open("sigma_files/test_img.png", "rb") as img:
+             response = self.client.post(self.user_url + "addphoto/", {'file': img}, format='multipart')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
 #### Deletion requests
