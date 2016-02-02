@@ -36,9 +36,9 @@ router.register(r'school', SchoolViewSet)
 router.register(r'user', UserViewSet)
 router.register(r'validator', ValidatorViewSet)
 
-from sigma_files.views import ProfileImageViewSet
+from sigma_files.views import ImageViewSet
 
-router.register(r'profile-image', ProfileImageViewSet)
+router.register(r'image', ImageViewSet)
 
 urlpatterns = [
     url(r'^admin/', include(admin.site.urls)),

@@ -26,7 +26,7 @@ L'équipe Sigma.
 """
 }
 
-# TODO: use DetailSerializerMixin
+
 class UserViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated, DRYPermissions, ]
     queryset = User.objects.all()
