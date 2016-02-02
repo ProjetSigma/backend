@@ -17,6 +17,7 @@ class GroupMemberPermissionTests(APITestCase):
     def setUpTestData(self):
         super().setUpTestData()
         self.member_rank_url = "/group-member/%d/rank/"
+        self.member_url = "/group-member/%d/"
         self.users = UserFactory.create_batch(6)
         self.group = GroupFactory(req_rank_promote=3, req_rank_demote=4, req_rank_kick=5)
         self.mships = [
@@ -32,6 +33,12 @@ class GroupMemberPermissionTests(APITestCase):
         if userId >= 0:
             self.client.force_authenticate(user=self.users[userId])
         response = self.client.put(self.member_rank_url % (self.mships[targetId].id), {"perm_rank": newPermRank})
+        self.assertEqual(response.status_code, expectedHttpResponseCode)
+
+    def try_delete(self, userId, targetId, expectedHttpResponseCode):
+        if userId >= 0:
+            self.client.force_authenticate(user=self.users[userId])
+        response = self.client.delete(self.member_url % targetId)
         self.assertEqual(response.status_code, expectedHttpResponseCode)
 
     # /rank
@@ -74,6 +81,23 @@ class GroupMemberPermissionTests(APITestCase):
     def test_rank_demote_ok(self):
         self.try_rank(5, 3, 2, status.HTTP_200_OK)
         self.assertEqual(GroupMember.objects.get(pk=self.mships[3].id).perm_rank, 2)
+
+    # delete
+    def test_delete_not_authed(self):
+        self.try_delete(-1, 1, status.HTTP_401_UNAUTHORIZED)
+
+    def test_delete_not_group_member(self):
+        self.try_delete(0, 1, status.HTTP_404_NOT_FOUND)
+
+    def test_delete_no_permission(self):
+        self.try_delete(3, 2, status.HTTP_403_FORBIDDEN)
+
+    def test_delete_user_not_in_group(self):
+        self.try_delete(4, 0, status.HTTP_404_NOT_FOUND)
+
+    def test_delete_ok(self):
+        self.try_delete(5, 1, status.HTTP_204_NO_CONTENT)
+        self.assertFalse(GroupMember.objects.filter(pk=self.mships[1].id).exists())
 
 class OpenGroupMemberCreationTests(APITestCase):
     @classmethod

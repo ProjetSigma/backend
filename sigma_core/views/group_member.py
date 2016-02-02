@@ -24,9 +24,27 @@ class GroupMemberViewSet(viewsets.ModelViewSet):
         mem = serializer.save()
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
-    # def update(self, request, pk=None):
-    #     pass
-    #
+    def destroy(self, request, pk=None):
+        from sigma_core.models.group import Group
+        try:
+            modified_mship = GroupMember.objects.all().select_related('group').get(pk=pk)
+            group_id = modified_mship.group.id;
+            group = modified_mship.group
+            my_mship = GroupMember.objects.all().get(group=group_id, user=request.user.id)
+        except GroupMember.DoesNotExist:
+            raise Http404()
+
+        # Can modify someone higher than you
+        if my_mship.perm_rank <= modified_mship.perm_rank:
+            return Response(status=status.HTTP_403_FORBIDDEN)
+
+        # Check permission
+        if group.req_rank_kick > my_mship.perm_rank:
+            return Response(status=status.HTTP_403_FORBIDDEN)
+
+        modified_mship.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
     @decorators.detail_route(methods=['put'])
     def rank(self, request, pk=None):
         from sigma_core.models.group import Group
