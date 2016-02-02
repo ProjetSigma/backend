@@ -41,7 +41,7 @@ class GroupMemberViewSet(viewsets.ModelViewSet):
         perm_rank_new = request.data.get('perm_rank', None)
 
         try:
-            if perm_rank_new > Group.ADMINISTRATOR_RANK or perm_rank_new < 0 or perm_rank_new == modified_mship.perm_rank:
+            if perm_rank_new > Group.ADMINISTRATOR_RANK or perm_rank_new < 1 or perm_rank_new == modified_mship.perm_rank:
                 return Response(status=status.HTTP_400_BAD_REQUEST)
         except TypeError:
             return Response(status=status.HTTP_400_BAD_REQUEST)
@@ -63,10 +63,6 @@ class GroupMemberViewSet(viewsets.ModelViewSet):
         modified_mship.save()
 
         return Response(status=status.HTTP_200_OK)
-    #
-    # @decorators.detail_route(methods=['put'])
-    # def demote(self, request, pk=None):
-    #     pass
 
     @decorators.detail_route(methods=['put'])
     def accept_join_request(self, request, pk=None):
@@ -85,8 +81,3 @@ class GroupMemberViewSet(viewsets.ModelViewSet):
 
         s = GroupMemberSerializer(gm)
         return Response(s.data, status=status.HTTP_200_OK)
-
-    # @decorators.detail_route(methods=['put'])
-    # def kick(self, request, pk=None):
-    #     pass
-    #
