@@ -24,16 +24,66 @@ class GroupMemberViewSet(viewsets.ModelViewSet):
         mem = serializer.save()
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
-    # def update(self, request, pk=None):
-    #     pass
-    #
-    # @decorators.detail_route(methods=['put'])
-    # def promote(self, request, pk=None):
-    #     pass
-    #
-    # @decorators.detail_route(methods=['put'])
-    # def demote(self, request, pk=None):
-    #     pass
+    def destroy(self, request, pk=None):
+        from sigma_core.models.group import Group
+        try:
+            modified_mship = GroupMember.objects.all().select_related('group').get(pk=pk)
+            group = modified_mship.group
+            my_mship = GroupMember.objects.all().get(group=group, user=request.user)
+        except GroupMember.DoesNotExist:
+            raise Http404()
+
+        # You can always quit the Group (ie destroy YOUR membership)
+        if my_mship.id != modified_mship.id:
+            # Can't modify someone higher than you
+            if my_mship.perm_rank <= modified_mship.perm_rank:
+                return Response(status=status.HTTP_403_FORBIDDEN)
+
+            # Check permission
+            if group.req_rank_kick > my_mship.perm_rank:
+                return Response(status=status.HTTP_403_FORBIDDEN)
+
+        modified_mship.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+    @decorators.detail_route(methods=['put'])
+    def rank(self, request, pk=None):
+        from sigma_core.models.group import Group
+        try:
+            modified_mship = GroupMember.objects.all().select_related('group').get(pk=pk)
+            group = modified_mship.group
+            my_mship = GroupMember.objects.all().get(group=group, user=request.user)
+        except GroupMember.DoesNotExist:
+            raise Http404()
+
+        perm_rank_new = request.data.get('perm_rank', None)
+
+        try:
+            if perm_rank_new > Group.ADMINISTRATOR_RANK or perm_rank_new < 1 or perm_rank_new == modified_mship.perm_rank:
+                return Response(status=status.HTTP_400_BAD_REQUEST)
+        except TypeError:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+
+        # You can demote yourself:
+        demote_self = modified_mship.id == my_mship.id and perm_rank_new < my_mship.perm_rank
+
+        # Can't modify someone higher than you, or set rank to higher than you
+        if (my_mship.perm_rank <= modified_mship.perm_rank or my_mship.perm_rank <= perm_rank_new) and not demote_self:
+            return Response(status=status.HTTP_403_FORBIDDEN)
+
+        # promote
+        if perm_rank_new > modified_mship.perm_rank:
+            if group.req_rank_promote > my_mship.perm_rank:
+                return Response(status=status.HTTP_403_FORBIDDEN)
+        # demote
+        else:
+            if group.req_rank_demote > my_mship.perm_rank and not demote_self:
+                return Response(status=status.HTTP_403_FORBIDDEN)
+
+        modified_mship.perm_rank = perm_rank_new
+        modified_mship.save()
+
+        return Response(GroupMemberSerializer(modified_mship).data, status=status.HTTP_200_OK)
 
     @decorators.detail_route(methods=['put'])
     def accept_join_request(self, request, pk=None):
@@ -52,8 +102,3 @@ class GroupMemberViewSet(viewsets.ModelViewSet):
 
         s = GroupMemberSerializer(gm)
         return Response(s.data, status=status.HTTP_200_OK)
-
-    # @decorators.detail_route(methods=['put'])
-    # def kick(self, request, pk=None):
-    #     pass
-    #
