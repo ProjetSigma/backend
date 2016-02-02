@@ -92,6 +92,10 @@ class GroupMemberPermissionTests(APITestCase):
         self.try_rank(5, 3, 2, status.HTTP_200_OK)
         self.assertEqual(GroupMember.objects.get(pk=self.mships[3].id).perm_rank, 2)
 
+    def test_rank_demote_self_ok(self):
+        self.try_rank(3, 3, 2, status.HTTP_200_OK)
+        self.assertEqual(GroupMember.objects.get(pk=self.mships[3].id).perm_rank, 2)
+
     # delete
     def test_delete_not_authed(self):
         self.try_delete(-1, 1, status.HTTP_401_UNAUTHORIZED)
@@ -104,6 +108,10 @@ class GroupMemberPermissionTests(APITestCase):
 
     def test_delete_user_not_in_group(self):
         self.try_delete(4, 0, status.HTTP_404_NOT_FOUND)
+
+    def test_delete_self_ok(self):
+        self.try_delete(1, 1, status.HTTP_204_NO_CONTENT)
+        self.assertFalse(GroupMember.objects.filter(pk=self.mships[1].id).exists())
 
     def test_delete_ok(self):
         self.try_delete(5, 1, status.HTTP_204_NO_CONTENT)

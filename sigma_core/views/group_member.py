@@ -33,13 +33,15 @@ class GroupMemberViewSet(viewsets.ModelViewSet):
         except GroupMember.DoesNotExist:
             raise Http404()
 
-        # Can modify someone higher than you
-        if my_mship.perm_rank <= modified_mship.perm_rank:
-            return Response(status=status.HTTP_403_FORBIDDEN)
+        # You can always quit the Group (ie destroy YOUR membership)
+        if my_mship.id != modified_mship.id:
+            # Can't modify someone higher than you
+            if my_mship.perm_rank <= modified_mship.perm_rank:
+                return Response(status=status.HTTP_403_FORBIDDEN)
 
-        # Check permission
-        if group.req_rank_kick > my_mship.perm_rank:
-            return Response(status=status.HTTP_403_FORBIDDEN)
+            # Check permission
+            if group.req_rank_kick > my_mship.perm_rank:
+                return Response(status=status.HTTP_403_FORBIDDEN)
 
         modified_mship.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
@@ -62,8 +64,11 @@ class GroupMemberViewSet(viewsets.ModelViewSet):
         except TypeError:
             return Response(status=status.HTTP_400_BAD_REQUEST)
 
-        # Can modify someone higher than you, or set rank to higher than you
-        if my_mship.perm_rank <= modified_mship.perm_rank or my_mship.perm_rank <= perm_rank_new:
+        # You can demote yourself:
+        demote_self = modified_mship.id == my_mship.id and perm_rank_new < my_mship.perm_rank
+
+        # Can't modify someone higher than you, or set rank to higher than you
+        if (my_mship.perm_rank <= modified_mship.perm_rank or my_mship.perm_rank <= perm_rank_new) and not demote_self:
             return Response(status=status.HTTP_403_FORBIDDEN)
 
         # promote
@@ -72,7 +77,7 @@ class GroupMemberViewSet(viewsets.ModelViewSet):
                 return Response(status=status.HTTP_403_FORBIDDEN)
         # demote
         else:
-            if group.req_rank_demote > my_mship.perm_rank:
+            if group.req_rank_demote > my_mship.perm_rank and not demote_self:
                 return Response(status=status.HTTP_403_FORBIDDEN)
 
         modified_mship.perm_rank = perm_rank_new
