@@ -13,7 +13,7 @@ from sigma_core.serializers.group import GroupSerializer
 
 
 class GroupFilterBackend(DRYPermissionFiltersBase):
-    def filter_list_queryset(self, request, queryset, view):
+    def filter_queryset(self, request, queryset, view):
         """
         Limits all list requests to only be seen by the members or public groups.
         """
