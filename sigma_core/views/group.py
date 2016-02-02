@@ -17,6 +17,8 @@ class GroupFilterBackend(DRYPermissionFiltersBase):
         """
         Limits all list requests to only be seen by the members or public groups.
         """
+        if request.user.is_sigma_admin():
+            return queryset
         return queryset.prefetch_related('memberships__user').filter(Q(visibility=Group.VIS_PUBLIC) | Q(memberships__user=request.user)).distinct()
 
 
