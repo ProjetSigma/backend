@@ -4,8 +4,9 @@ import string
 
 from django.core.mail import send_mail
 from django.http import Http404
+from django.views.decorators.csrf import csrf_exempt
 
-from rest_framework import viewsets, decorators, status
+from rest_framework import viewsets, decorators, status, parsers
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from dry_rest_permissions.generics import DRYPermissions
@@ -26,7 +27,7 @@ L'équipe Sigma.
 """
 }
 
-
+# TODO: use DetailSerializerMixin
 class UserViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated, DRYPermissions, ]
     queryset = User.objects.all()
@@ -135,3 +136,35 @@ class UserViewSet(viewsets.ModelViewSet):
         user.save()
 
         return Response('Password reset', status=status.HTTP_200_OK)
+
+    @decorators.detail_route(methods=['post'])
+    @decorators.parser_classes([parsers.MultiPartParser, ])
+    def addphoto(self, request, pk=None):
+        """
+        Add a profile photo to user "pk".
+        ---
+        omit_serializer: true
+        parameters_strategy:
+            form: replace
+        parameters:
+            - name: file
+              type: file
+              required: true
+        """
+        from sigma_files.models import Image
+        from sigma_files.serializers import ImageSerializer_WithoutPerms as ImageSerializer
+
+        try:
+            user = User.objects.get(pk=pk)
+        except User.DoesNotExist:
+            raise Http404()
+
+        s = ImageSerializer(data=request.data, context={'request': request})
+        s.is_valid(raise_exception=True)
+        img = s.save()
+        img.owner = user
+        img.save()
+        user.photo = img
+        user.save()
+
+        return Response(status=status.HTTP_201_CREATED)
