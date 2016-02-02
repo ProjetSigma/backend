@@ -3,13 +3,14 @@ import random
 import string
 
 from django.core.mail import send_mail
+from django.db.models import Q
 from django.http import Http404
 from django.views.decorators.csrf import csrf_exempt
 
 from rest_framework import viewsets, decorators, status, parsers
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, AllowAny
-from dry_rest_permissions.generics import DRYPermissions
+from dry_rest_permissions.generics import DRYPermissions, DRYPermissionFiltersBase
 
 from sigma_core.models.user import User
 from sigma_core.serializers.user import BasicUserWithPermsSerializer, DetailedUserWithPermsSerializer
@@ -27,11 +28,24 @@ L'équipe Sigma.
 """
 }
 
+class VisibleUsersFilterBackend(DRYPermissionFiltersBase):
+    def filter_queryset(self, request, queryset, view):
+        """
+        Never display informtion for Users who have no group in common
+        """
+        if request.user.is_sigma_admin():
+            return queryset
+        from sigma_core.models.group_member import GroupMember
+        # @sqlperf: Maybe it is more efficient with only one Query?
+        my_groups = GroupMember.objects.filter(Q(user=request.user) & Q(perm_rank__gte=1)).values_list('group', flat=True)
+        return queryset.filter(Q(memberships__group=my_groups) | Q(pk=request.user.id))
+
 # TODO: use DetailSerializerMixin
 class UserViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated, DRYPermissions, ]
     queryset = User.objects.all()
     serializer_class = BasicUserWithPermsSerializer # by default, basic data and permissions
+    filter_backends = (VisibleUsersFilterBackend, )
 
     def retrieve(self, request, pk=None):
         """
@@ -39,14 +53,8 @@ class UserViewSet(viewsets.ModelViewSet):
         ---
         response_serializer: DetailedUserWithPermsSerializer
         """
-        try:
-            user = User.objects.get(pk=pk)
-        except User.DoesNotExist:
-            raise Http404()
-
-        # Use DetailedUserWithPermsSerializer to have the groups whom user belongs to
-        serializer = DetailedUserWithPermsSerializer(user, context={'request': request})
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        self.serializer_class = DetailedUserWithPermsSerializer
+        return super().retrieve(request, pk)
 
     def update(self, request, pk=None):
         try:
