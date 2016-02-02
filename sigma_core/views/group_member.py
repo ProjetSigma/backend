@@ -83,7 +83,7 @@ class GroupMemberViewSet(viewsets.ModelViewSet):
         modified_mship.perm_rank = perm_rank_new
         modified_mship.save()
 
-        return Response(status=status.HTTP_200_OK)
+        return Response(GroupMemberSerializer(modified_mship).data, status=status.HTTP_200_OK)
 
     @decorators.detail_route(methods=['put'])
     def accept_join_request(self, request, pk=None):
