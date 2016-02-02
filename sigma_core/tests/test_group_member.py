@@ -11,6 +11,66 @@ from sigma_core.models.group_member import GroupMember
 from sigma_core.serializers.user import DetailedUserSerializer as UserSerializer
 from sigma_core.tests.factories import UserFactory, AdminUserFactory, GroupFactory, GroupMemberFactory
 
+# Test /rank, /kick
+class GroupMemberPermissionTests(APITestCase):
+    @classmethod
+    def setUpTestData(self):
+        super().setUpTestData()
+        self.member_action_url = "/group-member/%d/%s/"
+        self.users = UserFactory.create_batch(6)
+        self.group = GroupFactory(req_rank_promote=3, req_rank_demote=4, req_rank_kick=5)
+        self.mships = [
+            None,
+            GroupMemberFactory(user=self.users[1], group=self.group, perm_rank=1),
+            GroupMemberFactory(user=self.users[2], group=self.group, perm_rank=2),
+            GroupMemberFactory(user=self.users[3], group=self.group, perm_rank=3),
+            GroupMemberFactory(user=self.users[4], group=self.group, perm_rank=4),
+            GroupMemberFactory(user=self.users[5], group=self.group, perm_rank=5)
+        ]
+
+    def try_action(self, userId, action, targetId, newPermRank, expectedHttpResponseCode):
+        if userId >= 0:
+            self.client.force_authenticate(user=self.users[userId])
+        response = self.client.put(self.member_action_url % (self.mships[targetId].id, action), {"perm_rank": newPermRank})
+        self.assertEqual(response.status_code, expectedHttpResponseCode)
+
+    # /rank
+    def test_rank_not_authed(self):
+        self.try_action(-1, "rank", 1, 4, status.HTTP_401_UNAUTHORIZED)
+
+    def test_rank_not_group_member(self):
+        self.try_action(0, "rank", 1, 4, status.HTTP_404_NOT_FOUND)
+
+    def test_rank_demote_no_permission(self):
+        self.try_action(1, "rank", 2, 1, status.HTTP_403_FORBIDDEN)
+
+    def test_rank_demote_no_permission2(self):
+        self.try_action(3, "rank", 2, 1, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(GroupMember.objects.get(pk=self.mships[2].id).perm_rank, 2)
+
+    def test_rank_promote_no_permission(self):
+        self.try_action(1, "rank", 1, 2, status.HTTP_403_FORBIDDEN)
+
+    def test_rank_no_rank_change(self):
+        self.try_action(5, "rank", 1, 1, status.HTTP_400_BAD_REQUEST)
+
+    def test_rank_not_a_number(self):
+        self.try_action(5, "rank", 1, "hi!", status.HTTP_400_BAD_REQUEST)
+
+    def test_rank_bad_rank(self):
+        self.try_action(5, "rank", 1, -1, status.HTTP_400_BAD_REQUEST)
+        self.try_action(5, "rank", 1, Group.ADMINISTRATOR_RANK + 1, status.HTTP_400_BAD_REQUEST)
+
+    def test_rank_too_high_rank(self):
+        self.try_action(5, "rank", 1, 5, status.HTTP_403_FORBIDDEN)
+
+    def test_rank_promote_ok(self):
+        self.try_action(3, "rank", 1, 2, status.HTTP_200_OK)
+        self.assertEqual(GroupMember.objects.get(pk=self.mships[1].id).perm_rank, 2)
+
+    def test_rank_demote_ok(self):
+        self.try_action(5, "rank", 3, 2, status.HTTP_200_OK)
+        self.assertEqual(GroupMember.objects.get(pk=self.mships[3].id).perm_rank, 2)
 
 class OpenGroupMemberCreationTests(APITestCase):
     @classmethod
