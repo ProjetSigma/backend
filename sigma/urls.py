@@ -16,6 +16,7 @@ Including another URLconf
 from django.conf.urls import include, url
 from django.contrib import admin
 from rest_framework import routers
+from django.conf import settings
 
 router = routers.DefaultRouter()
 
@@ -47,3 +48,10 @@ urlpatterns = [
     url(r'^o/', include('oauth2_provider.urls', namespace='oauth2_provider')),
     url(r'^', include(router.urls)),
 ]
+
+if settings.DEBUG:
+    urlpatterns.append(
+        url(r'^media/(?P<path>.*)$',
+            'django.views.static.serve',
+            {'document_root': settings.MEDIA_ROOT, }),
+    )

@@ -20,7 +20,7 @@ class Image(models.Model):
     added = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return "Profile image of user %s" % self.user.__str__()
+        return self.file.__str__()
 
     def delete(self, *args, **kwargs):
         self.file.delete(save=False)

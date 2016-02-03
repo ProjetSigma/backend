@@ -147,6 +147,10 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/1.8/howto/static-files/
 STATIC_URL = '/static/'
 
+ENV_PATH = os.path.abspath(os.path.dirname(__file__))
+MEDIA_ROOT = os.path.join(ENV_PATH, '../media/')
+MEDIA_URL = '/media/'
+
 # CORS headers
 CORS_ORIGIN_ALLOW_ALL = True
 
