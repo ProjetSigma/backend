@@ -42,7 +42,7 @@ class DetailedUserSerializer(BasicUserSerializer):
         exclude = ('is_staff', 'is_superuser', )
         read_only_fields = BasicUserSerializerMeta.read_only_fields + ('invited_to_groups', )
 
-    memberships = serializers.PrimaryKeyRelatedField(read_only=True, many=True)
+    memberships = GroupMemberSerializer_Group(read_only=True, many=True)
 
 
 class DetailedUserWithPermsSerializer(DetailedUserSerializer):
