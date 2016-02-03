@@ -5,8 +5,10 @@ from dry_rest_permissions.generics import allow_staff_or_superuser
 
 class UserManager(BaseUserManager):
     # TODO: Determine whether 'memberships' fields needs to be retrieved every time or not...
-    # def get_queryset(self):
-    #     return super(UserManager, self).get_queryset().prefetch_related('memberships', 'invited_to_groups')
+    def get_queryset(self):
+        return super(UserManager, self).get_queryset() \
+            .select_related('photo')# \
+            #.prefetch_related('memberships', 'invited_to_groups')
 
     def create_user(self, email, lastname, firstname, password=None):
         """
