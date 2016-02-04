@@ -1,5 +1,7 @@
 from django.db import models
 
+from sigma_core.models.group import Group
+from sigma_core.models.user import User
 
 class Publication(models.Model):
     """
@@ -9,8 +11,8 @@ class Publication(models.Model):
         pass
 
     # Warning! Both can be NULL !
-    poster_user = models.ForeignKey('User', null=True, related_name='created_publications', on_delete=models.SET_NULL)
-    poster_group = models.ForeignKey('Group', null=True, related_name='created_publications', on_delete=models.SET_NULL)
+    poster_user = models.ForeignKey(User, null=True, related_name='created_publications', on_delete=models.SET_NULL)
+    poster_group = models.ForeignKey(Group, null=True, related_name='created_publications', on_delete=models.SET_NULL)
 
     # Link to event ?
     created = models.DateTimeField(auto_now_add=True)

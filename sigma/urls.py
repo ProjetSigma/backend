@@ -40,6 +40,15 @@ from sigma_files.views import ImageViewSet
 
 router.register(r'image', ImageViewSet)
 
+from sigma_publications.views.group_post import GroupPostViewSet
+from sigma_publications.views.publication import PublicationViewSet
+from sigma_publications.views.publication_comment import PublicationCommentViewSet
+
+router.register(r'group-post', GroupPostViewSet)
+router.register(r'publication', PublicationViewSet)
+router.register(r'publication-comment', PublicationCommentViewSet)
+
+
 urlpatterns = [
     url(r'^admin/', include(admin.site.urls)),
     url(r'^api-auth/', include('rest_framework.urls', namespace='rest_framework')),
