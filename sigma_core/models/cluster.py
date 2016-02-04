@@ -9,7 +9,7 @@ class Cluster(Group):
     DEFAULT_MEMBER_RANK = 1
 
     # Related fields:
-    #   - cluster_users (model User.clusters)
+    #   - cluster_users (model User.clusters through GroupMember)
 
     def save(self, *args, **kwargs):
         """

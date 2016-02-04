@@ -45,6 +45,8 @@ class Group(models.Model):
     #   - memberships (model GroupMember)
     #   - users (model User)
     #   - fields (model GroupField)
+    #   - posts (model GroupPost)
+    #   - created_publications (model Publication)
     # TODO: Determine whether 'memberships' fields needs to be retrieved every time or not...
 
     @property

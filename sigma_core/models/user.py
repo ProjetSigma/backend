@@ -66,7 +66,9 @@ class User(AbstractBaseUser):
     groups = models.ManyToManyField('Group', through='GroupMember', related_name='users')
 
     # Related fields:
-    #   - memberships (model GroupMember)
+    #   - memberships (model Group through GroupMember)
+    #   - created_publications (model Publication)
+    #   - comments (PublicationComment)
 
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['lastname', 'firstname']
