@@ -46,13 +46,31 @@ class GroupMemberViewSet(viewsets.ModelViewSet):
         modified_mship.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
+    def can_rank(self, request, modified_mship, my_mship, perm_rank_new):
+        # You can demote yourself:
+        demote_self = modified_mship.id == my_mship.id and perm_rank_new < my_mship.perm_rank
+        group = modified_mship.group
+
+        # Can't modify someone higher than you, or set rank to higher than you
+        if (my_mship.perm_rank <= modified_mship.perm_rank or my_mship.perm_rank <= perm_rank_new) and not demote_self:
+            return False
+
+        # promote
+        if perm_rank_new > modified_mship.perm_rank:
+            if group.req_rank_promote > my_mship.perm_rank:
+                return False
+        # demote
+        else:
+            if group.req_rank_demote > my_mship.perm_rank and not demote_self:
+                return False
+        return True
+
     @decorators.detail_route(methods=['put'])
     def rank(self, request, pk=None):
         from sigma_core.models.group import Group
         try:
             modified_mship = GroupMember.objects.all().select_related('group').get(pk=pk)
-            group = modified_mship.group
-            my_mship = GroupMember.objects.all().get(group=group, user=request.user)
+            my_mship = GroupMember.objects.all().get(group=modified_mship.group, user=request.user)
         except GroupMember.DoesNotExist:
             raise Http404()
 
@@ -64,21 +82,8 @@ class GroupMemberViewSet(viewsets.ModelViewSet):
         except TypeError:
             return Response(status=status.HTTP_400_BAD_REQUEST)
 
-        # You can demote yourself:
-        demote_self = modified_mship.id == my_mship.id and perm_rank_new < my_mship.perm_rank
-
-        # Can't modify someone higher than you, or set rank to higher than you
-        if (my_mship.perm_rank <= modified_mship.perm_rank or my_mship.perm_rank <= perm_rank_new) and not demote_self:
+        if not self.can_rank(request, modified_mship, my_mship, perm_rank_new):
             return Response(status=status.HTTP_403_FORBIDDEN)
-
-        # promote
-        if perm_rank_new > modified_mship.perm_rank:
-            if group.req_rank_promote > my_mship.perm_rank:
-                return Response(status=status.HTTP_403_FORBIDDEN)
-        # demote
-        else:
-            if group.req_rank_demote > my_mship.perm_rank and not demote_self:
-                return Response(status=status.HTTP_403_FORBIDDEN)
 
         modified_mship.perm_rank = perm_rank_new
         modified_mship.save()
