@@ -21,6 +21,9 @@ class UserTests(APITestCase):
         self.group23 = GroupFactory()
         GroupMemberFactory(group=self.group23, user=self.user2, perm_rank=0)
         GroupMemberFactory(group=self.group23, user=self.user3, perm_rank=1)
+        self.group23_bis = GroupFactory()
+        GroupMemberFactory(group=self.group23_bis, user=self.user2, perm_rank=1)
+        GroupMemberFactory(group=self.group23_bis, user=self.user3, perm_rank=1)
         self.admin_user = AdminUserFactory()
 
         serializer = UserSerializer(self.user)
@@ -65,8 +68,10 @@ class UserTests(APITestCase):
 
     def test_get_user_forbidden_common_group_not_accepted(self):
         # Client authenticated, group in common, but not accepted in this Group
-        self.client.force_authenticate(user=self.user2)
-        response = self.client.get("/user/%d/" % self.user3.id)
+        user4 = UserFactory()
+        GroupMemberFactory(group=self.group23, user=user4, perm_rank=0)
+        self.client.force_authenticate(user=user4)
+        response = self.client.get("/user/%d/" % self.user2.id)
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_get_user_ok_same_group(self):
@@ -81,6 +86,20 @@ class UserTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         response.data.pop('permissions', None) # Workaround because DRY rest permissions needs a request
         self.assertEqual(response.data, self.user_data)
+
+    def test_get_user_memberships_all_visible(self):
+        # User3 is in both groups
+        self.client.force_authenticate(user=self.user3)
+        response = self.client.get('/user/%d/' % self.user2.id)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data['memberships']), 2)
+
+    def test_get_user_memberships_only_one_visible(self):
+        # User2 is in both groups, but not accepted in the first group
+        self.client.force_authenticate(user=self.user2)
+        response = self.client.get('/user/%d/' % self.user3.id)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data['memberships']), 1)
 
 #### "Get my data" requests
     def test_get_my_data_unauthed(self):

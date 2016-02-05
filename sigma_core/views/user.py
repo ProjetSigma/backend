@@ -31,7 +31,7 @@ L'équipe Sigma.
 
 class VisibleUsersFilterBackend(DRYPermissionFiltersBase):
     def filter_queryset(self, request, queryset, view):
-        """
+        """ break sigma_core/views/user.py:41
         Never display information for Users who have no group in common
         """
         if request.user.is_sigma_admin():
@@ -39,7 +39,8 @@ class VisibleUsersFilterBackend(DRYPermissionFiltersBase):
         from sigma_core.models.group_member import GroupMember
         # @sqlperf: Maybe it is more efficient with only one Query?
         my_groups = GroupMember.objects.filter(Q(user=request.user) & Q(perm_rank__gte=1)).values_list('group', flat=True)
-        return queryset.filter(Q(memberships__group=my_groups) | Q(pk=request.user.id))
+        visible_users_ids = GroupMember.objects.filter(group__in=my_groups).values('user')
+        return queryset.filter(Q(pk__in=visible_users_ids) | Q(pk=request.user.id))
 
 # TODO: use DetailSerializerMixin
 class UserViewSet(viewsets.ModelViewSet):
@@ -54,12 +55,11 @@ class UserViewSet(viewsets.ModelViewSet):
         ---
         response_serializer: DetailedUserWithPermsSerializer
         """
-        my_groups = GroupMember.objects.filter(user=request.user, perm_rank__gte=1).values_list('group', flat=True)
+        my_groups = GroupMember.objects.filter(Q(user=request.user) & Q(perm_rank__gte=1)).values_list('group', flat=True)
         self.queryset = self.queryset.select_related('photo').prefetch_related(
-            Prefetch('memberships', queryset=GroupMember.objects.filter(group=my_groups).select_related('group'))
+            Prefetch('memberships', queryset=GroupMember.objects.filter(group__in=my_groups).select_related('group'))
         )
         self.serializer_class = DetailedUserWithPermsSerializer
-        self.filter_backends = ()
         return super().retrieve(request, pk)
 
     def update(self, request, pk=None):
