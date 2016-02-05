@@ -17,7 +17,7 @@ class GroupFilterBackend(DRYPermissionFiltersBase):
         """
         Limits all list requests to only be seen by the members or public groups.
         """
-        return queryset.prefetch_related('memberships__user').filter(Q(visibility=Group.VIS_PUBLIC) | Q(memberships__user=request.user)).distinct()
+        return queryset.prefetch_related('memberships__user').filter(Q(private=False) | Q(memberships__user=request.user)).distinct()
 
 
 class GroupViewSet(viewsets.ModelViewSet):

@@ -12,7 +12,7 @@ class School(Group):
         """
         Schools are special groups: some params cannot be specified by user.
         """
-        self.visibility = Group.VIS_PUBLIC
+        self.private = False
         self.type = Group.TYPE_SCHOOL
         self.default_member_rank = -1
         self.req_rank_invite = Group.ADMINISTRATOR_RANK

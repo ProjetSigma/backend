@@ -22,9 +22,9 @@ class GroupTests(APITestCase):
 
         # Groups
         self.groups = GroupFactory.create_batch(2)
-        self.groups[0].visibility = Group.VIS_PUBLIC
+        self.groups[0].private = False
         self.groups[0].save()
-        self.groups[1].visibility = Group.VIS_PRIVATE
+        self.groups[1].private = True
         self.groups[1].req_rank_invite = 5
         self.groups[1].save()
 
@@ -45,8 +45,8 @@ class GroupTests(APITestCase):
         self.groups_url = "/group/"
         self.group_url = self.groups_url + "%d/"
 
-        self.new_private_group_data = {"name": "New group", "type": Group.TYPE_BASIC, "visibility": Group.VIS_PRIVATE}
-        self.new_association_group_data = {"name": "New group", "type": Group.TYPE_ASSO, "visibility": Group.VIS_PUBLIC, "resp_school": self.schools[0].id}
+        self.new_private_group_data = {"name": "New group", "type": Group.TYPE_BASIC, "private": True}
+        self.new_association_group_data = {"name": "New group", "type": Group.TYPE_ASSO, "private": False, "resp_school": self.schools[0].id}
         self.invite_data = {"user": self.users[0].id}
 
     #### List requests
@@ -125,7 +125,7 @@ class GroupTests(APITestCase):
         response = self.client.post(self.groups_url, self.new_private_group_data)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(response.data['name'], self.new_private_group_data['name'])
-        self.assertEqual(response.data['visibility'], Group.VIS_PRIVATE)
+        self.assertEqual(response.data['private'], True)
         Group.objects.get(pk=response.data['id']).delete()
 
     def test_create_association_group_forbidden(self):
@@ -140,7 +140,7 @@ class GroupTests(APITestCase):
         response = self.client.post(self.groups_url, self.new_association_group_data)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(response.data['type'], Group.TYPE_ASSO)
-        self.assertEqual(response.data['visibility'], Group.VIS_PUBLIC)
+        self.assertEqual(response.data['private'], False)
         Group.objects.get(pk=response.data['id']).delete()
 
     #### Modification requests

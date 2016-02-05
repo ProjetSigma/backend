@@ -12,13 +12,6 @@ class Group(models.Model):
     #########################
     ADMINISTRATOR_RANK  = 10
 
-    VIS_PUBLIC          = 'public'
-    VIS_PRIVATE         = 'private'
-    VISIBILITY_CHOICES = (
-        (VIS_PUBLIC, 'Anyone can see the group'),
-        (VIS_PRIVATE, 'Group is not visible')
-    )
-
     TYPE_BASIC          = 'basic'
     TYPE_CURSUS         = 'cursus'
     TYPE_ASSO           = 'association'
@@ -36,7 +29,7 @@ class Group(models.Model):
     # Fields #
     ##########
     name = models.CharField(max_length=254)
-    visibility = models.CharField(max_length=64, choices=VISIBILITY_CHOICES, default=VIS_PRIVATE)
+    private = models.BooleanField(default=False)
     type = models.CharField(max_length=64, choices=TYPE_CHOICES, default=TYPE_BASIC)
 
     # The school responsible of the group in case of admin conflict (can be null for non-school-related groups)
@@ -101,7 +94,7 @@ class Group(models.Model):
         """
         Public groups are visible by everybody. Private groups are only visible by members.
         """
-        return self.visibility == Group.VIS_PUBLIC or request.user.is_group_member(self)
+        return not self.private or request.user.is_group_member(self)
 
     @staticmethod
     def has_write_permission(request):
