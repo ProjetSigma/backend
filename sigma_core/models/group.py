@@ -97,11 +97,9 @@ class Group(models.Model):
         """
         return True
 
+    # Handled in View directly with queryset override
     def has_object_read_permission(self, request):
-        """
-        Public groups are visible by everybody. Private groups are only visible by members.
-        """
-        return self.visibility == Group.VIS_PUBLIC or request.user.is_group_member(self)
+        return True
 
     @staticmethod
     def has_write_permission(request):

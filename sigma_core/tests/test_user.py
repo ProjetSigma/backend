@@ -5,9 +5,10 @@ from django.core import mail
 from rest_framework import status
 from rest_framework.test import APITestCase, force_authenticate
 
-from sigma_core.tests.factories import UserFactory, AdminUserFactory
+from sigma_core.tests.factories import UserFactory, AdminUserFactory, GroupMemberFactory, GroupFactory
 from sigma_core.serializers.user import DetailedUserSerializer as UserSerializer
-
+from sigma_core.models.group import Group
+from sigma_core.models.group_member import GroupMember
 
 class UserTests(APITestCase):
     @classmethod
@@ -16,6 +17,10 @@ class UserTests(APITestCase):
 
         self.user = UserFactory()
         self.user2 = UserFactory()
+        self.user3 = UserFactory()
+        self.group23 = GroupFactory()
+        GroupMemberFactory(group=self.group23, user=self.user2, perm_rank=0)
+        GroupMemberFactory(group=self.group23, user=self.user3, perm_rank=1)
         self.admin_user = AdminUserFactory()
 
         serializer = UserSerializer(self.user)
@@ -23,6 +28,7 @@ class UserTests(APITestCase):
         self.user_url = '/user/%d/' % self.user.id
 
         self.users_list = [self.user, self.user2, self.admin_user]
+        self.users_list_for_user3 = [self.user2, self.user3]
 
         self.new_user_data = {'lastname': 'Doe', 'firstname': 'John', 'email': 'john.doe@newschool.edu', 'password': 'password'}
 
@@ -40,10 +46,10 @@ class UserTests(APITestCase):
 
     def test_get_users_list_ok(self):
         # Client has permissions
-        self.client.force_authenticate(user=self.user)
+        self.client.force_authenticate(user=self.user3)
         response = self.client.get('/user/')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(response.data), len(self.users_list))
+        self.assertEqual(len(response.data), len(self.users_list_for_user3))
 
 #### Get requests
     def test_get_user_unauthed(self):
@@ -51,11 +57,22 @@ class UserTests(APITestCase):
         response = self.client.get(self.user_url)
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
-    # def test_get_user_forbidden(self):
-    #     # Client authenticated but has no permission
-    #     self.client.force_authenticate(user=self.user2)
-    #     response = self.client.get(self.user_url)
-    #     self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+    def test_get_user_forbidden_no_common_group(self):
+        # Client authenticated but has no group in common
+        self.client.force_authenticate(user=self.user)
+        response = self.client.get("/user/%d/" % self.user3.id)
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_get_user_forbidden_common_group_not_accepted(self):
+        # Client authenticated, group in common, but not accepted in this Group
+        self.client.force_authenticate(user=self.user2)
+        response = self.client.get("/user/%d/" % self.user3.id)
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_get_user_ok_same_group(self):
+        self.client.force_authenticate(user=self.user3)
+        response = self.client.get("/user/%d/" % self.user2.id)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_get_user_ok(self):
         # Client has permissions
@@ -104,7 +121,7 @@ class UserTests(APITestCase):
         user_data = UserSerializer(self.user2).data
         user_data['email'] = "pi@random.org"
         response = self.client.put("/user/%d/" % self.user2.id, user_data)
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_edit_is_superuser_no_permission(self):
         # Client can't set himself as administrator !
@@ -140,7 +157,7 @@ class UserTests(APITestCase):
         user_data = UserSerializer(self.user2).data
         user_data['phone'] = "0123456789"
         response = self.client.put("/user/%d/" % self.user2.id, user_data)
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_edit_profile_ok(self):
         # Client wants to change his phone number
