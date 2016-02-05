@@ -89,7 +89,7 @@ class SchoolTests(APITestCase):
         response = self.client.post(self.schools_url, self.new_school_data)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(response.data['name'], "Ecole polytechnique")
-        self.assertEqual(response.data['visibility'], Group.VIS_PUBLIC)
+        self.assertEqual(response.data['private'], False)
         self.assertEqual(response.data['default_member_rank'], -1)
         self.assertEqual(response.data['req_rank_invite'], Group.ADMINISTRATOR_RANK)
 

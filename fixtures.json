@@ -1,0 +1,665 @@
+[
+    {
+        "model": "sigma_core.user",
+        "pk": 1,
+        "fields": {
+            "password": "pbkdf2_sha256$24000$023IXGyjNKJm$V2EYuhPjLnergchTULv4WNVgjUMUBqhYxkt6UP7Pd/0=",
+            "last_login": "2016-02-05T15:34:27.319Z",
+            "email": "admin@sigma.fr",
+            "lastname": "Dumbledore",
+            "firstname": "Albus",
+            "phone": "",
+            "photo": null,
+            "is_active": true,
+            "last_modified": "2016-02-05T15:20:44.922Z",
+            "join_date": "2016-02-05T15:20:44.915Z",
+            "is_superuser": true,
+            "is_staff": true,
+            "invited_to_groups": []
+        }
+    },
+    {
+        "model": "sigma_core.user",
+        "pk": 2,
+        "fields": {
+            "password": "pbkdf2_sha256$24000$9Z4lf8RjlRPh$OGIP7SSJIzxqtjbCCDL8J7+O4SnBPx3jd6/kOnqBRww=",
+            "last_login": "2016-02-05T15:34:18Z",
+            "email": "user@sigma.fr",
+            "lastname": "Masset",
+            "firstname": "Camille",
+            "phone": "",
+            "photo": 1,
+            "is_active": true,
+            "last_modified": "2016-02-05T15:48:28.216Z",
+            "join_date": "2016-02-05T15:27:00.147Z",
+            "is_superuser": false,
+            "is_staff": false,
+            "invited_to_groups": []
+        }
+    },
+    {
+        "model": "sigma_core.user",
+        "pk": 3,
+        "fields": {
+            "password": "pbkdf2_sha256$24000$Usv762QEf8Ys$CdJ7vpKLnX7fybxM23ZU9/wf4jNOrdcDJXP8ockSwKU=",
+            "last_login": null,
+            "email": "ntag@sigma.fr",
+            "lastname": "Bruneau",
+            "firstname": "Basile",
+            "phone": "",
+            "photo": 2,
+            "is_active": true,
+            "last_modified": "2016-02-05T15:48:55.381Z",
+            "join_date": "2016-02-05T15:27:22.893Z",
+            "is_superuser": false,
+            "is_staff": false,
+            "invited_to_groups": []
+        }
+    },
+    {
+        "model": "sigma_core.user",
+        "pk": 4,
+        "fields": {
+            "password": "pbkdf2_sha256$24000$MQD5Uph3cJSd$NGV3hX8+FPy/hdXc8tN8uReoErCpk4z9VfnUh0tIOPs=",
+            "last_login": null,
+            "email": "kessier2013@sigma.fr",
+            "lastname": "Fruit",
+            "firstname": "Gros",
+            "phone": "",
+            "photo": 3,
+            "is_active": true,
+            "last_modified": "2016-02-05T15:49:21.411Z",
+            "join_date": "2016-02-05T15:28:46.443Z",
+            "is_superuser": false,
+            "is_staff": false,
+            "invited_to_groups": []
+        }
+    },
+    {
+        "model": "sigma_core.user",
+        "pk": 5,
+        "fields": {
+            "password": "pbkdf2_sha256$24000$R755Hfo5lOu9$nmarybui575umDRu+vrOPcO/L+HdRxelDLBhvM3sO4o=",
+            "last_login": null,
+            "email": "tos2014@sigma.fr",
+            "lastname": "TOS",
+            "firstname": "Big",
+            "phone": "",
+            "photo": null,
+            "is_active": true,
+            "last_modified": "2016-02-05T15:29:13.694Z",
+            "join_date": "2016-02-05T15:29:13.694Z",
+            "is_superuser": false,
+            "is_staff": false,
+            "invited_to_groups": []
+        }
+    },
+    {
+        "model": "sigma_core.user",
+        "pk": 6,
+        "fields": {
+            "password": "pbkdf2_sha256$24000$JtFqdoWvBTdY$ReIXT1Pam52IK/guQBFNI1CToRCR3yvdx501N5o/zrE=",
+            "last_login": null,
+            "email": "ensta@sigma.fr",
+            "lastname": "Voisin",
+            "firstname": "Proche",
+            "phone": "",
+            "photo": null,
+            "is_active": true,
+            "last_modified": "2016-02-05T15:29:38.274Z",
+            "join_date": "2016-02-05T15:29:38.274Z",
+            "is_superuser": false,
+            "is_staff": false,
+            "invited_to_groups": []
+        }
+    },
+    {
+        "model": "sigma_core.user",
+        "pk": 7,
+        "fields": {
+            "password": "pbkdf2_sha256$24000$1A3Le5VSvZxA$Fr1a+5ttn9i25krNsiyNFd7PvG/B94CQxSxuy68DdRE=",
+            "last_login": null,
+            "email": "fruit2014@sigma.fr",
+            "lastname": "Kessier",
+            "firstname": "TOS",
+            "phone": "",
+            "photo": null,
+            "is_active": true,
+            "last_modified": "2016-02-05T15:30:25.598Z",
+            "join_date": "2016-02-05T15:30:25.598Z",
+            "is_superuser": false,
+            "is_staff": false,
+            "invited_to_groups": []
+        }
+    },
+    {
+        "model": "sigma_core.group",
+        "pk": 1,
+        "fields": {
+            "name": "École polytechnique",
+            "private": false,
+            "type": "school",
+            "resp_school": null,
+            "default_member_rank": -1,
+            "req_rank_invite": 10,
+            "req_rank_kick": 10,
+            "req_rank_accept_join_requests": 10,
+            "req_rank_promote": 10,
+            "req_rank_demote": 10,
+            "req_rank_modify_group_infos": 10
+        }
+    },
+    {
+        "model": "sigma_core.group",
+        "pk": 2,
+        "fields": {
+            "name": "ENSTA",
+            "private": false,
+            "type": "school",
+            "resp_school": null,
+            "default_member_rank": -1,
+            "req_rank_invite": 10,
+            "req_rank_kick": 10,
+            "req_rank_accept_join_requests": 10,
+            "req_rank_promote": 10,
+            "req_rank_demote": 10,
+            "req_rank_modify_group_infos": 10
+        }
+    },
+    {
+        "model": "sigma_core.group",
+        "pk": 3,
+        "fields": {
+            "name": "Promotion X2013",
+            "private": false,
+            "type": "school_promotion",
+            "resp_school": 1,
+            "default_member_rank": -1,
+            "req_rank_invite": 10,
+            "req_rank_kick": 10,
+            "req_rank_accept_join_requests": 10,
+            "req_rank_promote": 10,
+            "req_rank_demote": 10,
+            "req_rank_modify_group_infos": 10
+        }
+    },
+    {
+        "model": "sigma_core.group",
+        "pk": 4,
+        "fields": {
+            "name": "Promotion X2014",
+            "private": false,
+            "type": "school_promotion",
+            "resp_school": 1,
+            "default_member_rank": -1,
+            "req_rank_invite": 10,
+            "req_rank_kick": 10,
+            "req_rank_accept_join_requests": 10,
+            "req_rank_promote": 10,
+            "req_rank_demote": 10,
+            "req_rank_modify_group_infos": 10
+        }
+    },
+    {
+        "model": "sigma_core.group",
+        "pk": 5,
+        "fields": {
+            "name": "Promotion 2018",
+            "private": false,
+            "type": "school_promotion",
+            "resp_school": 2,
+            "default_member_rank": -1,
+            "req_rank_invite": 10,
+            "req_rank_kick": 10,
+            "req_rank_accept_join_requests": 10,
+            "req_rank_promote": 10,
+            "req_rank_demote": 10,
+            "req_rank_modify_group_infos": 10
+        }
+    },
+    {
+        "model": "sigma_core.group",
+        "pk": 6,
+        "fields": {
+            "name": "Binet Réseau",
+            "private": false,
+            "type": "association",
+            "resp_school": 1,
+            "default_member_rank": 0,
+            "req_rank_invite": 10,
+            "req_rank_kick": 10,
+            "req_rank_accept_join_requests": 1,
+            "req_rank_promote": 10,
+            "req_rank_demote": 10,
+            "req_rank_modify_group_infos": 10
+        }
+    },
+    {
+        "model": "sigma_core.group",
+        "pk": 7,
+        "fields": {
+            "name": "Association DATA",
+            "private": false,
+            "type": "association",
+            "resp_school": 2,
+            "default_member_rank": 0,
+            "req_rank_invite": 1,
+            "req_rank_kick": 10,
+            "req_rank_accept_join_requests": 1,
+            "req_rank_promote": 10,
+            "req_rank_demote": 10,
+            "req_rank_modify_group_infos": 10
+        }
+    },
+    {
+        "model": "sigma_core.group",
+        "pk": 8,
+        "fields": {
+            "name": "Binet JTX",
+            "private": false,
+            "type": "association",
+            "resp_school": 1,
+            "default_member_rank": -1,
+            "req_rank_invite": 10,
+            "req_rank_kick": 10,
+            "req_rank_accept_join_requests": 10,
+            "req_rank_promote": 10,
+            "req_rank_demote": 10,
+            "req_rank_modify_group_infos": 10
+        }
+    },
+    {
+        "model": "sigma_core.group",
+        "pk": 9,
+        "fields": {
+            "name": "Un flil",
+            "private": true,
+            "type": "basic",
+            "resp_school": null,
+            "default_member_rank": -1,
+            "req_rank_invite": 1,
+            "req_rank_kick": 10,
+            "req_rank_accept_join_requests": 1,
+            "req_rank_promote": 10,
+            "req_rank_demote": 10,
+            "req_rank_modify_group_infos": 10
+        }
+    },
+    {
+        "model": "sigma_core.groupacknowledgment",
+        "pk": 1,
+        "fields": {
+            "subgroup": 3,
+            "parent_group": 1,
+            "validated": true,
+            "created": "2016-02-05T15:50:05.242Z",
+            "updated": "2016-02-05T15:50:05.242Z"
+        }
+    },
+    {
+        "model": "sigma_core.groupacknowledgment",
+        "pk": 2,
+        "fields": {
+            "subgroup": 4,
+            "parent_group": 1,
+            "validated": true,
+            "created": "2016-02-05T15:50:12.419Z",
+            "updated": "2016-02-05T15:50:12.419Z"
+        }
+    },
+    {
+        "model": "sigma_core.groupacknowledgment",
+        "pk": 3,
+        "fields": {
+            "subgroup": 5,
+            "parent_group": 2,
+            "validated": true,
+            "created": "2016-02-05T15:50:19.802Z",
+            "updated": "2016-02-05T15:50:19.802Z"
+        }
+    },
+    {
+        "model": "sigma_core.groupacknowledgment",
+        "pk": 4,
+        "fields": {
+            "subgroup": 6,
+            "parent_group": 1,
+            "validated": true,
+            "created": "2016-02-05T15:50:27.046Z",
+            "updated": "2016-02-05T15:50:27.046Z"
+        }
+    },
+    {
+        "model": "sigma_core.groupacknowledgment",
+        "pk": 5,
+        "fields": {
+            "subgroup": 7,
+            "parent_group": 2,
+            "validated": true,
+            "created": "2016-02-05T15:50:33.053Z",
+            "updated": "2016-02-05T15:50:33.053Z"
+        }
+    },
+    {
+        "model": "sigma_core.groupacknowledgment",
+        "pk": 6,
+        "fields": {
+            "subgroup": 8,
+            "parent_group": 1,
+            "validated": true,
+            "created": "2016-02-05T15:50:39.503Z",
+            "updated": "2016-02-05T15:50:39.503Z"
+        }
+    },
+    {
+        "model": "sigma_core.school",
+        "pk": 1,
+        "fields": {
+            "design": "default"
+        }
+    },
+    {
+        "model": "sigma_core.school",
+        "pk": 2,
+        "fields": {
+            "design": "default"
+        }
+    },
+    {
+        "model": "sigma_core.groupmember",
+        "pk": 1,
+        "fields": {
+            "user": 2,
+            "group": 1,
+            "created": "2016-02-05T15:39:52.907Z",
+            "join_date": "2013-09-01",
+            "leave_date": null,
+            "perm_rank": 1
+        }
+    },
+    {
+        "model": "sigma_core.groupmember",
+        "pk": 2,
+        "fields": {
+            "user": 3,
+            "group": 1,
+            "created": "2016-02-05T15:40:03.280Z",
+            "join_date": "2013-09-01",
+            "leave_date": null,
+            "perm_rank": 1
+        }
+    },
+    {
+        "model": "sigma_core.groupmember",
+        "pk": 3,
+        "fields": {
+            "user": 4,
+            "group": 1,
+            "created": "2016-02-05T15:40:12.102Z",
+            "join_date": "2013-09-01",
+            "leave_date": null,
+            "perm_rank": 10
+        }
+    },
+    {
+        "model": "sigma_core.groupmember",
+        "pk": 4,
+        "fields": {
+            "user": 5,
+            "group": 1,
+            "created": "2016-02-05T15:40:20.630Z",
+            "join_date": "2014-09-01",
+            "leave_date": null,
+            "perm_rank": 1
+        }
+    },
+    {
+        "model": "sigma_core.groupmember",
+        "pk": 5,
+        "fields": {
+            "user": 6,
+            "group": 2,
+            "created": "2016-02-05T15:40:43.335Z",
+            "join_date": "2015-09-01",
+            "leave_date": null,
+            "perm_rank": 1
+        }
+    },
+    {
+        "model": "sigma_core.groupmember",
+        "pk": 6,
+        "fields": {
+            "user": 7,
+            "group": 1,
+            "created": "2016-02-05T15:40:53.622Z",
+            "join_date": "2014-09-01",
+            "leave_date": null,
+            "perm_rank": 10
+        }
+    },
+    {
+        "model": "sigma_core.groupmember",
+        "pk": 7,
+        "fields": {
+            "user": 2,
+            "group": 3,
+            "created": "2016-02-05T15:41:12.342Z",
+            "join_date": "2013-09-01",
+            "leave_date": null,
+            "perm_rank": 1
+        }
+    },
+    {
+        "model": "sigma_core.groupmember",
+        "pk": 8,
+        "fields": {
+            "user": 3,
+            "group": 3,
+            "created": "2016-02-05T15:41:20.599Z",
+            "join_date": "2013-09-01",
+            "leave_date": null,
+            "perm_rank": 1
+        }
+    },
+    {
+        "model": "sigma_core.groupmember",
+        "pk": 9,
+        "fields": {
+            "user": 4,
+            "group": 3,
+            "created": "2016-02-05T15:41:34.777Z",
+            "join_date": "2013-09-01",
+            "leave_date": null,
+            "perm_rank": 10
+        }
+    },
+    {
+        "model": "sigma_core.groupmember",
+        "pk": 10,
+        "fields": {
+            "user": 5,
+            "group": 4,
+            "created": "2016-02-05T15:41:43.649Z",
+            "join_date": "2014-09-01",
+            "leave_date": null,
+            "perm_rank": 1
+        }
+    },
+    {
+        "model": "sigma_core.groupmember",
+        "pk": 11,
+        "fields": {
+            "user": 6,
+            "group": 5,
+            "created": "2016-02-05T15:41:54.074Z",
+            "join_date": "2015-09-01",
+            "leave_date": null,
+            "perm_rank": 1
+        }
+    },
+    {
+        "model": "sigma_core.groupmember",
+        "pk": 12,
+        "fields": {
+            "user": 7,
+            "group": 4,
+            "created": "2016-02-05T15:42:03.818Z",
+            "join_date": "2014-09-01",
+            "leave_date": null,
+            "perm_rank": 10
+        }
+    },
+    {
+        "model": "sigma_core.groupmember",
+        "pk": 13,
+        "fields": {
+            "user": 2,
+            "group": 6,
+            "created": "2016-02-05T15:42:56.153Z",
+            "join_date": "2015-11-01",
+            "leave_date": null,
+            "perm_rank": 1
+        }
+    },
+    {
+        "model": "sigma_core.groupmember",
+        "pk": 14,
+        "fields": {
+            "user": 3,
+            "group": 6,
+            "created": "2016-02-05T15:43:13.338Z",
+            "join_date": "2014-03-15",
+            "leave_date": null,
+            "perm_rank": 10
+        }
+    },
+    {
+        "model": "sigma_core.groupmember",
+        "pk": 15,
+        "fields": {
+            "user": 5,
+            "group": 6,
+            "created": "2016-02-05T15:43:36.613Z",
+            "join_date": "2015-06-01",
+            "leave_date": null,
+            "perm_rank": 1
+        }
+    },
+    {
+        "model": "sigma_core.groupmember",
+        "pk": 16,
+        "fields": {
+            "user": 6,
+            "group": 7,
+            "created": "2016-02-05T15:43:48.571Z",
+            "join_date": "2015-10-01",
+            "leave_date": null,
+            "perm_rank": 1
+        }
+    },
+    {
+        "model": "sigma_core.groupmember",
+        "pk": 17,
+        "fields": {
+            "user": 2,
+            "group": 8,
+            "created": "2016-02-05T15:44:42.248Z",
+            "join_date": "2014-11-16",
+            "leave_date": null,
+            "perm_rank": 1
+        }
+    },
+    {
+        "model": "sigma_core.groupmember",
+        "pk": 18,
+        "fields": {
+            "user": 2,
+            "group": 9,
+            "created": "2016-02-05T15:44:59.837Z",
+            "join_date": "2015-09-01",
+            "leave_date": null,
+            "perm_rank": 10
+        }
+    },
+    {
+        "model": "sigma_core.groupmember",
+        "pk": 19,
+        "fields": {
+            "user": 3,
+            "group": 9,
+            "created": "2016-02-05T15:45:11.945Z",
+            "join_date": "2015-09-01",
+            "leave_date": null,
+            "perm_rank": 10
+        }
+    },
+    {
+        "model": "sigma_files.image",
+        "pk": 1,
+        "fields": {
+            "file": "img/X0zgHN6Fz-f5oixsGWo9X4B3UWgaQ5B8BuFrk395czNCovDW17T7ziX3xyDdRDUsyUJoDL6hkLKJM7jm-6DhmAfyjJE-sgTdrhwA0hxNVdV6FyPetP9oVeuA0eeSbmiOZqtG4Nb2HJ7g6br3CpfnEs.jpg",
+            "owner": 2,
+            "added": "2016-02-05T15:48:05.767Z"
+        }
+    },
+    {
+        "model": "sigma_files.image",
+        "pk": 2,
+        "fields": {
+            "file": "img/dSf4nXfKk4eOQHUA2-pabSKv6rFGKs3UnV0i_DUD8sOPeqAyDSmbioTDCFGtpMKKMJO8BnOr5aTdKjzin30wm_ErPex4zDP_LHt0C-mMnk7iMtc7DrQd29TYSKo7xF45Ob2Q6y7OBtL16MQKeMxiBu.jpeg",
+            "owner": 3,
+            "added": "2016-02-05T15:48:45.279Z"
+        }
+    },
+    {
+        "model": "sigma_files.image",
+        "pk": 3,
+        "fields": {
+            "file": "img/4yIeW2f3RzdnDrQR7M2Hen5xNursnRFiLzJpJafj0V4B_J9_SZdEnMRVSMnoA4XFsyiWMWj6bspcbw3BHQaRUeGaudEJsBXPYczIqH4dlpri9oRgCc9iQ6NNhei2Hb9sTHXblrpa405y1ilc_k8-RW.jpg",
+            "owner": 4,
+            "added": "2016-02-05T15:49:07.001Z"
+        }
+    },
+    {
+        "model": "sigma_files.image",
+        "pk": 4,
+        "fields": {
+            "file": "img/R3sxwrxD26wwzY7x5wJUkqUsMOMWhHPMeG0EXc1stZf7IjTbztOnBHN9XMrFXocS1LOhCy6GQGEqToYMmVSJwSDHuv-kCoNNiUk4iLc5L7lD5jHTeWFRNFBj4J0-gvGvCH3DEKpDNUjmuoMl3RvEmb.jpg",
+            "owner": 7,
+            "added": "2016-02-05T15:49:38.703Z"
+        }
+    },
+    {
+        "model": "oauth2_provider.application",
+        "pk": 1,
+        "fields": {
+            "client_id": "bJeSCIWpvjbYCuXZNxMzVz0wglX8mHR2ZTKHxaDv",
+            "user": 1,
+            "redirect_uris": "",
+            "client_type": "confidential",
+            "authorization_grant_type": "password",
+            "client_secret": "XjbfZS6Apq05PDTSL4CoFHGo7NsKVAa1XMVrVElk5N1t0dOSyqxrHPff6okAi6X6Du9XxrK4dl0mLQ0YlscJsjnL5IKhQagQdGv2SgumhYRFaMi6LtHNPXicmMr8oLdy",
+            "name": "frontend",
+            "skip_authorization": false
+        }
+    },
+    {
+        "model": "sigma_core.validator",
+        "fields": {
+            "display_name": "Text",
+            "html_name": "text",
+            "values": {
+                "message": "Error message",
+                "regex": "Regex"
+            }
+        }
+    },
+    {
+        "model": "sigma_core.validator",
+        "fields": {
+            "display_name": "No validation",
+            "html_name": "none",
+            "values": {}
+        }
+    }
+]
