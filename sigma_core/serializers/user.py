@@ -39,8 +39,7 @@ class DetailedUserSerializer(BasicUserSerializer):
     Serialize full data about an User.
     """
     class Meta(BasicUserSerializerMeta):
-        exclude = ('is_staff', 'is_superuser', )
-        read_only_fields = BasicUserSerializerMeta.read_only_fields + ('invited_to_groups', )
+        pass
 
     memberships = GroupMemberSerializer_Group(read_only=True, many=True)
 
@@ -50,7 +49,15 @@ class DetailedUserWithPermsSerializer(DetailedUserSerializer):
     Serialize full data about an User and add current user's permissions on the serialized User.
     """
     class Meta(BasicUserSerializerMeta):
-        exclude = ('is_staff', 'is_superuser', )
-        read_only_fields = BasicUserSerializerMeta.read_only_fields + ('invited_to_groups', )
+        pass
 
     permissions = DRYPermissionsField(read_only=True)
+
+
+class MyUserDetailsWithPermsSerializer(DetailedUserWithPermsSerializer):
+    """
+    Serialize full data about current User (with permissions).
+    """
+    class Meta(BasicUserSerializerMeta):
+        exclude = ('is_staff', 'is_superuser', )
+        read_only_fields = BasicUserSerializerMeta.read_only_fields + ('invited_to_groups', )

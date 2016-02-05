@@ -3,7 +3,7 @@ import random
 import string
 
 from django.core.mail import send_mail
-from django.db.models import Q
+from django.db.models import Q, Prefetch
 from django.http import Http404
 from django.views.decorators.csrf import csrf_exempt
 
@@ -13,7 +13,8 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 from dry_rest_permissions.generics import DRYPermissions, DRYPermissionFiltersBase
 
 from sigma_core.models.user import User
-from sigma_core.serializers.user import BasicUserWithPermsSerializer, DetailedUserWithPermsSerializer
+from sigma_core.models.group_member import GroupMember
+from sigma_core.serializers.user import BasicUserWithPermsSerializer, DetailedUserWithPermsSerializer, MyUserDetailsWithPermsSerializer
 
 
 reset_mail = {
@@ -31,7 +32,7 @@ L'équipe Sigma.
 class VisibleUsersFilterBackend(DRYPermissionFiltersBase):
     def filter_queryset(self, request, queryset, view):
         """
-        Never display informtion for Users who have no group in common
+        Never display information for Users who have no group in common
         """
         if request.user.is_sigma_admin():
             return queryset
@@ -53,7 +54,12 @@ class UserViewSet(viewsets.ModelViewSet):
         ---
         response_serializer: DetailedUserWithPermsSerializer
         """
+        my_groups = GroupMember.objects.filter(user=request.user, perm_rank__gte=1).values_list('group', flat=True)
+        self.queryset = self.queryset.select_related('photo').prefetch_related(
+            Prefetch('memberships', queryset=GroupMember.objects.filter(group=my_groups).select_related('group'))
+        )
         self.serializer_class = DetailedUserWithPermsSerializer
+        self.filter_backends = ()
         return super().retrieve(request, pk)
 
     def update(self, request, pk=None):
@@ -79,8 +85,11 @@ class UserViewSet(viewsets.ModelViewSet):
             return Response(status=status.HTTP_401_UNAUTHORIZED)
         else:
             # Use DetailedUserWithPermsSerializer to have the groups whom user belongs to
-            serializer = DetailedUserWithPermsSerializer(request.user, context={'request': request})
-            return Response(serializer.data)
+            user = User.objects.all().select_related('photo').prefetch_related(
+                Prefetch('memberships', queryset=GroupMember.objects.all().select_related('group'))
+            ).get(pk=request.user.id)
+            s = MyUserDetailsWithPermsSerializer(user, context={'request': request})
+            return Response(s.data, status=status.HTTP_200_OK)
 
     @decorators.list_route(methods=['put'])
     def change_password(self, request):
