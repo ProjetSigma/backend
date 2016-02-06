@@ -1,0 +1,38 @@
+[
+    {
+        "model": "sigma_files.image",
+        "pk": 1,
+        "fields": {
+            "file": "img/X0zgHN6Fz-f5oixsGWo9X4B3UWgaQ5B8BuFrk395czNCovDW17T7ziX3xyDdRDUsyUJoDL6hkLKJM7jm-6DhmAfyjJE-sgTdrhwA0hxNVdV6FyPetP9oVeuA0eeSbmiOZqtG4Nb2HJ7g6br3CpfnEs.jpg",
+            "owner": 2,
+            "added": "2016-02-05T15:48:05.767Z"
+        }
+    },
+    {
+        "model": "sigma_files.image",
+        "pk": 2,
+        "fields": {
+            "file": "img/dSf4nXfKk4eOQHUA2-pabSKv6rFGKs3UnV0i_DUD8sOPeqAyDSmbioTDCFGtpMKKMJO8BnOr5aTdKjzin30wm_ErPex4zDP_LHt0C-mMnk7iMtc7DrQd29TYSKo7xF45Ob2Q6y7OBtL16MQKeMxiBu.jpeg",
+            "owner": 3,
+            "added": "2016-02-05T15:48:45.279Z"
+        }
+    },
+    {
+        "model": "sigma_files.image",
+        "pk": 3,
+        "fields": {
+            "file": "img/4yIeW2f3RzdnDrQR7M2Hen5xNursnRFiLzJpJafj0V4B_J9_SZdEnMRVSMnoA4XFsyiWMWj6bspcbw3BHQaRUeGaudEJsBXPYczIqH4dlpri9oRgCc9iQ6NNhei2Hb9sTHXblrpa405y1ilc_k8-RW.jpg",
+            "owner": 4,
+            "added": "2016-02-05T15:49:07.001Z"
+        }
+    },
+    {
+        "model": "sigma_files.image",
+        "pk": 4,
+        "fields": {
+            "file": "img/R3sxwrxD26wwzY7x5wJUkqUsMOMWhHPMeG0EXc1stZf7IjTbztOnBHN9XMrFXocS1LOhCy6GQGEqToYMmVSJwSDHuv-kCoNNiUk4iLc5L7lD5jHTeWFRNFBj4J0-gvGvCH3DEKpDNUjmuoMl3RvEmb.jpg",
+            "owner": 7,
+            "added": "2016-02-05T15:49:38.703Z"
+        }
+    }
+]
