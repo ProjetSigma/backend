@@ -94,6 +94,8 @@ class Group(models.Model):
         """
         Public groups are visible by everybody. Private groups are only visible by members.
         """
+        # Handled in View directly with queryset override
+        return True
         return not self.private or request.user.is_group_member(self)
 
     @staticmethod

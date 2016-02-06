@@ -3,16 +3,18 @@ import random
 import string
 
 from django.core.mail import send_mail
+from django.db.models import Q, Prefetch
 from django.http import Http404
 from django.views.decorators.csrf import csrf_exempt
 
 from rest_framework import viewsets, decorators, status, parsers
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, AllowAny
-from dry_rest_permissions.generics import DRYPermissions
+from dry_rest_permissions.generics import DRYPermissions, DRYPermissionFiltersBase
 
 from sigma_core.models.user import User
-from sigma_core.serializers.user import BasicUserWithPermsSerializer, DetailedUserWithPermsSerializer
+from sigma_core.models.group_member import GroupMember
+from sigma_core.serializers.user import BasicUserWithPermsSerializer, DetailedUserWithPermsSerializer, MyUserDetailsWithPermsSerializer
 
 
 reset_mail = {
@@ -27,11 +29,25 @@ L'équipe Sigma.
 """
 }
 
+class VisibleUsersFilterBackend(DRYPermissionFiltersBase):
+    def filter_queryset(self, request, queryset, view):
+        """ break sigma_core/views/user.py:41
+        Never display information for Users who have no group in common
+        """
+        if request.user.is_sigma_admin():
+            return queryset
+        from sigma_core.models.group_member import GroupMember
+        # @sqlperf: Maybe it is more efficient with only one Query?
+        my_groups = GroupMember.objects.filter(Q(user=request.user) & Q(perm_rank__gte=1)).values_list('group', flat=True)
+        visible_users_ids = GroupMember.objects.filter(group__in=my_groups).values('user')
+        return queryset.filter(Q(pk__in=visible_users_ids) | Q(pk=request.user.id))
+
 # TODO: use DetailSerializerMixin
 class UserViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated, DRYPermissions, ]
     queryset = User.objects.all()
     serializer_class = BasicUserWithPermsSerializer # by default, basic data and permissions
+    filter_backends = (VisibleUsersFilterBackend, )
 
     def retrieve(self, request, pk=None):
         """
@@ -39,14 +55,12 @@ class UserViewSet(viewsets.ModelViewSet):
         ---
         response_serializer: DetailedUserWithPermsSerializer
         """
-        try:
-            user = User.objects.get(pk=pk)
-        except User.DoesNotExist:
-            raise Http404()
-
-        # Use DetailedUserWithPermsSerializer to have the groups whom user belongs to
-        serializer = DetailedUserWithPermsSerializer(user, context={'request': request})
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        my_groups = GroupMember.objects.filter(Q(user=request.user) & Q(perm_rank__gte=1)).values_list('group', flat=True)
+        self.queryset = self.queryset.select_related('photo').prefetch_related(
+            Prefetch('memberships', queryset=GroupMember.objects.filter(group__in=my_groups).select_related('group'))
+        )
+        self.serializer_class = DetailedUserWithPermsSerializer
+        return super().retrieve(request, pk)
 
     def update(self, request, pk=None):
         try:
@@ -71,8 +85,11 @@ class UserViewSet(viewsets.ModelViewSet):
             return Response(status=status.HTTP_401_UNAUTHORIZED)
         else:
             # Use DetailedUserWithPermsSerializer to have the groups whom user belongs to
-            serializer = DetailedUserWithPermsSerializer(request.user, context={'request': request})
-            return Response(serializer.data)
+            user = User.objects.all().select_related('photo').prefetch_related(
+                Prefetch('memberships', queryset=GroupMember.objects.all().select_related('group'))
+            ).get(pk=request.user.id)
+            s = MyUserDetailsWithPermsSerializer(user, context={'request': request})
+            return Response(s.data, status=status.HTTP_200_OK)
 
     @decorators.list_route(methods=['put'])
     def change_password(self, request):

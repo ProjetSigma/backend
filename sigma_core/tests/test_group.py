@@ -81,7 +81,7 @@ class GroupTests(APITestCase):
         # Non-member wants to see a private group
         self.client.force_authenticate(user=self.users[0])
         response = self.client.get(self.group_url % self.groups[1].id)
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_get_group_ok(self):
         # Client wants to see a public group

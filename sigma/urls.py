@@ -23,7 +23,6 @@ router = routers.DefaultRouter()
 from sigma_core.views.user import UserViewSet
 from sigma_core.views.group import GroupViewSet
 from sigma_core.views.school import SchoolViewSet
-from sigma_core.views.group_user import GroupUserViewSet
 from sigma_core.views.group_member import GroupMemberViewSet
 from sigma_core.views.group_member_value import GroupMemberValueViewSet
 from sigma_core.views.group_field import GroupFieldViewSet
