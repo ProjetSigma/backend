@@ -27,6 +27,9 @@ For a first installation, or if you have broken your database, reset it !
 If you have just made a `git pull`, onlu migrate the database with  
 `python manage.py migrate`
 
+You can load fixtures data with  
+`python manage.py loaddata fixtures.json`
+
 Run dev server  
 `python manage.py runserver` or `python manage.py runserver_plus` (can be useful but buggier...)
 
@@ -36,10 +39,12 @@ API is accessible at `127.0.0.1:8000` and documented at `127.0.0.1:8000/docs/` (
 Fixtures
 --------
 
-A few fixtures are loaded when `resetdb.sh` is executed. You have three users, whose credentials are (login/password):
+A few fixtures are loaded when `resetdb.sh` is executed. You have several users, whose credentials are (login/password):
 * admin@sigma.fr / admin
 * user@sigma.fr / user
-* student@sigma.fr / student
+* ntag@sigma.fr / ntag
+* ensta@sigma.fr / ensta
+* and some others (see the database, the password is always the username in the email adress).
 
 An OAuth client application is also created (see below for further information), with data:
 * `clientId`: `bJeSCIWpvjbYCuXZNxMzVz0wglX8mHR2ZTKHxaDv`
