@@ -31,6 +31,7 @@ class Group(models.Model):
     name = models.CharField(max_length=254)
     private = models.BooleanField(default=False)
     type = models.CharField(max_length=64, choices=TYPE_CHOICES, default=TYPE_BASIC)
+    description = models.TextField(blank=True)
 
     # The school responsible of the group in case of admin conflict (can be null for non-school-related groups)
     resp_school = models.ForeignKey('School', null=True, blank=True, on_delete=models.SET_NULL)
