@@ -5,7 +5,7 @@ from django.utils.text import slugify
 
 from sigma_core.models.user import User
 from sigma_core.models.group import Group
-from sigma_core.models.school import School
+from sigma_core.models.cluster import Cluster
 from sigma_core.models.group_member import GroupMember
 from sigma_core.models.group_member_value import GroupMemberValue
 from sigma_core.models.group_field import GroupField
@@ -38,11 +38,11 @@ class GroupFieldFactory(factory.django.DjangoModelFactory):
 
     name = factory.Sequence(lambda n: 'Field %d' % n)
 
-class SchoolFactory(factory.django.DjangoModelFactory):
+class ClusterFactory(factory.django.DjangoModelFactory):
     class Meta:
-        model = School
+        model = Cluster
 
-    name = factory.Sequence(lambda n: 'School %d' % n)
+    name = factory.Sequence(lambda n: 'Cluster %d' % n)
     design = "default"
 
 class GroupMemberFactory(factory.django.DjangoModelFactory):

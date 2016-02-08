@@ -53,6 +53,8 @@ class User(AbstractBaseUser):
     is_superuser = models.BooleanField(default=False)
     is_staff = models.BooleanField(default=False)
 
+    clusters = models.ManyToManyField('Cluster', related_name="users") # users are compulsory members of at least one cluster
+
     objects = UserManager()
 
     invited_to_groups = models.ManyToManyField('Group', blank=True, related_name="invited_users");
