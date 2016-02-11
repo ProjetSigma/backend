@@ -63,9 +63,10 @@ class User(AbstractBaseUser):
     objects = UserManager()
 
     invited_to_groups = models.ManyToManyField('Group', blank=True, related_name="invited_users");
+    groups = models.ManyToManyField('Group', through='GroupMember', related_name='users')
 
     # Related fields:
-    #   - memberships (model UserGroup)
+    #   - memberships (model GroupMember)
 
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['lastname', 'firstname']

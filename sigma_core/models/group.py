@@ -42,7 +42,8 @@ class Group(models.Model):
 
     # Related fields:
     #   - invited_users (model User)
-    #   - memberships (model UserGroup)
+    #   - memberships (model GroupMember)
+    #   - users (model User)
     #   - fields (model GroupField)
     # TODO: Determine whether 'memberships' fields needs to be retrieved every time or not...
 
