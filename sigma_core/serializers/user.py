@@ -3,7 +3,6 @@ from dry_rest_permissions.generics import DRYPermissionsField
 
 from sigma_core.models.user import User
 from sigma_core.serializers.group_member import GroupMemberSerializer_Group
-#from sigma_core.serializers.cluster import BasicClusterSerializer
 from sigma_files.models import Image
 from sigma_files.serializers import ImageSerializer
 
@@ -35,10 +34,19 @@ class BasicUserWithPermsSerializer(BasicUserSerializer):
     permissions = DRYPermissionsField(read_only=True)
 
     def create(self, fields):
-        request = self.context['request']
-        clusters = request.data.get('clusters')
-        # TODO: Check that the user cluster is allowed ?
-        # TODO: Create related GroupMember ?
+        from sigma_core.models.group_member import GroupMember
+        from sigma_core.models.cluster import Cluster
+        try:
+            request = self.context['request']
+            inputClusters = request.data.get('clusters')
+            if request.user.is_sigma_admin():
+                fields['clusters'] = Cluster.objects.filter(pk__in=inputClusters).values_list('id', flat=True)
+            else:
+                fields['clusters'] = GroupMember.objects.filter(user=request.user, group__in=inputClusters).values_list('group', flat=True)
+        except ValueError:
+            raise serializers.ValidationError("Cluster list: bad format")
+        if inputClusters != list(fields['clusters']):
+            raise serializers.ValidationError("Cluster list: incorrect values")
         return super().create(fields)
 
 

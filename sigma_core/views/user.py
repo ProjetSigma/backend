@@ -39,6 +39,18 @@ class UserViewSet(mixins.CreateModelMixin,      # Only Cluster admins can create
     queryset = User.objects.all()
     serializer_class = BasicUserWithPermsSerializer # by default, basic data and permissions
 
+    def perform_create(self, serializer):
+        from sigma_core.models.cluster import Cluster
+        from sigma_core.models.group import Group
+        serializer.save()
+        # Create related GroupMember associations
+        # TODO: Looks like a hacky-way to do this.
+        # But how to do it properly ?
+        memberships = []
+        for cluster in serializer.data['clusters']:
+            memberships += [GroupMember(group=Group(id=cluster), user=User(id=serializer.data['id']), perm_rank=Cluster.DEFAULT_MEMBER_RANK)]
+        GroupMember.objects.bulk_create(memberships)
+
     def list(self, request, *args, **kwargs):
         # Only sigma admins can list all the users
         if request.user.is_sigma_admin():

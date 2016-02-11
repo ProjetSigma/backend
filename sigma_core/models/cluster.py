@@ -8,6 +8,8 @@ from sigma_core.models.group import Group
 class Cluster(Group):
     design = models.CharField(max_length=255)
 
+    DEFAULT_MEMBER_RANK = 1
+
     def save(self, *args, **kwargs):
         """
         Clusters are special groups: some params cannot be specified by user.

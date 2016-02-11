@@ -123,11 +123,11 @@ class UserTests(APITestCase):
         response = self.client.post('/user/', self.new_user_data)
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
-    def test_create_user_forbidden(self):
+    def test_create_user_not_cluster_admin(self):
         # Client has no permission
         self.client.force_authenticate(user=self.user)
         response = self.client.post('/user/', self.new_user_data)
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_create_user_admin_ok(self):
         # Client has permissions
@@ -135,6 +135,31 @@ class UserTests(APITestCase):
         response = self.client.post('/user/', self.new_user_data)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(response.data['lastname'], self.new_user_data['lastname'])
+        self.assertTrue(GroupMember.objects.filter(user=response.data['id'], group=self.cluster.id).exists())
+
+    def test_create_user_admin__bad_request1(self):
+        # Client has permissions
+        self.client.force_authenticate(user=self.admin_user)
+        data = self.new_user_data.copy()
+        data['clusters'] = 'Completely wrong'
+        response = self.client.post('/user/', data)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_create_user_admin__bad_request2(self):
+        # Client has permissions
+        self.client.force_authenticate(user=self.admin_user)
+        data = self.new_user_data.copy()
+        data['clusters'] = {'cluster': 1}
+        response = self.client.post('/user/', data)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_create_user_admin__bad_request3(self):
+        # Client has permissions
+        self.client.force_authenticate(user=self.admin_user)
+        data = self.new_user_data.copy()
+        data['clusters'] = None
+        response = self.client.post('/user/', data)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_create_user_clusteradmin_ok(self):
         # Client has permissions
@@ -142,6 +167,7 @@ class UserTests(APITestCase):
         response = self.client.post('/user/', self.new_user_data)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(response.data['lastname'], self.new_user_data['lastname'])
+        self.assertTrue(GroupMember.objects.filter(user=response.data['id'], group=self.cluster.id).exists())
 
 #### Modification requests
     def test_edit_email_wrong_permission(self):
