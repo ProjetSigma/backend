@@ -10,6 +10,9 @@ class Cluster(Group):
 
     DEFAULT_MEMBER_RANK = 1
 
+    # Related fields:
+    #   - cluster_users (model User.clusters)
+
     def save(self, *args, **kwargs):
         """
         Clusters are special groups: some params cannot be specified by user.

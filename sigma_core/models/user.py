@@ -58,7 +58,7 @@ class User(AbstractBaseUser):
     is_superuser = models.BooleanField(default=False)
     is_staff = models.BooleanField(default=False)
 
-    clusters = models.ManyToManyField('Cluster', related_name="users") # users should be members of at least one cluster
+    clusters = models.ManyToManyField('Cluster', related_name="cluster_users") # users should be members of at least one cluster
 
     objects = UserManager()
 
