@@ -9,7 +9,7 @@ class BasicClusterSerializer(serializers.ModelSerializer):
     """
     class Meta:
         model = Cluster
-        exclude = ('resp_cluster', )
+        exclude = ('resp_group', )
 
 
 from sigma_core.serializers.user import BasicUserWithPermsSerializer
@@ -20,6 +20,6 @@ class ClusterSerializer(BasicClusterSerializer):
     """
     class Meta:
         model = Cluster
-        exclude = ('resp_cluster', )
+        exclude = ('resp_group', )
 
     users = BasicUserWithPermsSerializer(read_only=True, many=True)

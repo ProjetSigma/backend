@@ -5,7 +5,7 @@ from sigma_core.models.group import Group
 from sigma_core.models.cluster import Cluster
 from sigma_core.serializers.group import GroupSerializer
 from sigma_core.serializers.cluster import ClusterSerializer
-from sigma_core.tests.factories import UserFactory, GroupFactory, GroupMemberFactory
+from sigma_core.tests.factories import UserFactory, GroupFactory, GroupMemberFactory, ClusterFactory
 
 
 def reload(obj):
@@ -17,8 +17,8 @@ class ClusterTests(APITestCase):
     def setUpTestData(self):
         super().setUpTestData()
 
-        # Schools
-        self.cluster = ClusterFactory.create_batch(2)
+        # Clusters
+        self.clusters = ClusterFactory.create_batch(2)
 
         # Users
         self.users = UserFactory.create_batch(4)

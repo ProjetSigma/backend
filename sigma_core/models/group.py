@@ -21,7 +21,7 @@ class Group(models.Model):
     protected = models.BooleanField(default=False) # if True, the Group cannot be deleted
 
     # The cluster responsible of the group in case of admin conflict (can be null for non-cluster-related groups)
-    resp_cluster = models.ForeignKey('Cluster', null=True, blank=True, on_delete=models.SET_NULL)
+    resp_group = models.ForeignKey('Group', null=True, blank=True, on_delete=models.SET_NULL)
 
     # The permission a member has upon joining
     # A value of -1 means that no one can join the group.
@@ -84,7 +84,6 @@ class Group(models.Model):
         """
         # Handled in View directly with queryset override
         return True
-        return not self.private or request.user.is_group_member(self)
 
     @staticmethod
     def has_write_permission(request):
@@ -94,19 +93,9 @@ class Group(models.Model):
     @allow_staff_or_superuser
     def has_create_permission(request):
         """
-        Everybody can create a private group. For other types, user must be school admin or sigma admin.
+        Everybody can create a group.
         """
-        from sigma_core.models.school import School
-        group_type = request.data.get('type', None)
-        if group_type == Group.TYPE_BASIC:
-            return True
-
-        resp_school = request.data.get('resp_school', None)
-        try:
-            school = School.objects.get(pk=resp_school)
-        except School.DoesNotExist:
-            school = None
-        return school is not None and request.user.has_group_admin_perm(school)
+        return True
 
     @allow_staff_or_superuser
     def has_object_write_permission(self, request):
