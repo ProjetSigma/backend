@@ -180,9 +180,9 @@ class User(AbstractBaseUser):
     @allow_staff_or_superuser
     def has_create_permission(request):
         """
-        Only Sigma admins can create users.
+        Only Cluster admins can create users, inside their cluster
         """
-        return False
+        return True
 
     def has_object_write_permission(self, request):
         """

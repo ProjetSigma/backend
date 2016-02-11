@@ -31,34 +31,38 @@ L'équipe Sigma.
 
 class VisibleUsersFilterBackend(DRYPermissionFiltersBase):
     def filter_queryset(self, request, queryset, view):
-        """ break sigma_core/views/user.py:41
-        Never display information for Users who have no group in common
+        """
+        Never display information for Users who have no group (/cluster) in common
+        Rq: If we are in the same cluster, we have a group in common.
         """
         if request.user.is_sigma_admin():
             return queryset
-        from sigma_core.models.group_member import GroupMember
-        # @sqlperf: Maybe it is more efficient with only one Query?
-        my_groups = GroupMember.objects.filter(Q(user=request.user) & Q(perm_rank__gte=1)).values_list('group', flat=True)
-        visible_users_ids = GroupMember.objects.filter(group__in=my_groups).values('user')
-        return queryset.filter(Q(pk__in=visible_users_ids) | Q(pk=request.user.id))
+        if view.action is "retrieve":
+            from sigma_core.models.group_member import GroupMember
+            # @sqlperf: Maybe it is more efficient with only one Query?
+            view.my_groups = GroupMember.objects.filter(Q(user=request.user) & Q(perm_rank__gte=1)).values_list('group', flat=True)
+            view.visible_users_ids = GroupMember.objects.filter(group__in=view.my_groups).values('user')
+            return queryset.filter(Q(pk__in=view.visible_users_ids) | Q(pk=request.user.id))
+        elif view.action is "update" or view.action is "destroy": # Destroy
+            return queryset.filter(pk=request.user.id)
+        return queryset
 
-
-class UserViewSet(mixins.CreateModelMixin,
-                    mixins.ListModelMixin,
-                    mixins.RetrieveModelMixin,
-                    mixins.UpdateModelMixin,
-                    mixins.DestroyModelMixin,
+class UserViewSet(mixins.CreateModelMixin,      # Only Cluster admins can create users
+                    mixins.ListModelMixin,      # Only sigma admins can list
+                    mixins.RetrieveModelMixin,  # Can only see members within same group or cluster
+                    mixins.UpdateModelMixin,    # Only self
+                    mixins.DestroyModelMixin,   # ??
                     viewsets.GenericViewSet):
     permission_classes = [IsAuthenticated, ]#DRYPermissions, ]
     queryset = User.objects.all()
     serializer_class = BasicUserWithPermsSerializer # by default, basic data and permissions
-    # filter_backends = (VisibleUsersFilterBackend, )
+    filter_backends = (VisibleUsersFilterBackend, )
 
-    def list(self, request):
+    def list(self, request, *args, **kwargs):
         # Only sigma admins can list all the users
         if request.user.is_sigma_admin():
-            return super().list(self, request)
-        return Response(status.HTTP_403_FORBIDDEN)
+            return super().list(self, request, args, kwargs)
+        return Response(status=status.HTTP_403_FORBIDDEN)
 
     def retrieve(self, request, pk=None):
         """
@@ -66,24 +70,28 @@ class UserViewSet(mixins.CreateModelMixin,
         ---
         response_serializer: DetailedUserWithPermsSerializer
         """
-        try:
-            user = User.objects.prefetch_related('clusters', 'memberships').get(pk=pk)
-        except User.DoesNotExist:
-            raise Http404()
+        # 1. Check if we are allowed to see this user
+        user = self.get_object()
 
-        my_groups = GroupMember.objects.filter(Q(user=request.user) & Q(perm_rank__gte=1)).values_list('group', flat=True)
-        if request.user.is_sigma_admin() or request.user.has_common_cluster(user):
+        # 2. Check what we can see from this User
+        # Admin: can see everything
+        if request.user.is_sigma_admin():
             user = User.objects.all().select_related('photo').prefetch_related(
                 'clusters',
-                Prefetch('memberships', queryset=GroupMember.objects.filter(Q(group__in=my_groups) | Q(group__private=False)).select_related('group'))
+                Prefetch('memberships', queryset=GroupMember.objects.all())
             ).get(pk=pk)
-        elif request.user.has_common_group(user):
+        # Same cluster: can see public groups memberships
+        elif request.user.has_common_cluster(user):
             user = User.objects.all().select_related('photo').prefetch_related(
                 'clusters',
-                Prefetch('memberships', queryset=GroupMember.objects.filter(group__in=my_groups).select_related('group'))
+                Prefetch('memberships', queryset=GroupMember.objects.filter(Q(group__private=False) | Q(group__in=self.my_groups)).select_related('group'))
             ).get(pk=pk)
+        # In the general case, we only see common Group memberships
         else:
-            raise Http404()
+            user = User.objects.all().select_related('photo').prefetch_related(
+                'clusters',
+                Prefetch('memberships', queryset=GroupMember.objects.filter(group__in=self.my_groups).select_related('group'))
+            ).get(pk=pk)
 
         s = DetailedUserWithPermsSerializer(user, context={'request': request})
         return Response(s.data, status=status.HTTP_200_OK)
@@ -95,7 +103,7 @@ class UserViewSet(mixins.CreateModelMixin,
             raise Http404()
 
         # Names edition is allowed to Sigma admins only
-        if ((request.data['lastname'] != user.lastname or request.data['firstname'] != user.firstname)) and not (request.user.is_sigma_admin()):
+        if ((request.data['lastname'] != user.lastname or request.data['firstname'] != user.firstname)) and not request.user.is_sigma_admin():
             return Response('You cannot change your lastname or firstname', status=status.HTTP_400_BAD_REQUEST)
 
         return super(UserViewSet, self).update(request, pk)

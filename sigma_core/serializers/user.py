@@ -24,7 +24,6 @@ class BasicUserSerializer(serializers.ModelSerializer):
     photo = ImageSerializer(read_only=True)
 
 
-from sigma_core.serializers.group_member import GroupMemberSerializer
 class BasicUserWithPermsSerializer(BasicUserSerializer):
     """
     Serialize an User without relations and add current user's permissions on the serialized User.
@@ -33,6 +32,12 @@ class BasicUserWithPermsSerializer(BasicUserSerializer):
         pass
 
     permissions = DRYPermissionsField(read_only=True)
+
+    def create(self, fields):
+        request = self.context['request']
+        # TODO: Check that the user cluster is allowed ?
+        # TODO: Create related GroupMember ?
+        return super().create(fields)
 
 
 class DetailedUserSerializer(BasicUserSerializer):
