@@ -105,13 +105,13 @@ class ClusterTests(APITestCase):
         self.client.force_authenticate(user=self.users[3])
         self.cluster_data['name'] = "Ecole polytechnique"
         response = self.client.put(self.cluster_url % self.cluster_data['id'], self.cluster_data)
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_update_cluster_forbidden_2(self):
         self.client.force_authenticate(user=self.users[1])
         self.cluster_data['name'] = "Ecole polytechnique"
         response = self.client.put(self.cluster_url % self.cluster_data['id'], self.cluster_data)
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_update_cluster_wrong_data(self):
         self.client.force_authenticate(user=self.users[2])

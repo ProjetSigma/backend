@@ -24,25 +24,3 @@ class Cluster(Group):
         self.protected = True
 
         return super().save(*args, **kwargs)
-
-    # Permissions
-    @staticmethod
-    def has_read_permission(request):
-        """
-        Clusters list is visible by everybody.
-        """
-        return True
-
-    def has_object_read_permission(self, request):
-        """
-        Clusters are visible by everybody.
-        """
-        return True
-
-    @staticmethod
-    @allow_staff_or_superuser
-    def has_create_permission(request):
-        """
-        Clusters can be created by Sigma admin only.
-        """
-        return False
