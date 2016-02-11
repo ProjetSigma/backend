@@ -63,7 +63,7 @@ class UserViewSet(mixins.CreateModelMixin,      # Only Cluster admins can create
         response_serializer: DetailedUserWithPermsSerializer
         """
         # 1. Check if we are allowed to see this user
-        user = User.objects.only('id').prefetch_related('clusters').filter(pk=pk).get()
+        user = User.objects.only('id').filter(pk=pk).prefetch_related('clusters').get()
 
         # 2. Check what we can see from this User
         qs = User.objects.all().select_related('photo').prefetch_related('clusters')
