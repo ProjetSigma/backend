@@ -7,7 +7,7 @@ from django.db.models import Q, Prefetch
 from django.http import Http404
 from django.views.decorators.csrf import csrf_exempt
 
-from rest_framework import viewsets, decorators, status, parsers
+from rest_framework import mixins, viewsets, decorators, status, parsers
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from dry_rest_permissions.generics import DRYPermissions, DRYPermissionFiltersBase
@@ -42,12 +42,16 @@ class VisibleUsersFilterBackend(DRYPermissionFiltersBase):
         visible_users_ids = GroupMember.objects.filter(group__in=my_groups).values('user')
         return queryset.filter(Q(pk__in=visible_users_ids) | Q(pk=request.user.id))
 
-# TODO: use DetailSerializerMixin
-class UserViewSet(viewsets.ModelViewSet):
-    permission_classes = [IsAuthenticated, DRYPermissions, ]
+
+class UserViewSet(mixins.CreateModelMixin,
+                    mixins.RetrieveModelMixin,
+                    mixins.UpdateModelMixin,
+                    mixins.DestroyModelMixin,
+                    viewsets.GenericViewSet):
+    permission_classes = [IsAuthenticated, ]#DRYPermissions, ]
     queryset = User.objects.all()
     serializer_class = BasicUserWithPermsSerializer # by default, basic data and permissions
-    filter_backends = (VisibleUsersFilterBackend, )
+    # filter_backends = (VisibleUsersFilterBackend, )
 
     def retrieve(self, request, pk=None):
         """
@@ -55,12 +59,27 @@ class UserViewSet(viewsets.ModelViewSet):
         ---
         response_serializer: DetailedUserWithPermsSerializer
         """
+        try:
+            user = User.objects.prefetch_related('clusters', 'memberships').get(pk=pk)
+        except User.DoesNotExist:
+            raise Http404()
+
         my_groups = GroupMember.objects.filter(Q(user=request.user) & Q(perm_rank__gte=1)).values_list('group', flat=True)
-        self.queryset = self.queryset.select_related('photo').prefetch_related(
-            Prefetch('memberships', queryset=GroupMember.objects.filter(group__in=my_groups).select_related('group'))
-        )
-        self.serializer_class = DetailedUserWithPermsSerializer
-        return super().retrieve(request, pk)
+        if request.user.is_sigma_admin() or request.user.has_common_cluster(user):
+            user = User.objects.all().select_related('photo').prefetch_related(
+                'clusters',
+                Prefetch('memberships', queryset=GroupMember.objects.filter(Q(group__in=my_groups) | Q(group__private=False)).select_related('group'))
+            ).get(pk=pk)
+        elif request.user.has_common_group(user):
+            user = User.objects.all().select_related('photo').prefetch_related(
+                'clusters',
+                Prefetch('memberships', queryset=GroupMember.objects.filter(group__in=my_groups).select_related('group'))
+            ).get(pk=pk)
+        else:
+            raise Http404()
+
+        s = DetailedUserWithPermsSerializer(user, context={'request': request})
+        return Response(s.data, status=status.HTTP_200_OK)
 
     def update(self, request, pk=None):
         try:

@@ -4,6 +4,9 @@ from dry_rest_permissions.generics import allow_staff_or_superuser
 
 
 class UserManager(BaseUserManager):
+    def get_queryset(self):
+        return super().get_queryset().prefetch_related('clusters')
+
     def create_user(self, email, lastname, firstname, password=None):
         """
         Creates and saves a User with the given email, lastname, firstname and password
@@ -44,7 +47,7 @@ class User(AbstractBaseUser):
     firstname = models.CharField(max_length=128)
     # username = models.CharField(max_length=128, unique=True) # TODO - Add unique username for frontend URLs
     phone = models.CharField(max_length=20, blank=True)
-    photo = models.OneToOneField('sigma_files.Image', null=True, on_delete=models.SET_NULL)
+    photo = models.OneToOneField('sigma_files.Image', blank=True, null=True, on_delete=models.SET_NULL)
 
     is_active = models.BooleanField(default=True)
     last_modified = models.DateTimeField(auto_now=True)
@@ -53,7 +56,7 @@ class User(AbstractBaseUser):
     is_superuser = models.BooleanField(default=False)
     is_staff = models.BooleanField(default=False)
 
-    clusters = models.ManyToManyField('Cluster', related_name="users") # users are compulsory members of at least one cluster
+    clusters = models.ManyToManyField('Cluster', related_name="users") # users should be members of at least one cluster
 
     objects = UserManager()
 
@@ -76,6 +79,21 @@ class User(AbstractBaseUser):
 
     def is_sigma_admin(self):
         return self.is_staff or self.is_superuser
+
+    def is_in_cluster(self, cluster):
+        return cluster in self.clusters.all()
+
+    def has_common_cluster(self, user):
+        """
+        Return True iff self has a cluster in common with user.
+        """
+        return len(set(self.clusters.all().values_list('id', flat=True)).intersection(user.clusters.all().values_list('id', flat=True))) > 0
+
+    def has_common_group(self, user):
+        """
+        Return True iff self has a group in common with user.
+        """
+        return len(set(self.memberships.all().values_list('group', flat=True)).intersection(user.memberships.all().values_list('group', flat=True))) > 0
 
     def get_group_membership(self, group):
         from sigma_core.models.group_member import GroupMember
@@ -137,11 +155,18 @@ class User(AbstractBaseUser):
         """
         return True
 
+    @allow_staff_or_superuser
     def has_object_read_permission(self, request):
         """
-        Only authenticated users can retrieve an user.
+        One can see an user if one is in the same cluster, or is member of a group in common.
         """
-        return True
+        if request.user.id == self.id:
+            return True
+        if request.user.has_common_cluster(self):
+            return True
+        if request.user.has_common_group(self):
+            return True
+        return False
 
     @staticmethod
     def has_write_permission(request):

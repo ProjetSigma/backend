@@ -1,7 +1,7 @@
 from rest_framework import serializers
 
 from sigma_core.models.cluster import Cluster
-from sigma_core.serializers.user import BasicUserWithPermsSerializer
+
 
 class BasicClusterSerializer(serializers.ModelSerializer):
     """
@@ -11,6 +11,8 @@ class BasicClusterSerializer(serializers.ModelSerializer):
         model = Cluster
         exclude = ('resp_cluster', )
 
+
+from sigma_core.serializers.user import BasicUserWithPermsSerializer
 
 class ClusterSerializer(BasicClusterSerializer):
     """

@@ -7,11 +7,12 @@ from sigma_files.models import Image
 from sigma_files.serializers import ImageSerializer
 
 
-class BasicUserSerializerMeta(object):
+class BasicUserSerializerMeta():
     model = User
     exclude = ('is_staff', 'is_superuser', 'invited_to_groups', )
-    read_only_fields = ('last_login', 'is_active', 'photo') # TODO: serialize invited_to_groups correctly
+    read_only_fields = ('last_login', 'is_active', 'photo', 'clusters', ) # TODO: serialize invited_to_groups correctly
     extra_kwargs = {'password': {'write_only': True, 'required': False}}
+
 
 class BasicUserSerializer(serializers.ModelSerializer):
     """
