@@ -4,7 +4,7 @@ from rest_framework.test import APITestCase, force_authenticate
 from sigma_core.models.group import Group
 from sigma_core.models.cluster import Cluster
 from sigma_core.serializers.group import GroupSerializer
-from sigma_core.serializers.cluster import ClusterSerializer
+from sigma_core.serializers.cluster import BasicClusterSerializer
 from sigma_core.tests.factories import UserFactory, GroupFactory, GroupMemberFactory, ClusterFactory
 
 
@@ -29,7 +29,7 @@ class ClusterTests(APITestCase):
         self.member1 = GroupMemberFactory(user=self.users[0], group=self.clusters[0], perm_rank=Group.ADMINISTRATOR_RANK)
         self.member2 = GroupMemberFactory(user=self.users[1], group=self.clusters[0], perm_rank=1)
 
-        serializer = ClusterSerializer(self.clusters[0])
+        serializer = BasicClusterSerializer(self.clusters[0])
         self.cluster_data = serializer.data
         self.clusters_url = "/cluster/"
         self.cluster_url = self.clusters_url + "%d/"
