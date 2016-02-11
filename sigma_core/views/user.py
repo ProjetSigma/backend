@@ -29,24 +29,6 @@ L'équipe Sigma.
 """
 }
 
-class VisibleUsersFilterBackend(DRYPermissionFiltersBase):
-    def filter_queryset(self, request, queryset, view):
-        """
-        Never display information for Users who have no group (/cluster) in common
-        Rq: If we are in the same cluster, we have a group in common.
-        """
-        if request.user.is_sigma_admin():
-            return queryset
-        if view.action is "retrieve":
-            from sigma_core.models.group_member import GroupMember
-            # @sqlperf: Maybe it is more efficient with only one Query?
-            view.my_groups = GroupMember.objects.filter(Q(user=request.user) & Q(perm_rank__gte=1)).values_list('group', flat=True)
-            view.visible_users_ids = GroupMember.objects.filter(group__in=view.my_groups).values('user')
-            return queryset.filter(Q(pk__in=view.visible_users_ids) | Q(pk=request.user.id))
-        elif view.action is "update" or view.action is "destroy": # Destroy
-            return queryset.filter(pk=request.user.id)
-        return queryset
-
 class UserViewSet(mixins.CreateModelMixin,      # Only Cluster admins can create users
                     mixins.ListModelMixin,      # Only sigma admins can list
                     mixins.RetrieveModelMixin,  # Can only see members within same group or cluster
@@ -56,7 +38,6 @@ class UserViewSet(mixins.CreateModelMixin,      # Only Cluster admins can create
     permission_classes = [IsAuthenticated, ]#DRYPermissions, ]
     queryset = User.objects.all()
     serializer_class = BasicUserWithPermsSerializer # by default, basic data and permissions
-    filter_backends = (VisibleUsersFilterBackend, )
 
     def list(self, request, *args, **kwargs):
         # Only sigma admins can list all the users
@@ -71,32 +52,37 @@ class UserViewSet(mixins.CreateModelMixin,      # Only Cluster admins can create
         response_serializer: DetailedUserWithPermsSerializer
         """
         # 1. Check if we are allowed to see this user
-        user = self.get_object()
+        user = User.objects.only('id').prefetch_related('clusters').filter(pk=pk).get()
 
         # 2. Check what we can see from this User
+        qs = User.objects.all().select_related('photo').prefetch_related('clusters')
+        gm = GroupMember.objects.select_related('group')
         # Admin: can see everything
-        if request.user.is_sigma_admin():
-            user = User.objects.all().select_related('photo').prefetch_related(
-                'clusters',
-                Prefetch('memberships', queryset=GroupMember.objects.all())
+        if request.user.is_sigma_admin() or user.id == request.user.id:
+            user = qs.prefetch_related(
+                Prefetch('memberships', queryset=gm)
             ).get(pk=pk)
         # Same cluster: can see public groups memberships
         elif request.user.has_common_cluster(user):
-            user = User.objects.all().select_related('photo').prefetch_related(
-                'clusters',
-                Prefetch('memberships', queryset=GroupMember.objects.filter(Q(group__private=False) | Q(group__in=self.my_groups)).select_related('group'))
+            user = qs.prefetch_related(
+                Prefetch('memberships', queryset=gm.filter(Q(group__private=False) | Q(group__in=request.user.get_groups_with_confirmed_membership())))
             ).get(pk=pk)
         # In the general case, we only see common Group memberships
+        # Also verify that we are on the same Group
         else:
-            user = User.objects.all().select_related('photo').prefetch_related(
-                'clusters',
-                Prefetch('memberships', queryset=GroupMember.objects.filter(group__in=self.my_groups).select_related('group'))
+            user = qs.prefetch_related(
+                Prefetch('memberships', queryset=gm.filter(group__in=request.user.get_groups_with_confirmed_membership()))
             ).get(pk=pk)
+            if not user.memberships.exists(): # No membership visible => User not visible
+                return Response(status=status.HTTP_404_NOT_FOUND)
 
         s = DetailedUserWithPermsSerializer(user, context={'request': request})
         return Response(s.data, status=status.HTTP_200_OK)
 
     def update(self, request, pk=None):
+        if not request.user.is_sigma_admin() and int(pk) != request.user.id:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+
         try:
             user = User.objects.get(pk=pk)
         except User.DoesNotExist:

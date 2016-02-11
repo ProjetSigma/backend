@@ -5,7 +5,7 @@ from django.core import mail
 from rest_framework import status
 from rest_framework.test import APITestCase, force_authenticate
 
-from sigma_core.tests.factories import UserFactory, AdminUserFactory, GroupMemberFactory, GroupFactory
+from sigma_core.tests.factories import UserFactory, AdminUserFactory, GroupMemberFactory, GroupFactory, ClusterFactory
 from sigma_core.serializers.user import DetailedUserSerializer as UserSerializer
 from sigma_core.models.group import Group
 from sigma_core.models.group_member import GroupMember
@@ -14,6 +14,10 @@ class UserTests(APITestCase):
     @classmethod
     def setUpTestData(self):
         super(UserTests, self).setUpTestData()
+        self.cluster = ClusterFactory()
+        self.clusteradmin = UserFactory()
+        self.clusteradmin.clusters.add(self.cluster)
+        GroupMemberFactory(group=self.cluster, user=self.clusteradmin, perm_rank=Group.ADMINISTRATOR_RANK)
 
         self.user = UserFactory()
         self.user2 = UserFactory()
@@ -33,7 +37,7 @@ class UserTests(APITestCase):
         self.users_list = [self.user, self.user2, self.admin_user]
         self.users_list_for_user3 = [self.user2, self.user3]
 
-        self.new_user_data = {'lastname': 'Doe', 'firstname': 'John', 'email': 'john.doe@newschool.edu', 'password': 'password'}
+        self.new_user_data = {'lastname': 'Doe', 'firstname': 'John', 'email': 'john.doe@newschool.edu', 'password': 'password', 'clusters' : {self.cluster.id}}
 
 #### List requests
     def test_get_users_list_unauthed(self):
@@ -125,9 +129,16 @@ class UserTests(APITestCase):
         response = self.client.post('/user/', self.new_user_data)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
-    def test_create_user_ok(self):
+    def test_create_user_admin_ok(self):
         # Client has permissions
         self.client.force_authenticate(user=self.admin_user)
+        response = self.client.post('/user/', self.new_user_data)
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(response.data['lastname'], self.new_user_data['lastname'])
+
+    def test_create_user_clusteradmin_ok(self):
+        # Client has permissions
+        self.client.force_authenticate(user=self.clusteradmin)
         response = self.client.post('/user/', self.new_user_data)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(response.data['lastname'], self.new_user_data['lastname'])

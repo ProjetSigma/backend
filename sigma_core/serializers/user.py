@@ -3,6 +3,7 @@ from dry_rest_permissions.generics import DRYPermissionsField
 
 from sigma_core.models.user import User
 from sigma_core.serializers.group_member import GroupMemberSerializer_Group
+#from sigma_core.serializers.cluster import BasicClusterSerializer
 from sigma_files.models import Image
 from sigma_files.serializers import ImageSerializer
 
@@ -35,6 +36,7 @@ class BasicUserWithPermsSerializer(BasicUserSerializer):
 
     def create(self, fields):
         request = self.context['request']
+        clusters = request.data.get('clusters')
         # TODO: Check that the user cluster is allowed ?
         # TODO: Create related GroupMember ?
         return super().create(fields)

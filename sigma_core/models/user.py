@@ -1,4 +1,6 @@
 from django.db import models
+from django.db.models import Q
+
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 from dry_rest_permissions.generics import allow_staff_or_superuser
 
@@ -135,6 +137,10 @@ class User(AbstractBaseUser):
 
     def is_invited_to_group_id(self, groupId):
         return self.invited_to_groups.filter(pk=groupId).exists()
+
+    def get_groups_with_confirmed_membership(self):
+        from sigma_core.models.group_member import GroupMember
+        return GroupMember.objects.filter(Q(user=self) & Q(perm_rank__gte=1)).values_list('group', flat=True)
 
     ###############
     # Permissions #

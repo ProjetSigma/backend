@@ -11,9 +11,7 @@ class BasicClusterSerializer(serializers.ModelSerializer):
         model = Cluster
         exclude = ('resp_group', )
 
-
 from sigma_core.serializers.user import BasicUserWithPermsSerializer
-
 class ClusterSerializer(BasicClusterSerializer):
     """
     Serialize Cluster model with memberships.
