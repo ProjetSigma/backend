@@ -5,7 +5,7 @@ from rest_framework.test import APITestCase, force_authenticate
 
 from sigma_core.models.group import Group
 from sigma_core.serializers.group import GroupSerializer
-from sigma_core.tests.factories import UserFactory, GroupFactory, GroupMemberFactory, SchoolFactory
+from sigma_core.tests.factories import UserFactory, GroupFactory, GroupMemberFactory, ClusterFactory
 
 
 def reload(obj):
@@ -18,15 +18,10 @@ class GroupTests(APITestCase):
         super(GroupTests, self).setUpTestData()
 
         # Schools
-        self.schools = SchoolFactory.create_batch(1)
+        self.schools = ClusterFactory.create_batch(1)
 
         # Groups
-        self.groups = GroupFactory.create_batch(2)
-        self.groups[0].private = False
-        self.groups[0].save()
-        self.groups[1].private = True
-        self.groups[1].req_rank_invite = 5
-        self.groups[1].save()
+        self.groups = [GroupFactory(private=False), GroupFactory(private=True, req_rank_invite=5)]
 
         # Users
         self.users = UserFactory.create_batch(3)

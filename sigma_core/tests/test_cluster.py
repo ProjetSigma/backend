@@ -5,7 +5,7 @@ from sigma_core.models.group import Group
 from sigma_core.models.cluster import Cluster
 from sigma_core.serializers.group import GroupSerializer
 from sigma_core.serializers.cluster import ClusterSerializer
-from sigma_core.tests.factories import UserFactory, GroupFactory, SchoolFactory, GroupMemberFactory
+from sigma_core.tests.factories import UserFactory, GroupFactory, GroupMemberFactory
 
 
 def reload(obj):
