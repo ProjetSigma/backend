@@ -14,7 +14,7 @@ class ClusterViewSet(mixins.CreateModelMixin,   # Only sigma admins
                     mixins.ListModelMixin,      # Everyone (even if not authed)
                     mixins.RetrieveModelMixin,  # Everyone (even if not authed)
                     mixins.UpdateModelMixin,    # Only sigma admins
-                    mixins.DestroyModelMixin,   # ??
+                    mixins.DestroyModelMixin,   # Only sigma admins
                     viewsets.GenericViewSet):
     queryset = Cluster.objects.all()
     serializer_class = ClusterSerializer
