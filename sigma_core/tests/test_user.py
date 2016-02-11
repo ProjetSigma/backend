@@ -18,9 +18,9 @@ class UserTests(APITestCase):
         self.user = UserFactory()
         self.user2 = UserFactory()
         self.user3 = UserFactory()
-        self.group23 = GroupFactory()
-        GroupMemberFactory(group=self.group23, user=self.user2, perm_rank=0)
-        GroupMemberFactory(group=self.group23, user=self.user3, perm_rank=1)
+        self.group_2pending_3accepted = GroupFactory()
+        GroupMemberFactory(group=self.group_2pending_3accepted, user=self.user2, perm_rank=0)
+        GroupMemberFactory(group=self.group_2pending_3accepted, user=self.user3, perm_rank=1)
         self.group23_bis = GroupFactory()
         GroupMemberFactory(group=self.group23_bis, user=self.user2, perm_rank=1)
         GroupMemberFactory(group=self.group23_bis, user=self.user3, perm_rank=1)
@@ -41,18 +41,17 @@ class UserTests(APITestCase):
         response = self.client.get('/user/')
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
-    # def test_get_users_list_forbidden(self):
-    #     # Client authenticated but has no permission
-    #     self.client.force_authenticate(user=self.user)
-    #     response = self.client.get('/user/')
-    #     self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+    def test_get_users_list_forbidden(self):
+        # Client authenticated but has no permission
+        self.client.force_authenticate(user=self.user)
+        response = self.client.get('/user/')
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
-    def test_get_users_list_ok(self):
-        # Client has permissions
-        self.client.force_authenticate(user=self.user3)
+    def test_get_users_list_admin_ok(self):
+        # Client authenticated but has no permission
+        self.client.force_authenticate(user=self.admin_user)
         response = self.client.get('/user/')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(response.data), len(self.users_list_for_user3))
 
 #### Get requests
     def test_get_user_unauthed(self):
@@ -69,7 +68,7 @@ class UserTests(APITestCase):
     def test_get_user_forbidden_common_group_not_accepted(self):
         # Client authenticated, group in common, but not accepted in this Group
         user4 = UserFactory()
-        GroupMemberFactory(group=self.group23, user=user4, perm_rank=0)
+        GroupMemberFactory(group=self.group_2pending_3accepted, user=user4, perm_rank=0)
         self.client.force_authenticate(user=user4)
         response = self.client.get("/user/%d/" % self.user2.id)
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)

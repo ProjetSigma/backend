@@ -44,6 +44,7 @@ class VisibleUsersFilterBackend(DRYPermissionFiltersBase):
 
 
 class UserViewSet(mixins.CreateModelMixin,
+                    mixins.ListModelMixin,
                     mixins.RetrieveModelMixin,
                     mixins.UpdateModelMixin,
                     mixins.DestroyModelMixin,
@@ -52,6 +53,12 @@ class UserViewSet(mixins.CreateModelMixin,
     queryset = User.objects.all()
     serializer_class = BasicUserWithPermsSerializer # by default, basic data and permissions
     # filter_backends = (VisibleUsersFilterBackend, )
+
+    def list(self, request):
+        # Only sigma admins can list all the users
+        if request.user.is_sigma_admin():
+            return super().list(self, request)
+        return Response(status.HTTP_403_FORBIDDEN)
 
     def retrieve(self, request, pk=None):
         """
