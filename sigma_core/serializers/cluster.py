@@ -1,9 +1,9 @@
 from rest_framework import serializers
 
 from sigma_core.models.cluster import Cluster
+from sigma_core.serializers.group import GroupSerializer
 
-
-class BasicClusterSerializer(serializers.ModelSerializer):
+class BasicClusterSerializer(GroupSerializer):
     """
     Serialize Cluster model without memberships.
     """

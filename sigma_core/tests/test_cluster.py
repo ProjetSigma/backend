@@ -69,7 +69,7 @@ class ClusterTests(APITestCase):
         self.client.force_authenticate(user=self.users[1])
         response = self.client.get(self.cluster_url % self.clusters[0].id)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data, self.cluster_data)
+        self.assertEqual(response.data.get('name', None), self.cluster_data['name'])
 
     #### Create requests
     def test_create_cluster_unauthed(self):
