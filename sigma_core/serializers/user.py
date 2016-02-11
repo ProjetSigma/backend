@@ -38,14 +38,14 @@ class BasicUserWithPermsSerializer(BasicUserSerializer):
         from sigma_core.models.cluster import Cluster
         try:
             request = self.context['request']
-            inputClusters = request.data.get('clusters')
+            input_clusters = request.data.get('clusters')
             if request.user.is_sigma_admin():
-                fields['clusters'] = Cluster.objects.filter(pk__in=inputClusters).values_list('id', flat=True)
+                fields['clusters'] = Cluster.objects.filter(pk__in=input_clusters).values_list('id', flat=True)
             else:
-                fields['clusters'] = GroupMember.objects.filter(user=request.user, group__in=inputClusters).values_list('group', flat=True)
+                fields['clusters'] = GroupMember.objects.filter(user=request.user, group__in=input_clusters).values_list('group', flat=True)
         except ValueError:
             raise serializers.ValidationError("Cluster list: bad format")
-        if inputClusters != list(fields['clusters']):
+        if input_clusters != list(fields['clusters']):
             raise serializers.ValidationError("Cluster list: incorrect values")
         return super().create(fields)
 
