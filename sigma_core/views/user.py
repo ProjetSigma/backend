@@ -10,7 +10,6 @@ from django.views.decorators.csrf import csrf_exempt
 from rest_framework import mixins, viewsets, decorators, status, parsers
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, AllowAny
-from dry_rest_permissions.generics import DRYPermissions, DRYPermissionFiltersBase
 
 from sigma_core.models.user import User
 from sigma_core.models.group_member import GroupMember
@@ -33,9 +32,9 @@ class UserViewSet(mixins.CreateModelMixin,      # Only Cluster admins can create
                     mixins.ListModelMixin,      # Only sigma admins can list
                     mixins.RetrieveModelMixin,  # Can only see members within same group or cluster
                     mixins.UpdateModelMixin,    # Only self
-                    mixins.DestroyModelMixin,   # ??
+                    mixins.DestroyModelMixin,   # Only self or Sigma admin
                     viewsets.GenericViewSet):
-    permission_classes = [IsAuthenticated, ]#DRYPermissions, ]
+    permission_classes = [IsAuthenticated, ]
     queryset = User.objects.all()
     serializer_class = BasicUserWithPermsSerializer # by default, basic data and permissions
 
@@ -90,6 +89,11 @@ class UserViewSet(mixins.CreateModelMixin,      # Only Cluster admins can create
 
         s = DetailedUserWithPermsSerializer(user, context={'request': request})
         return Response(s.data, status=status.HTTP_200_OK)
+
+    def destroy(self, request, pk=None):
+        if not request.user.is_sigma_admin() and int(pk) != request.user.id:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        super().destroy(request, pk)
 
     def update(self, request, pk=None):
         if not request.user.is_sigma_admin() and int(pk) != request.user.id:
