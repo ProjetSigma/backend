@@ -55,14 +55,14 @@ class ClusterTests(APITestCase):
         # Client is not authenticated, can see cluster data but cannot see cluster details (especially members)
         response = self.client.get(self.cluster_url % self.clusters[0].id)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(response.data['users']), 0)
+        self.assertEqual(response.data.get('users', None), None)
 
     def test_get_cluster_forbidden(self):
         # Client wants to see a cluster whose he is not member of
         self.client.force_authenticate(user=self.users[0])
         response = self.client.get(self.cluster_url % self.clusters[1].id)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(response.data['users']), 0)
+        self.assertEqual(response.data.get('users', None), None)
 
     def test_get_cluster_ok(self):
         # Client wants to see a cluster to which he belongs
@@ -90,10 +90,11 @@ class ClusterTests(APITestCase):
         self.client.force_authenticate(user=self.users[2])
         response = self.client.post(self.clusters_url, self.new_cluster_data)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        self.assertEqual(response.data['name'], "Ecole polytechnique")
-        self.assertEqual(response.data['private'], False)
-        self.assertEqual(response.data['default_member_rank'], -1)
-        self.assertEqual(response.data['req_rank_invite'], Group.ADMINISTRATOR_RANK)
+        cluster = Cluster.objects.filter(pk=response.data['id']).get()
+        self.assertEqual(cluster.name, "Ecole polytechnique")
+        self.assertEqual(cluster.private, False)
+        self.assertEqual(cluster.default_member_rank, -1)
+        self.assertEqual(cluster.req_rank_invite, Group.ADMINISTRATOR_RANK)
 
     #### Modification requests
     def test_update_cluster_unauthed(self):

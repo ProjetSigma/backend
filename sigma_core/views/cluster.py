@@ -38,6 +38,15 @@ class ClusterViewSet(mixins.CreateModelMixin,   # Only sigma admins
     def create(self, request):
         return super().create(request)
 
+    def list(self, request):
+        self.serializer_class = BasicClusterSerializer
+        return super().list(request)
+
+    def retrieve(self, request, pk=None):
+        if not request.user.is_authenticated() or (not request.user.is_sigma_admin() and not request.user.clusters.filter(pk=pk).exists()):
+            self.serializer_class = BasicClusterSerializer
+        return super().retrieve(request, pk=pk)
+
     @restrict_queryset_to_administrated_clusters
     def update(self, request, pk=None):
         return super().update(request, pk=pk)
@@ -50,8 +59,3 @@ class ClusterViewSet(mixins.CreateModelMixin,   # Only sigma admins
         if self.action == 'list' or self.action == 'retrieve':
             self.permission_classes = [AllowAny, ]
         return super().get_permissions()
-
-    def get_serializer_class(self):
-        if self.action == 'list':
-            return BasicClusterSerializer
-        return super().get_serializer_class()
