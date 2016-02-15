@@ -7,8 +7,6 @@ class Publication(models.Model):
     """
     Modelize a Publication. A Publication can be posted to a Group with the GroupPost model.
     """
-    class Meta:
-        pass
 
     # Warning! Both can be NULL !
     poster_user = models.ForeignKey(User, null=True, related_name='created_publications', on_delete=models.SET_NULL)
@@ -30,8 +28,6 @@ class GroupPost(models.Model):
     """
     Modelize a Post on a Group. A Post is a link between a Publication and a Group.
     """
-    class Meta:
-        auto_created = True
 
     # Poster ?
     group = models.ForeignKey(Group, related_name='posts', on_delete=models.CASCADE)
@@ -43,8 +39,6 @@ class PublicationComment(models.Model):
     """
     Modelize a comment on a Publication
     """
-    class Meta:
-        pass
 
     user = models.ForeignKey(User, related_name='comments', on_delete=models.CASCADE)
     publication = models.ForeignKey('Publication', related_name='comments', on_delete=models.CASCADE)
