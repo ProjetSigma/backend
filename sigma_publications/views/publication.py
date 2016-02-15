@@ -23,16 +23,13 @@ class PublicationViewSet(mixins.CreateModelMixin,    # Everyone can create a pub
     permission_classes = [IsAuthenticated, ]
 
     def create(self, request):
-        serializer = PublicationSerializer(data=request.data)
-
+        serializer = self.get_serializer(data=request.data)
         allowed_groups = Group.objects.filter(memberships__user=request.user,
             memberships__perm_rank__gte=F('req_rank_create_group_publication'))
         serializer.fields['poster_group'] = serializers.PrimaryKeyRelatedField(allow_null=True, queryset=allowed_groups)
 
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        if serializer.validated_data.get('poster_user').id != request.user.id:
-            return Response("`poster_user` should be yourself", status=status.HTTP_400_BAD_REQUEST)
 
         serializer.save()
         return Response(serializer.data, status=status.HTTP_201_CREATED)

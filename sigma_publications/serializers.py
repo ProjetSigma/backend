@@ -9,7 +9,10 @@ class PublicationSerializer(serializers.ModelSerializer):
         model = Publication
 
     poster_group = serializers.PrimaryKeyRelatedField(allow_null=True, queryset=Group.objects.all())
-    poster_user = serializers.PrimaryKeyRelatedField(queryset=User.objects.all())
+    poster_user = serializers.PrimaryKeyRelatedField(
+        read_only=True,
+        default=serializers.CurrentUserDefault()
+    )
     text = serializers.CharField()
 
 

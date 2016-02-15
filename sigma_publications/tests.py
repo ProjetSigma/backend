@@ -98,7 +98,9 @@ class PublicationTests(PublicationTestsSituation):
     def test_create_publication_as_someone_else(self):
         self.client.force_authenticate(user=self.users[0])
         response = self.client.post(self.publications_route, self.gen_new_publication(self.users[1], None))
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(Publication.objects.filter(poster_user=self.users[0]).count(), 1)
+        self.assertEqual(Publication.objects.filter(poster_user=self.users[1]).count(), 0)
 
     def test_create_publication_as_group_ok(self):
         self.client.force_authenticate(user=self.users[1])
