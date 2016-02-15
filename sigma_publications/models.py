@@ -24,6 +24,7 @@ class Publication(models.Model):
     #   - posts (model GroupPost)
     #   - posted_in (model Group.publications through GroupPost)
 
+
 class GroupPost(models.Model):
     """
     Modelize a Post on a Group. A Post is a link between a Publication and a Group.
