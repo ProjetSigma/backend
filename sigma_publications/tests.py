@@ -44,6 +44,8 @@ class PublicationCommentFactory(factory.django.DjangoModelFactory):
 from rest_framework import status
 from rest_framework.test import APITestCase
 
+from sigma_core.tests.factories import UserFactory, GroupFactory, AdminUserFactory, GroupMemberFactory
+
 
 class PublicationTestsSituation(APITestCase):
     @classmethod
@@ -85,20 +87,20 @@ class PublicationTests(PublicationTestsSituation):
 
     def test_create_publication_as_group_not_group_member(self):
         self.client.force_authenticate(user=self.users[1])
-        response = self.client.get(self.clusters_url, self.gen_new_publication(None, self.groups[0]))
+        response = self.client.get(self.publications_route, self.gen_new_publication(None, self.groups[0]))
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_create_publication_as_group_no_permission(self):
         self.client.force_authenticate(user=self.users[0])
-        response = self.client.get(self.clusters_url, self.gen_new_publication(None, self.groups[1]))
+        response = self.client.get(self.publications_route, self.gen_new_publication(None, self.groups[1]))
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_create_publication_as_group_ok(self):
         self.client.force_authenticate(user=self.users[1])
-        response = self.client.get(self.clusters_url, self.gen_new_publication(None, self.groups[1]))
+        response = self.client.get(self.publications_route, self.gen_new_publication(None, self.groups[1]))
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
     def test_create_publication_as_user_ok(self):
         self.client.force_authenticate(user=self.users[0])
-        response = self.client.get(self.clusters_url, self.gen_new_publication(self.users[0], None))
+        response = self.client.get(self.publications_route, self.gen_new_publication(self.users[0], None))
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
