@@ -12,29 +12,16 @@ class Group(models.Model):
     #########################
     ADMINISTRATOR_RANK  = 10
 
-    TYPE_BASIC          = 'basic'
-    TYPE_CURSUS         = 'cursus'
-    TYPE_ASSO           = 'association'
-    TYPE_PROMO          = 'school_promotion'
-    TYPE_SCHOOL         = 'school'
-    TYPE_CHOICES = (
-        (TYPE_BASIC, 'Simple group'),
-        (TYPE_CURSUS, 'Cursus or department'),
-        (TYPE_ASSO, 'Association'),
-        (TYPE_PROMO, 'School promotion'),
-        (TYPE_SCHOOL, 'School')
-    )
-
     ##########
     # Fields #
     ##########
     name = models.CharField(max_length=254)
     private = models.BooleanField(default=False)
-    type = models.CharField(max_length=64, choices=TYPE_CHOICES, default=TYPE_BASIC)
     description = models.TextField(blank=True)
+    protected = models.BooleanField(default=False) # if True, the Group cannot be deleted
 
-    # The school responsible of the group in case of admin conflict (can be null for non-school-related groups)
-    resp_school = models.ForeignKey('School', null=True, blank=True, on_delete=models.SET_NULL)
+    # The cluster responsible of the group in case of admin conflict (can be null for non-cluster-related groups)
+    resp_group = models.ForeignKey('Group', null=True, blank=True, on_delete=models.SET_NULL)
 
     # The permission a member has upon joining
     # A value of -1 means that no one can join the group.
@@ -55,7 +42,8 @@ class Group(models.Model):
 
     # Related fields:
     #   - invited_users (model User)
-    #   - memberships (model UserGroup)
+    #   - memberships (model GroupMember)
+    #   - users (model User)
     #   - fields (model GroupField)
     # TODO: Determine whether 'memberships' fields needs to be retrieved every time or not...
 
@@ -70,7 +58,7 @@ class Group(models.Model):
         return self.default_member_rank >= 0
 
     def __str__(self):
-        return "%s (%s)" % (self.name, self.get_type_display())
+        return self.name
 
     ###############
     # Permissions #
@@ -97,7 +85,6 @@ class Group(models.Model):
         """
         # Handled in View directly with queryset override
         return True
-        return not self.private or request.user.is_group_member(self)
 
     @staticmethod
     def has_write_permission(request):
@@ -107,19 +94,9 @@ class Group(models.Model):
     @allow_staff_or_superuser
     def has_create_permission(request):
         """
-        Everybody can create a private group. For other types, user must be school admin or sigma admin.
+        Everybody can create a group.
         """
-        from sigma_core.models.school import School
-        group_type = request.data.get('type', None)
-        if group_type == Group.TYPE_BASIC:
-            return True
-
-        resp_school = request.data.get('resp_school', None)
-        try:
-            school = School.objects.get(pk=resp_school)
-        except School.DoesNotExist:
-            school = None
-        return school is not None and request.user.has_group_admin_perm(school)
+        return True
 
     @allow_staff_or_superuser
     def has_object_write_permission(self, request):

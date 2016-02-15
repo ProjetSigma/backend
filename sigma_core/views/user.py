@@ -7,10 +7,9 @@ from django.db.models import Q, Prefetch
 from django.http import Http404
 from django.views.decorators.csrf import csrf_exempt
 
-from rest_framework import viewsets, decorators, status, parsers
+from rest_framework import mixins, viewsets, decorators, status, parsers
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, AllowAny
-from dry_rest_permissions.generics import DRYPermissions, DRYPermissionFiltersBase
 
 from sigma_core.models.user import User
 from sigma_core.models.group_member import GroupMember
@@ -29,25 +28,33 @@ L'équipe Sigma.
 """
 }
 
-class VisibleUsersFilterBackend(DRYPermissionFiltersBase):
-    def filter_queryset(self, request, queryset, view):
-        """ break sigma_core/views/user.py:41
-        Never display information for Users who have no group in common
-        """
-        if request.user.is_sigma_admin():
-            return queryset
-        from sigma_core.models.group_member import GroupMember
-        # @sqlperf: Maybe it is more efficient with only one Query?
-        my_groups = GroupMember.objects.filter(Q(user=request.user) & Q(perm_rank__gte=1)).values_list('group', flat=True)
-        visible_users_ids = GroupMember.objects.filter(group__in=my_groups).values('user')
-        return queryset.filter(Q(pk__in=visible_users_ids) | Q(pk=request.user.id))
-
-# TODO: use DetailSerializerMixin
-class UserViewSet(viewsets.ModelViewSet):
-    permission_classes = [IsAuthenticated, DRYPermissions, ]
+class UserViewSet(mixins.CreateModelMixin,      # Only Cluster admins can create users
+                    mixins.ListModelMixin,      # Only sigma admins can list
+                    mixins.RetrieveModelMixin,  # Can only see members within same group or cluster
+                    mixins.UpdateModelMixin,    # Only self
+                    mixins.DestroyModelMixin,   # Only self or Sigma admin
+                    viewsets.GenericViewSet):
+    permission_classes = [IsAuthenticated, ]
     queryset = User.objects.all()
     serializer_class = BasicUserWithPermsSerializer # by default, basic data and permissions
-    filter_backends = (VisibleUsersFilterBackend, )
+
+    def perform_create(self, serializer):
+        from sigma_core.models.cluster import Cluster
+        from sigma_core.models.group import Group
+        serializer.save()
+        # Create related GroupMember associations
+        # TODO: Looks like a hacky-way to do this.
+        # But how to do it properly ?
+        memberships = []
+        for cluster in serializer.data['clusters']:
+            memberships += [GroupMember(group=Group(id=cluster), user=User(id=serializer.data['id']), perm_rank=Cluster.DEFAULT_MEMBER_RANK)]
+        GroupMember.objects.bulk_create(memberships)
+
+    def list(self, request, *args, **kwargs):
+        # Only sigma admins can list all the users
+        if request.user.is_sigma_admin():
+            return super().list(self, request, args, kwargs)
+        return Response(status=status.HTTP_403_FORBIDDEN)
 
     def retrieve(self, request, pk=None):
         """
@@ -55,21 +62,50 @@ class UserViewSet(viewsets.ModelViewSet):
         ---
         response_serializer: DetailedUserWithPermsSerializer
         """
-        my_groups = GroupMember.objects.filter(Q(user=request.user) & Q(perm_rank__gte=1)).values_list('group', flat=True)
-        self.queryset = self.queryset.select_related('photo').prefetch_related(
-            Prefetch('memberships', queryset=GroupMember.objects.filter(group__in=my_groups).select_related('group'))
-        )
-        self.serializer_class = DetailedUserWithPermsSerializer
-        return super().retrieve(request, pk)
+        # 1. Check if we are allowed to see this user
+        user = User.objects.only('id').filter(pk=pk).prefetch_related('clusters').get()
+
+        # 2. Check what we can see from this User
+        qs = User.objects.all().select_related('photo').prefetch_related('clusters')
+        gm = GroupMember.objects.select_related('group')
+        # Admin: can see everything
+        if request.user.is_sigma_admin() or user.id == request.user.id:
+            user = qs.prefetch_related(
+                Prefetch('memberships', queryset=gm)
+            ).get(pk=pk)
+        # Same cluster: can see public groups memberships
+        elif request.user.has_common_cluster(user):
+            user = qs.prefetch_related(
+                Prefetch('memberships', queryset=gm.filter(Q(group__private=False) | Q(group__in=request.user.get_groups_with_confirmed_membership())))
+            ).get(pk=pk)
+        # In the general case, we only see common Group memberships
+        # Also verify that we are on the same Group
+        else:
+            user = qs.prefetch_related(
+                Prefetch('memberships', queryset=gm.filter(group__in=request.user.get_groups_with_confirmed_membership()))
+            ).get(pk=pk)
+            if not user.memberships.exists(): # No membership visible => User not visible
+                return Response(status=status.HTTP_404_NOT_FOUND)
+
+        s = DetailedUserWithPermsSerializer(user, context={'request': request})
+        return Response(s.data, status=status.HTTP_200_OK)
+
+    def destroy(self, request, pk=None):
+        if not request.user.is_sigma_admin() and int(pk) != request.user.id:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        super().destroy(request, pk)
 
     def update(self, request, pk=None):
+        if not request.user.is_sigma_admin() and int(pk) != request.user.id:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+
         try:
             user = User.objects.get(pk=pk)
         except User.DoesNotExist:
             raise Http404()
 
         # Names edition is allowed to Sigma admins only
-        if ((request.data['lastname'] != user.lastname or request.data['firstname'] != user.firstname)) and not (request.user.is_sigma_admin()):
+        if ((request.data['lastname'] != user.lastname or request.data['firstname'] != user.firstname)) and not request.user.is_sigma_admin():
             return Response('You cannot change your lastname or firstname', status=status.HTTP_400_BAD_REQUEST)
 
         return super(UserViewSet, self).update(request, pk)

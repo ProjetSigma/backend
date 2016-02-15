@@ -138,8 +138,7 @@
         "fields": {
             "name": "École polytechnique",
             "private": false,
-            "type": "school",
-            "resp_school": null,
+            "resp_group": null,
             "default_member_rank": -1,
             "req_rank_invite": 10,
             "req_rank_kick": 10,
@@ -155,8 +154,7 @@
         "fields": {
             "name": "ENSTA",
             "private": false,
-            "type": "school",
-            "resp_school": null,
+            "resp_group": null,
             "default_member_rank": -1,
             "req_rank_invite": 10,
             "req_rank_kick": 10,
@@ -172,8 +170,7 @@
         "fields": {
             "name": "Promotion X2013",
             "private": false,
-            "type": "school_promotion",
-            "resp_school": 1,
+            "resp_group": 1,
             "default_member_rank": -1,
             "req_rank_invite": 10,
             "req_rank_kick": 10,
@@ -189,8 +186,7 @@
         "fields": {
             "name": "Promotion X2014",
             "private": false,
-            "type": "school_promotion",
-            "resp_school": 1,
+            "resp_group": 1,
             "default_member_rank": -1,
             "req_rank_invite": 10,
             "req_rank_kick": 10,
@@ -206,8 +202,7 @@
         "fields": {
             "name": "Promotion 2018",
             "private": false,
-            "type": "school_promotion",
-            "resp_school": 2,
+            "resp_group": 2,
             "default_member_rank": -1,
             "req_rank_invite": 10,
             "req_rank_kick": 10,
@@ -223,8 +218,7 @@
         "fields": {
             "name": "Binet Réseau",
             "private": false,
-            "type": "association",
-            "resp_school": 1,
+            "resp_group": 1,
             "default_member_rank": 0,
             "req_rank_invite": 10,
             "req_rank_kick": 10,
@@ -240,8 +234,7 @@
         "fields": {
             "name": "Association DATA",
             "private": false,
-            "type": "association",
-            "resp_school": 2,
+            "resp_group": 2,
             "default_member_rank": 0,
             "req_rank_invite": 1,
             "req_rank_kick": 10,
@@ -257,8 +250,7 @@
         "fields": {
             "name": "Binet JTX",
             "private": false,
-            "type": "association",
-            "resp_school": 1,
+            "resp_group": 1,
             "default_member_rank": -1,
             "req_rank_invite": 10,
             "req_rank_kick": 10,
@@ -274,8 +266,7 @@
         "fields": {
             "name": "Un flil",
             "private": true,
-            "type": "basic",
-            "resp_school": null,
+            "resp_group": null,
             "default_member_rank": -1,
             "req_rank_invite": 1,
             "req_rank_kick": 10,
@@ -352,14 +343,14 @@
         }
     },
     {
-        "model": "sigma_core.school",
+        "model": "sigma_core.cluster",
         "pk": 1,
         "fields": {
             "design": "default"
         }
     },
     {
-        "model": "sigma_core.school",
+        "model": "sigma_core.cluster",
         "pk": 2,
         "fields": {
             "design": "default"

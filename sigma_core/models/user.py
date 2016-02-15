@@ -1,9 +1,14 @@
 from django.db import models
+from django.db.models import Q
+
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 from dry_rest_permissions.generics import allow_staff_or_superuser
 
 
 class UserManager(BaseUserManager):
+    def get_queryset(self):
+        return super().get_queryset().prefetch_related('clusters')
+
     def create_user(self, email, lastname, firstname, password=None):
         """
         Creates and saves a User with the given email, lastname, firstname and password
@@ -44,7 +49,7 @@ class User(AbstractBaseUser):
     firstname = models.CharField(max_length=128)
     # username = models.CharField(max_length=128, unique=True) # TODO - Add unique username for frontend URLs
     phone = models.CharField(max_length=20, blank=True)
-    photo = models.OneToOneField('sigma_files.Image', null=True, on_delete=models.SET_NULL)
+    photo = models.OneToOneField('sigma_files.Image', blank=True, null=True, on_delete=models.SET_NULL)
 
     is_active = models.BooleanField(default=True)
     last_modified = models.DateTimeField(auto_now=True)
@@ -53,12 +58,15 @@ class User(AbstractBaseUser):
     is_superuser = models.BooleanField(default=False)
     is_staff = models.BooleanField(default=False)
 
+    clusters = models.ManyToManyField('Cluster', related_name="cluster_users") # users should be members of at least one cluster
+
     objects = UserManager()
 
     invited_to_groups = models.ManyToManyField('Group', blank=True, related_name="invited_users");
+    groups = models.ManyToManyField('Group', through='GroupMember', related_name='users')
 
     # Related fields:
-    #   - memberships (model UserGroup)
+    #   - memberships (model GroupMember)
 
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['lastname', 'firstname']
@@ -74,6 +82,21 @@ class User(AbstractBaseUser):
 
     def is_sigma_admin(self):
         return self.is_staff or self.is_superuser
+
+    def is_in_cluster(self, cluster):
+        return cluster in self.clusters.all()
+
+    def has_common_cluster(self, user):
+        """
+        Return True iff self has a cluster in common with user.
+        """
+        return len(set(self.clusters.all().values_list('id', flat=True)).intersection(user.clusters.all().values_list('id', flat=True))) > 0
+
+    def has_common_group(self, user):
+        """
+        Return True iff self has a group in common with user.
+        """
+        return len(set(self.memberships.all().values_list('group', flat=True)).intersection(user.memberships.all().values_list('group', flat=True))) > 0
 
     def get_group_membership(self, group):
         from sigma_core.models.group_member import GroupMember
@@ -116,6 +139,10 @@ class User(AbstractBaseUser):
     def is_invited_to_group_id(self, groupId):
         return self.invited_to_groups.filter(pk=groupId).exists()
 
+    def get_groups_with_confirmed_membership(self):
+        from sigma_core.models.group_member import GroupMember
+        return GroupMember.objects.filter(Q(user=self) & Q(perm_rank__gte=1)).values_list('group', flat=True)
+
     ###############
     # Permissions #
     ###############
@@ -126,46 +153,3 @@ class User(AbstractBaseUser):
 
     def has_module_perms(self, app_label):
         return True
-    # End of admin site permissions
-
-    @staticmethod
-    def has_read_permission(request):
-        """
-        Only authenticated users can retrieve an users list.
-        """
-        return True
-
-    def has_object_read_permission(self, request):
-        """
-        Only authenticated users can retrieve an user.
-        """
-        return True
-
-    @staticmethod
-    def has_write_permission(request):
-        """
-        Everybody can edit or create users, but with certain restraints specified in below functions.
-        By the way, everybody can change one's password or reset it.
-        """
-        return True
-
-    @staticmethod
-    @allow_staff_or_superuser
-    def has_create_permission(request):
-        """
-        Only Sigma admins can create users.
-        """
-        return False
-
-    def has_object_write_permission(self, request):
-        """
-        Nobody has all write permissions on an user (especially, nobody can delete an user).
-        """
-        return False
-
-    @allow_staff_or_superuser
-    def has_object_update_permission(self, request):
-        """
-        Only Sigma admin and oneself can edit an user.
-        """
-        return request.user.id == self.id

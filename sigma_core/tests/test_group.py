@@ -5,7 +5,7 @@ from rest_framework.test import APITestCase, force_authenticate
 
 from sigma_core.models.group import Group
 from sigma_core.serializers.group import GroupSerializer
-from sigma_core.tests.factories import UserFactory, GroupFactory, GroupMemberFactory, SchoolFactory
+from sigma_core.tests.factories import UserFactory, GroupFactory, GroupMemberFactory, ClusterFactory
 
 
 def reload(obj):
@@ -18,15 +18,10 @@ class GroupTests(APITestCase):
         super(GroupTests, self).setUpTestData()
 
         # Schools
-        self.schools = SchoolFactory.create_batch(1)
+        self.schools = ClusterFactory.create_batch(1)
 
         # Groups
-        self.groups = GroupFactory.create_batch(2)
-        self.groups[0].private = False
-        self.groups[0].save()
-        self.groups[1].private = True
-        self.groups[1].req_rank_invite = 5
-        self.groups[1].save()
+        self.groups = [GroupFactory(private=False), GroupFactory(private=True, req_rank_invite=5)]
 
         # Users
         self.users = UserFactory.create_batch(3)
@@ -45,8 +40,8 @@ class GroupTests(APITestCase):
         self.groups_url = "/group/"
         self.group_url = self.groups_url + "%d/"
 
-        self.new_private_group_data = {"name": "New group", "type": Group.TYPE_BASIC, "private": True}
-        self.new_association_group_data = {"name": "New group", "type": Group.TYPE_ASSO, "private": False, "resp_school": self.schools[0].id}
+        self.new_private_group_data = {"name": "New group", "private": True}
+        self.new_public_group_data = {"name": "New group", "private": False, "resp_group": self.schools[0].id}
         self.invite_data = {"user": self.users[0].id}
 
     #### List requests
@@ -128,20 +123,12 @@ class GroupTests(APITestCase):
         self.assertEqual(response.data['private'], True)
         Group.objects.get(pk=response.data['id']).delete()
 
-    def test_create_association_group_forbidden(self):
+    def test_create_public_group_ok(self):
         # Only school andmins and Sigma admins can create association groups
         self.client.force_authenticate(user=self.users[0])
-        response = self.client.post(self.groups_url, self.new_association_group_data)
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
-
-    def test_create_association_group_ok(self):
-        # Only school andmins and Sigma admins can create association groups
-        self.client.force_authenticate(user=self.users[1])
-        response = self.client.post(self.groups_url, self.new_association_group_data)
+        response = self.client.post(self.groups_url, self.new_public_group_data)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        self.assertEqual(response.data['type'], Group.TYPE_ASSO)
         self.assertEqual(response.data['private'], False)
-        Group.objects.get(pk=response.data['id']).delete()
 
     #### Modification requests
     def test_update_unauthed(self):

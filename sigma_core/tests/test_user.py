@@ -5,7 +5,7 @@ from django.core import mail
 from rest_framework import status
 from rest_framework.test import APITestCase, force_authenticate
 
-from sigma_core.tests.factories import UserFactory, AdminUserFactory, GroupMemberFactory, GroupFactory
+from sigma_core.tests.factories import UserFactory, AdminUserFactory, GroupMemberFactory, GroupFactory, ClusterFactory
 from sigma_core.serializers.user import DetailedUserSerializer as UserSerializer
 from sigma_core.models.group import Group
 from sigma_core.models.group_member import GroupMember
@@ -14,13 +14,17 @@ class UserTests(APITestCase):
     @classmethod
     def setUpTestData(self):
         super(UserTests, self).setUpTestData()
+        self.cluster = ClusterFactory()
+        self.clusteradmin = UserFactory()
+        self.clusteradmin.clusters.add(self.cluster)
+        GroupMemberFactory(group=self.cluster, user=self.clusteradmin, perm_rank=Group.ADMINISTRATOR_RANK)
 
         self.user = UserFactory()
         self.user2 = UserFactory()
         self.user3 = UserFactory()
-        self.group23 = GroupFactory()
-        GroupMemberFactory(group=self.group23, user=self.user2, perm_rank=0)
-        GroupMemberFactory(group=self.group23, user=self.user3, perm_rank=1)
+        self.group_2pending_3accepted = GroupFactory()
+        GroupMemberFactory(group=self.group_2pending_3accepted, user=self.user2, perm_rank=0)
+        GroupMemberFactory(group=self.group_2pending_3accepted, user=self.user3, perm_rank=1)
         self.group23_bis = GroupFactory()
         GroupMemberFactory(group=self.group23_bis, user=self.user2, perm_rank=1)
         GroupMemberFactory(group=self.group23_bis, user=self.user3, perm_rank=1)
@@ -33,7 +37,7 @@ class UserTests(APITestCase):
         self.users_list = [self.user, self.user2, self.admin_user]
         self.users_list_for_user3 = [self.user2, self.user3]
 
-        self.new_user_data = {'lastname': 'Doe', 'firstname': 'John', 'email': 'john.doe@newschool.edu', 'password': 'password'}
+        self.new_user_data = {'lastname': 'Doe', 'firstname': 'John', 'email': 'john.doe@newschool.edu', 'password': 'password', 'clusters' : {self.cluster.id}}
 
 #### List requests
     def test_get_users_list_unauthed(self):
@@ -41,18 +45,17 @@ class UserTests(APITestCase):
         response = self.client.get('/user/')
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
-    # def test_get_users_list_forbidden(self):
-    #     # Client authenticated but has no permission
-    #     self.client.force_authenticate(user=self.user)
-    #     response = self.client.get('/user/')
-    #     self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+    def test_get_users_list_forbidden(self):
+        # Client authenticated but has no permission
+        self.client.force_authenticate(user=self.user)
+        response = self.client.get('/user/')
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
-    def test_get_users_list_ok(self):
-        # Client has permissions
-        self.client.force_authenticate(user=self.user3)
+    def test_get_users_list_admin_ok(self):
+        # Client authenticated but has no permission
+        self.client.force_authenticate(user=self.admin_user)
         response = self.client.get('/user/')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(response.data), len(self.users_list_for_user3))
 
 #### Get requests
     def test_get_user_unauthed(self):
@@ -69,7 +72,7 @@ class UserTests(APITestCase):
     def test_get_user_forbidden_common_group_not_accepted(self):
         # Client authenticated, group in common, but not accepted in this Group
         user4 = UserFactory()
-        GroupMemberFactory(group=self.group23, user=user4, perm_rank=0)
+        GroupMemberFactory(group=self.group_2pending_3accepted, user=user4, perm_rank=0)
         self.client.force_authenticate(user=user4)
         response = self.client.get("/user/%d/" % self.user2.id)
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
@@ -120,18 +123,51 @@ class UserTests(APITestCase):
         response = self.client.post('/user/', self.new_user_data)
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
-    def test_create_user_forbidden(self):
+    def test_create_user_not_cluster_admin(self):
         # Client has no permission
         self.client.force_authenticate(user=self.user)
         response = self.client.post('/user/', self.new_user_data)
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
-    def test_create_user_ok(self):
+    def test_create_user_admin_ok(self):
         # Client has permissions
         self.client.force_authenticate(user=self.admin_user)
         response = self.client.post('/user/', self.new_user_data)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(response.data['lastname'], self.new_user_data['lastname'])
+        self.assertTrue(GroupMember.objects.filter(user=response.data['id'], group=self.cluster.id).exists())
+
+    def test_create_user_admin__bad_request1(self):
+        # Client has permissions
+        self.client.force_authenticate(user=self.admin_user)
+        data = self.new_user_data.copy()
+        data['clusters'] = 'Completely wrong'
+        response = self.client.post('/user/', data)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_create_user_admin__bad_request2(self):
+        # Client has permissions
+        self.client.force_authenticate(user=self.admin_user)
+        data = self.new_user_data.copy()
+        data['clusters'] = {'cluster': 1}
+        response = self.client.post('/user/', data)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_create_user_admin__bad_request3(self):
+        # Client has permissions
+        self.client.force_authenticate(user=self.admin_user)
+        data = self.new_user_data.copy()
+        data['clusters'] = None
+        response = self.client.post('/user/', data)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_create_user_clusteradmin_ok(self):
+        # Client has permissions
+        self.client.force_authenticate(user=self.clusteradmin)
+        response = self.client.post('/user/', self.new_user_data)
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(response.data['lastname'], self.new_user_data['lastname'])
+        self.assertTrue(GroupMember.objects.filter(user=response.data['id'], group=self.cluster.id).exists())
 
 #### Modification requests
     def test_edit_email_wrong_permission(self):
