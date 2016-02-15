@@ -1,7 +1,7 @@
 from rest_framework import serializers
 
 from sigma_core.models.user import User
-from sigma_publications.models.group_post import Publication
+from sigma_publications.models import Publication
 
 class PublicationCommentSerializer(serializers.ModelSerializer):
     class Meta:

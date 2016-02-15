@@ -5,7 +5,7 @@ from rest_framework import viewsets, decorators, status, mixins
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 
-from sigma_publications.models.publication_comment import PublicationComment
+from sigma_publications.models import PublicationComment
 from sigma_publications.serializers.publication_comment import PublicationCommentSerializer
 
 class PublicationCommentViewSet(mixins.CreateModelMixin,    # TODO

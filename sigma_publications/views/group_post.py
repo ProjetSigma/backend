@@ -8,7 +8,7 @@ from dry_rest_permissions.generics import DRYPermissions
 
 from sigma_core.models.group_member import GroupMember
 
-from sigma_publications.models.group_post import GroupPost
+from sigma_publications.models import GroupPost
 from sigma_publications.serializers.group_post import GroupPostSerializer
 
 class GroupPostViewSet(mixins.CreateModelMixin,    # TODO
