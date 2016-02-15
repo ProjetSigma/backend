@@ -36,8 +36,10 @@ class Group(models.Model):
     req_rank_promote = models.SmallIntegerField(default=ADMINISTRATOR_RANK)
     # Downgrade someone (to rank 1 minimum)
     req_rank_demote = models.SmallIntegerField(default=ADMINISTRATOR_RANK)
-    # Modify group description
+    # TODO: Modify group description
     req_rank_modify_group_infos = models.SmallIntegerField(default=ADMINISTRATOR_RANK)
+    # Create a publication as Group
+    req_rank_create_group_publication = models.SmallIntegerField(default=ADMINISTRATOR_RANK)
 
     # Related fields:
     #   - invited_users (model User)
