@@ -8,7 +8,7 @@ class PublicationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Publication
 
-    poster_group = serializers.PrimaryKeyRelatedField(queryset=Group.objects.all())
+    poster_group = serializers.PrimaryKeyRelatedField(allow_null=True, queryset=Group.objects.all())
     poster_user = serializers.PrimaryKeyRelatedField(queryset=User.objects.all())
     text = serializers.CharField()
 

@@ -74,7 +74,7 @@ class PublicationTestsSituation(APITestCase):
 
 class PublicationTests(PublicationTestsSituation):
     def gen_new_publication(self, poster_user, poster_group):
-        pub = {'text' : 'Random text'}
+        pub = {'text' : 'Random text', 'poster_user': '', 'poster_group' : ''}
         if poster_user is not None:
             pub['poster_user'] = poster_user.id
         if poster_group is not None:
@@ -82,25 +82,30 @@ class PublicationTests(PublicationTestsSituation):
         return pub
 
     def test_create_publication_not_authed(self):
-        response = self.client.post(self.publications_route, self.gen_new_publication(None, None))
+        response = self.client.post(self.publications_route, self.gen_new_publication(self.users[0], None))
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
     def test_create_publication_as_group_not_group_member(self):
         self.client.force_authenticate(user=self.users[1])
-        response = self.client.get(self.publications_route, self.gen_new_publication(None, self.groups[0]))
-        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+        response = self.client.post(self.publications_route, self.gen_new_publication(self.users[1], self.groups[0]))
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_create_publication_as_group_no_permission(self):
         self.client.force_authenticate(user=self.users[0])
-        response = self.client.get(self.publications_route, self.gen_new_publication(None, self.groups[1]))
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        response = self.client.post(self.publications_route, self.gen_new_publication(self.users[0], self.groups[1]))
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_create_publication_as_someone_else(self):
+        self.client.force_authenticate(user=self.users[0])
+        response = self.client.post(self.publications_route, self.gen_new_publication(self.users[1], None))
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_create_publication_as_group_ok(self):
         self.client.force_authenticate(user=self.users[1])
-        response = self.client.get(self.publications_route, self.gen_new_publication(None, self.groups[1]))
+        response = self.client.post(self.publications_route, self.gen_new_publication(self.users[1], self.groups[1]))
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
     def test_create_publication_as_user_ok(self):
         self.client.force_authenticate(user=self.users[0])
-        response = self.client.get(self.publications_route, self.gen_new_publication(self.users[0], None))
+        response = self.client.post(self.publications_route, self.gen_new_publication(self.users[0], None))
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)

@@ -10,7 +10,7 @@ class Publication(models.Model):
 
     # Warning! Both can be NULL !
     poster_user = models.ForeignKey(User, null=True, related_name='created_publications', on_delete=models.SET_NULL)
-    poster_group = models.ForeignKey(Group, null=True, related_name='created_publications', on_delete=models.SET_NULL)
+    poster_group = models.ForeignKey(Group, blank=True, null=True, related_name='created_publications', on_delete=models.SET_NULL)
 
     # Link to event ?
     created = models.DateTimeField(auto_now_add=True)
