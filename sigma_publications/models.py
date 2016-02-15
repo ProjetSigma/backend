@@ -14,6 +14,7 @@ class Publication(models.Model):
 
     # Link to event ?
     created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
     text = models.TextField()
 
     posted_in = models.ManyToManyField(Group, through='GroupPost', related_name="publications")

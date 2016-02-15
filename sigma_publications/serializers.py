@@ -7,6 +7,7 @@ from sigma_publications.models import Publication, PublicationComment, GroupPost
 class PublicationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Publication
+        read_only_fields = ('poster_group', 'poster_user')
 
     poster_group = serializers.PrimaryKeyRelatedField(allow_null=True, queryset=Group.objects.all())
     poster_user = serializers.PrimaryKeyRelatedField(
