@@ -68,7 +68,7 @@ class User(AbstractBaseUser):
     # Related fields:
     #   - memberships (model Group through GroupMember)
     #   - created_publications (model Publication)
-    #   - comments (PublicationComment)
+    #   - comments (model PublicationComment)
 
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['lastname', 'firstname']

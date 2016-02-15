@@ -1,13 +1,14 @@
 from django.db import models
 
 from sigma_core.models.group_field import GroupField
+from sigma_core.models.group_member import GroupMember
 from sigma_core.models.user import User
 
 class GroupMemberValue(models.Model):
     class Meta:
         unique_together = (("membership", "field"),)
 
-    membership = models.ForeignKey('GroupMember', related_name='values')
+    membership = models.ForeignKey(GroupMember, related_name='values')
     field = models.ForeignKey('GroupField', related_name='+')
     value = models.CharField(max_length=GroupField.FIELD_VALUE_MAX_LENGTH)
 

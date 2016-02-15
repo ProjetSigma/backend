@@ -5,7 +5,6 @@ from dry_rest_permissions.generics import allow_staff_or_superuser
 from sigma_core.models.custom_field import CustomField
 from sigma_core.models.group_field import GroupField
 
-
 class Group(models.Model):
     #########################
     # Constants and choices #
@@ -46,7 +45,11 @@ class Group(models.Model):
     #   - users (model User)
     #   - fields (model GroupField)
     #   - posts (model GroupPost)
+    #   - publications (model Publication through GroupPost)
     #   - created_publications (model Publication)
+    #   - publications (model Publication through GroupPost)
+    #       Publications posted IN this group (different from `created_publications`)
+
     # TODO: Determine whether 'memberships' fields needs to be retrieved every time or not...
 
     @property
