@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from sigma_core.models import Publication, GroupPost, PublicationComment
+from sigma_publications.models import Publication, GroupPost, PublicationComment
 
 
 admin.site.register(Publication)
