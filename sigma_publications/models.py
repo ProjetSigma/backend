@@ -22,7 +22,6 @@ class Publication(models.Model):
     # Related fields
     #   - comments (model PublicationComment)
     #   - posts (model GroupPost)
-    #   - posted_in (model Group.publications through GroupPost)
 
 
 class GroupPost(models.Model):
