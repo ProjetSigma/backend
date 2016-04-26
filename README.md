@@ -10,8 +10,14 @@ Sigma - Backend
 <img src="https://img.shields.io/badge/license-GNU%20Affero%20General%20Public%20License%20%28AGPL%29%20v3.0-blue.svg" alt="license" />
 </a>
 
-Installation
-------------
+
+Vagrant usage
+-------------
+If you want to use the vagrant setup, you don't have to install python libraries.  
+Please see the [provisioning repository](https://github.com/ProjetSigma/provisioning).
+
+Installation (standalone version)
+---------------------------------
 
 
 Install requirements  
@@ -20,6 +26,9 @@ Install requirements
 
 If problems to install mysqlclient  
 `apt-get install python-dev libmysqlclient-dev` or `yum install python-devel mysql-devel`
+
+Since you don't use the vagrant, you have to use the local settings file:  
+`mv sigma/settings.py.local sigma/settings.py`  
 
 For a first installation, or if you have broken your database, reset it !  
 `./resetdb.sh`
@@ -34,6 +43,8 @@ Run dev server
 `python manage.py runserver` or `python manage.py runserver_plus` (can be useful but buggier...)
 
 API is accessible at `127.0.0.1:8000` and documented at `127.0.0.1:8000/docs/` (Swagger).
+
+
 
 
 Fixtures
