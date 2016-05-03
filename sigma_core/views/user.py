@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 import random
 import string
+import operator
+from functools import reduce
 
 from django.core.mail import send_mail
 from django.db.models import Q, Prefetch
@@ -28,8 +30,9 @@ L'équipe Sigma.
 """
 }
 
+
 class UserViewSet(mixins.CreateModelMixin,      # Only Cluster admins can create users
-                    mixins.ListModelMixin,      # Only sigma admins can list
+                    mixins.ListModelMixin,      # Can only see members within same cluster or group
                     mixins.RetrieveModelMixin,  # Can only see members within same group or cluster
                     mixins.UpdateModelMixin,    # Only self
                     mixins.DestroyModelMixin,   # Only self or Sigma admin
@@ -54,7 +57,21 @@ class UserViewSet(mixins.CreateModelMixin,      # Only Cluster admins can create
         # Only sigma admins can list all the users
         if request.user.is_sigma_admin():
             return super().list(self, request, args, kwargs)
-        return Response(status=status.HTTP_403_FORBIDDEN)
+
+        # We get clusters and groups ids
+        clusters_ids = [x['id'] for x in request.user.clusters.all().values('id')]
+        if len(clusters_ids) == 0:
+            return Response("You are in no cluster", status=status.HTTP_403_FORBIDDEN)
+
+        groups_ids = [x['group_id'] for x in request.user.memberships.all().values('group_id')]
+        # We get visible users ids, based on their belongings to common clusters/groups (let's anticipate the pagination)
+        if len(groups_ids) == 0:
+            users_ids = [x['id'] for x in User.objects.all().prefetch_related('clusters', 'memberships').filter(reduce(operator.or_, (Q(clusters__id=c) for c in clusters_ids))).distinct().values('id')]
+        else:
+            users_ids = [x['id'] for x in User.objects.all().prefetch_related('clusters', 'memberships').filter(reduce(operator.or_, (Q(clusters__id=c) for c in clusters_ids)) | reduce(operator.or_, (Q(memberships__group__id=g) for g in groups_ids))).distinct().values('id')]
+        qs = User.objects.filter(id__in=users_ids)
+        s = BasicUserWithPermsSerializer(qs, many=True, context={'request': request})
+        return Response(s.data, status=status.HTTP_200_OK)
 
     def retrieve(self, request, pk=None):
         """
