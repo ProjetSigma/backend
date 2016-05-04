@@ -4,7 +4,7 @@
         "pk": 1,
         "fields": {
             "password": "pbkdf2_sha256$24000$023IXGyjNKJm$V2EYuhPjLnergchTULv4WNVgjUMUBqhYxkt6UP7Pd/0=",
-            "last_login": "2016-02-05T15:34:27.319Z",
+            "last_login": "2016-05-04T17:45:04.198Z",
             "email": "admin@sigma.fr",
             "lastname": "Dumbledore",
             "firstname": "Albus",
@@ -15,6 +15,7 @@
             "join_date": "2016-02-05T15:20:44.915Z",
             "is_superuser": true,
             "is_staff": true,
+            "clusters": [],
             "invited_to_groups": []
         }
     },
@@ -30,10 +31,13 @@
             "phone": "",
             "photo": 1,
             "is_active": true,
-            "last_modified": "2016-02-05T15:48:28.216Z",
+            "last_modified": "2016-05-04T17:46:11.039Z",
             "join_date": "2016-02-05T15:27:00.147Z",
             "is_superuser": false,
             "is_staff": false,
+            "clusters": [
+                1
+            ],
             "invited_to_groups": []
         }
     },
@@ -49,10 +53,13 @@
             "phone": "",
             "photo": 2,
             "is_active": true,
-            "last_modified": "2016-02-05T15:48:55.381Z",
+            "last_modified": "2016-05-04T17:46:06.298Z",
             "join_date": "2016-02-05T15:27:22.893Z",
             "is_superuser": false,
             "is_staff": false,
+            "clusters": [
+                1
+            ],
             "invited_to_groups": []
         }
     },
@@ -68,10 +75,13 @@
             "phone": "",
             "photo": 3,
             "is_active": true,
-            "last_modified": "2016-02-05T15:49:21.411Z",
+            "last_modified": "2016-05-04T17:46:01.708Z",
             "join_date": "2016-02-05T15:28:46.443Z",
             "is_superuser": false,
             "is_staff": false,
+            "clusters": [
+                1
+            ],
             "invited_to_groups": []
         }
     },
@@ -87,10 +97,13 @@
             "phone": "",
             "photo": null,
             "is_active": true,
-            "last_modified": "2016-02-05T15:29:13.694Z",
+            "last_modified": "2016-05-04T17:45:54.971Z",
             "join_date": "2016-02-05T15:29:13.694Z",
             "is_superuser": false,
             "is_staff": false,
+            "clusters": [
+                1
+            ],
             "invited_to_groups": []
         }
     },
@@ -106,10 +119,13 @@
             "phone": "",
             "photo": null,
             "is_active": true,
-            "last_modified": "2016-02-05T15:29:38.274Z",
+            "last_modified": "2016-05-04T17:45:50.387Z",
             "join_date": "2016-02-05T15:29:38.274Z",
             "is_superuser": false,
             "is_staff": false,
+            "clusters": [
+                2
+            ],
             "invited_to_groups": []
         }
     },
@@ -125,10 +141,13 @@
             "phone": "",
             "photo": null,
             "is_active": true,
-            "last_modified": "2016-02-05T15:30:25.598Z",
+            "last_modified": "2016-05-04T17:45:44.696Z",
             "join_date": "2016-02-05T15:30:25.598Z",
             "is_superuser": false,
             "is_staff": false,
+            "clusters": [
+                1
+            ],
             "invited_to_groups": []
         }
     },
@@ -138,6 +157,8 @@
         "fields": {
             "name": "École polytechnique",
             "private": false,
+            "description": "",
+            "protected": false,
             "resp_group": null,
             "default_member_rank": -1,
             "req_rank_invite": 10,
@@ -154,6 +175,8 @@
         "fields": {
             "name": "ENSTA",
             "private": false,
+            "description": "",
+            "protected": false,
             "resp_group": null,
             "default_member_rank": -1,
             "req_rank_invite": 10,
@@ -170,6 +193,8 @@
         "fields": {
             "name": "Promotion X2013",
             "private": false,
+            "description": "",
+            "protected": false,
             "resp_group": 1,
             "default_member_rank": -1,
             "req_rank_invite": 10,
@@ -186,6 +211,8 @@
         "fields": {
             "name": "Promotion X2014",
             "private": false,
+            "description": "",
+            "protected": false,
             "resp_group": 1,
             "default_member_rank": -1,
             "req_rank_invite": 10,
@@ -202,6 +229,8 @@
         "fields": {
             "name": "Promotion 2018",
             "private": false,
+            "description": "",
+            "protected": false,
             "resp_group": 2,
             "default_member_rank": -1,
             "req_rank_invite": 10,
@@ -218,6 +247,8 @@
         "fields": {
             "name": "Binet Réseau",
             "private": false,
+            "description": "",
+            "protected": false,
             "resp_group": 1,
             "default_member_rank": 0,
             "req_rank_invite": 10,
@@ -234,6 +265,8 @@
         "fields": {
             "name": "Association DATA",
             "private": false,
+            "description": "",
+            "protected": false,
             "resp_group": 2,
             "default_member_rank": 0,
             "req_rank_invite": 1,
@@ -250,6 +283,8 @@
         "fields": {
             "name": "Binet JTX",
             "private": false,
+            "description": "",
+            "protected": false,
             "resp_group": 1,
             "default_member_rank": -1,
             "req_rank_invite": 10,
@@ -266,6 +301,8 @@
         "fields": {
             "name": "Un flil",
             "private": true,
+            "description": "",
+            "protected": false,
             "resp_group": null,
             "default_member_rank": -1,
             "req_rank_invite": 1,
