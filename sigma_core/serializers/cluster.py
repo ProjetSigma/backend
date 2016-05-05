@@ -21,7 +21,7 @@ class BasicClusterSerializer(serializers.ModelSerializer):
             'private')
 
 
-from sigma_core.serializers.user import BasicUserWithPermsSerializer
+from sigma_core.serializers.user import UserWithPermsSerializer
 class ClusterSerializer(BasicClusterSerializer):
     """
     Serialize Cluster model with memberships.
@@ -29,4 +29,4 @@ class ClusterSerializer(BasicClusterSerializer):
     class Meta(BasicClusterSerializer.Meta):
         pass
 
-    users = BasicUserWithPermsSerializer(read_only=True, many=True)
+    users = UserWithPermsSerializer(read_only=True, many=True)

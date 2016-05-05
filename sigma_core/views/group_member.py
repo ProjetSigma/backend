@@ -7,7 +7,7 @@ from dry_rest_permissions.generics import DRYPermissions
 
 from sigma_core.models.user import User
 from sigma_core.models.group_member import GroupMember
-from sigma_core.serializers.user import BasicUserWithPermsSerializer, DetailedUserWithPermsSerializer, DetailedUserSerializer
+from sigma_core.serializers.user import UserWithPermsSerializer
 from sigma_core.serializers.group_member import GroupMemberSerializer
 
 class GroupMemberViewSet(viewsets.ModelViewSet):

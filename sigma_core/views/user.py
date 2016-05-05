@@ -15,7 +15,7 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 
 from sigma_core.models.user import User
 from sigma_core.models.group_member import GroupMember
-from sigma_core.serializers.user import BasicUserWithPermsSerializer, DetailedUserWithPermsSerializer, MyUserDetailsWithPermsSerializer
+from sigma_core.serializers.user import UserSerializer, MyUserWithPermsSerializer
 
 
 reset_mail = {
@@ -33,13 +33,13 @@ L'équipe Sigma.
 
 class UserViewSet(mixins.CreateModelMixin,      # Only Cluster admins can create users
                     mixins.ListModelMixin,      # Can only see members within same cluster or group
-                    mixins.RetrieveModelMixin,  # Can only see members within same group or cluster
+                    mixins.RetrieveModelMixin,  # Idem
                     mixins.UpdateModelMixin,    # Only self
                     mixins.DestroyModelMixin,   # Only self or Sigma admin
                     viewsets.GenericViewSet):
     permission_classes = [IsAuthenticated, ]
     queryset = User.objects.all()
-    serializer_class = BasicUserWithPermsSerializer # by default, basic data and permissions
+    serializer_class = UserSerializer
 
     def perform_create(self, serializer):
         from sigma_core.models.cluster import Cluster
@@ -49,35 +49,34 @@ class UserViewSet(mixins.CreateModelMixin,      # Only Cluster admins can create
         # TODO: Looks like a hacky-way to do this.
         # But how to do it properly ?
         memberships = []
-        for cluster in serializer.data['clusters']:
+        for cluster in serializer.data['clusters_ids']:
             memberships += [GroupMember(group=Group(id=cluster), user=User(id=serializer.data['id']), perm_rank=Cluster.DEFAULT_MEMBER_RANK)]
         GroupMember.objects.bulk_create(memberships)
 
     def list(self, request, *args, **kwargs):
-        # Only sigma admins can list all the users
+        """
+        Get the list of users that you are allowed to see.
+        ---
+        response_serializer: UserSerializer
+        """
+        # Sigma admins can list all the users
         if request.user.is_sigma_admin():
             return super().list(self, request, args, kwargs)
 
-        # We get clusters and groups ids
-        clusters_ids = [x['id'] for x in request.user.clusters.all().values('id')]
-        if len(clusters_ids) == 0:
-            return Response("You are in no cluster", status=status.HTTP_403_FORBIDDEN)
-
-        groups_ids = [x['group_id'] for x in request.user.memberships.all().values('group_id')]
         # We get visible users ids, based on their belongings to common clusters/groups (let's anticipate the pagination)
-        if len(groups_ids) == 0:
-            users_ids = [x['id'] for x in User.objects.all().prefetch_related('clusters', 'memberships').filter(reduce(operator.or_, (Q(clusters__id=c) for c in clusters_ids))).distinct().values('id')]
-        else:
-            users_ids = [x['id'] for x in User.objects.all().prefetch_related('clusters', 'memberships').filter(reduce(operator.or_, (Q(clusters__id=c) for c in clusters_ids)) | reduce(operator.or_, (Q(memberships__group__id=g) for g in groups_ids))).distinct().values('id')]
+        # Since clusters are groups, we only check that condition for groups
+        groups_ids = request.user.memberships.all().values_list('group_id', flat=True)
+        users_ids = User.objects.all().prefetch_related('memberships').filter(memberships__group__id__in=groups_ids).distinct().values_list('id', flat=True)
+
         qs = User.objects.filter(id__in=users_ids)
-        s = BasicUserWithPermsSerializer(qs, many=True, context={'request': request})
+        s =UserSerializer(qs, many=True, context={'request': request})
         return Response(s.data, status=status.HTTP_200_OK)
 
     def retrieve(self, request, pk=None):
         """
         Retrieve an User according to its id (pk).
         ---
-        response_serializer: DetailedUserWithPermsSerializer
+        response_serializer: UserSerializer
         """
         # 1. Check if we are allowed to see this user
         user = User.objects.only('id').filter(pk=pk).prefetch_related('clusters').get()
@@ -93,7 +92,9 @@ class UserViewSet(mixins.CreateModelMixin,      # Only Cluster admins can create
         # Same cluster: can see public groups memberships
         elif request.user.has_common_cluster(user):
             user = qs.prefetch_related(
-                Prefetch('memberships', queryset=gm.filter(Q(group__private=False) | Q(group__in=request.user.get_groups_with_confirmed_membership())))
+                Prefetch('memberships', queryset=gm.filter(
+                    Q(group__private=False) | Q(group__in=request.user.get_groups_with_confirmed_membership()))
+                )
             ).get(pk=pk)
         # In the general case, we only see common Group memberships
         # Also verify that we are on the same Group
@@ -104,7 +105,7 @@ class UserViewSet(mixins.CreateModelMixin,      # Only Cluster admins can create
             if not user.memberships.exists(): # No membership visible => User not visible
                 return Response(status=status.HTTP_404_NOT_FOUND)
 
-        s = DetailedUserWithPermsSerializer(user, context={'request': request})
+        s =UserSerializer(user, context={'request': request})
         return Response(s.data, status=status.HTTP_200_OK)
 
     def destroy(self, request, pk=None):
@@ -132,16 +133,15 @@ class UserViewSet(mixins.CreateModelMixin,      # Only Cluster admins can create
         """
         Give the data of the current user.
         ---
-        response_serializer: DetailedUserWithPermsSerializer
+        response_serializer: MyUserWithPermsSerializer
         """
         if request.user.__class__.__name__ == 'AnonymousUser':
             return Response(status=status.HTTP_401_UNAUTHORIZED)
         else:
-            # Use DetailedUserWithPermsSerializer to have the groups whom user belongs to
             user = User.objects.all().select_related('photo').prefetch_related(
                 Prefetch('memberships', queryset=GroupMember.objects.all().select_related('group'))
             ).get(pk=request.user.id)
-            s = MyUserDetailsWithPermsSerializer(user, context={'request': request})
+            s = MyUserWithPermsSerializer(user, context={'request': request})
             return Response(s.data, status=status.HTTP_200_OK)
 
     @decorators.list_route(methods=['put'])
