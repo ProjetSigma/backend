@@ -10,11 +10,27 @@ from sigma_core.models.group_member import GroupMember
 from sigma_core.serializers.user import UserWithPermsSerializer
 from sigma_core.serializers.group_member import GroupMemberSerializer
 
+
 class GroupMemberViewSet(viewsets.ModelViewSet):
     queryset = GroupMember.objects.select_related('group', 'user')
     serializer_class = GroupMemberSerializer
     permission_classes = [IsAuthenticated, DRYPermissions, ]
     filter_fields = ('user', 'group', )
+
+    def list(self, request): # TODO: filter on groups request.user belongs to
+        """
+        ---
+        parameters_strategy:
+            query: replace
+        parameters:
+            - name: user
+              type: integer
+              paramType: query
+            - name: group
+              type: integer
+              paramType: query
+        """
+        return super().list(request)
 
     def create(self, request):
         serializer = GroupMemberSerializer(data=request.data)
@@ -67,6 +83,18 @@ class GroupMemberViewSet(viewsets.ModelViewSet):
 
     @decorators.detail_route(methods=['put'])
     def rank(self, request, pk=None):
+        """
+        Change the perm_rank of a member of the group pk.
+        ---
+        request_serializer: null
+        response_serializer: GroupMemberSerializer
+        parameters_strategy:
+            form: replace
+        parameters:
+            - name: perm_rank
+              type: integer
+              required: true
+        """
         from sigma_core.models.group import Group
         try:
             modified_mship = GroupMember.objects.all().select_related('group').get(pk=pk)
@@ -92,6 +120,12 @@ class GroupMemberViewSet(viewsets.ModelViewSet):
 
     @decorators.detail_route(methods=['put'])
     def accept_join_request(self, request, pk=None):
+        """
+        Validate a pending membership request.
+        ---
+        request_serializer: null
+        response_serializer: GroupMemberSerializer
+        """
         try:
             gm = GroupMember.objects.select_related('group').get(pk=pk)
         except GroupMember.DoesNotExist:

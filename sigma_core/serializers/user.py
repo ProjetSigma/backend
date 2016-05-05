@@ -3,7 +3,6 @@ from dry_rest_permissions.generics import DRYPermissionsField
 
 from sigma_core.models.user import User
 from sigma_core.models.cluster import Cluster
-from sigma_core.serializers.group_member import GroupMemberSerializer_Group
 from sigma_files.models import Image
 from sigma_files.serializers import ImageSerializer
 

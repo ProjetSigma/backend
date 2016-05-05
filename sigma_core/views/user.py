@@ -56,8 +56,6 @@ class UserViewSet(mixins.CreateModelMixin,      # Only Cluster admins can create
     def list(self, request, *args, **kwargs):
         """
         Get the list of users that you are allowed to see.
-        ---
-        response_serializer: UserSerializer
         """
         # Sigma admins can list all the users
         if request.user.is_sigma_admin():
@@ -75,8 +73,6 @@ class UserViewSet(mixins.CreateModelMixin,      # Only Cluster admins can create
     def retrieve(self, request, pk=None):
         """
         Retrieve an User according to its id (pk).
-        ---
-        response_serializer: UserSerializer
         """
         # 1. Check if we are allowed to see this user
         user = User.objects.only('id').filter(pk=pk).prefetch_related('clusters').get()
