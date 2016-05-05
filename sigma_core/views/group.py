@@ -19,7 +19,7 @@ class GroupFilterBackend(DRYPermissionFiltersBase):
         """
         if request.user.is_sigma_admin():
             return queryset
-        return queryset.prefetch_related('memberships__user').filter(Q(private=False) | Q(memberships__user=request.user)).distinct()
+        return queryset.prefetch_related('memberships').filter(Q(private=False) | Q(memberships__user=request.user)).distinct()
 
 
 class GroupViewSet(viewsets.ModelViewSet):
@@ -30,6 +30,17 @@ class GroupViewSet(viewsets.ModelViewSet):
 
     @decorators.detail_route(methods=['put'])
     def invite(self, request, pk=None):
+        """
+        Invite an user in group pk.
+        ---
+        omit_serializer: true
+        parameters_strategy:
+            form: replace
+        parameters:
+            - name: user
+              type: integer
+              required: true
+        """
         try:
             group = Group.objects.get(pk=pk)
             user = User.objects.get(pk=request.data.get('user', None))

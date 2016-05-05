@@ -3,7 +3,7 @@ from rest_framework import serializers
 from sigma_core.models.user import User
 from sigma_core.models.group import Group
 from sigma_core.models.group_member import GroupMember
-from sigma_core.serializers.group import BasicGroupSerializer
+from sigma_core.serializers.group import GroupSerializer
 
 
 class GroupMemberSerializerMeta(object):
@@ -29,4 +29,4 @@ class GroupMemberSerializer_Group(GroupMemberSerializer):
     class Meta(GroupMemberSerializerMeta):
         read_only_fields = GroupMemberSerializerMeta.read_only_fields = ('group', )
 
-    group = BasicGroupSerializer()
+    group = GroupSerializer()

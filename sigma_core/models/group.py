@@ -51,6 +51,10 @@ class Group(models.Model):
     def subgroups(self):
         return [ga.subgroup for ga in self.subgroups.filter(validated=True).select_related('subgroup')]
 
+    @property
+    def members_count(self):
+        return self.memberships.count()
+
     #################
     # Model methods #
     #################
