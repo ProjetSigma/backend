@@ -92,7 +92,7 @@ class ClusterTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         cluster = Cluster.objects.filter(pk=response.data['id']).get()
         self.assertEqual(cluster.name, "Ecole polytechnique")
-        self.assertEqual(cluster.private, False)
+        self.assertEqual(cluster.is_private, False)
         self.assertEqual(cluster.default_member_rank, -1)
         self.assertEqual(cluster.req_rank_invite, Group.ADMINISTRATOR_RANK)
 

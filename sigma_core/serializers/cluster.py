@@ -17,8 +17,8 @@ class BasicClusterSerializer(serializers.ModelSerializer):
             'req_rank_demote',
             'req_rank_modify_group_infos',
             'default_member_rank',
-            'protected',
-            'private')
+            'is_protected',
+            'is_private')
 
 
 class ClusterSerializer(BasicClusterSerializer):

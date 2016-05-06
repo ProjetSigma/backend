@@ -19,7 +19,7 @@ class GroupFilterBackend(DRYPermissionFiltersBase):
         """
         if request.user.is_sigma_admin():
             return queryset
-        return queryset.prefetch_related('memberships').filter(Q(private=False) | Q(memberships__user=request.user)).distinct()
+        return queryset.prefetch_related('memberships').filter(Q(is_private=False) | Q(memberships__user=request.user)).distinct()
 
 
 class GroupViewSet(viewsets.ModelViewSet):

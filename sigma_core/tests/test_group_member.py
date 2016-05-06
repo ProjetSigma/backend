@@ -221,7 +221,7 @@ class InvitationGroupMemberCreationTests(APITestCase):
         self.members_url = "/group-member/"
 
         # Group with invitation only
-        self.group = GroupFactory(req_rank_invite=5, default_member_rank=-1, private=True)
+        self.group = GroupFactory(req_rank_invite=5, default_member_rank=-1, is_private=True)
 
         # Testing user
         self.users = UserFactory.create_batch(2)

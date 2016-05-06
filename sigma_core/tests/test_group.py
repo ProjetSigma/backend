@@ -21,7 +21,7 @@ class GroupTests(APITestCase):
         self.schools = ClusterFactory.create_batch(1)
 
         # Groups
-        self.groups = [GroupFactory(private=False), GroupFactory(private=True, req_rank_invite=5)]
+        self.groups = [GroupFactory(is_private=False), GroupFactory(is_private=True, req_rank_invite=5)]
 
         # Users
         self.users = UserFactory.create_batch(3)
@@ -40,8 +40,8 @@ class GroupTests(APITestCase):
         self.groups_url = "/group/"
         self.group_url = self.groups_url + "%d/"
 
-        self.new_private_group_data = {"name": "New group", "private": True}
-        self.new_public_group_data = {"name": "New group", "private": False, "resp_group": self.schools[0].id}
+        self.new_private_group_data = {"name": "New group", "is_private": True}
+        self.new_public_group_data = {"name": "New group", "is_private": False, "resp_group": self.schools[0].id}
         self.invite_data = {"user": self.users[0].id}
 
     #### List requests
@@ -73,7 +73,7 @@ class GroupTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
     def test_get_group_forbidden(self):
-        # Non-member wants to see a private group
+        # Non-member wants to see a is_private group
         self.client.force_authenticate(user=self.users[0])
         response = self.client.get(self.group_url % self.groups[1].id)
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
@@ -115,12 +115,12 @@ class GroupTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
     def test_create_private_group(self):
-        # Everybody can create a private group
+        # Everybody can create a is_private group
         self.client.force_authenticate(user=self.users[0])
         response = self.client.post(self.groups_url, self.new_private_group_data)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(response.data['name'], self.new_private_group_data['name'])
-        self.assertEqual(response.data['private'], True)
+        self.assertEqual(response.data['is_private'], True)
         Group.objects.get(pk=response.data['id']).delete()
 
     def test_create_public_group_ok(self):
@@ -128,7 +128,7 @@ class GroupTests(APITestCase):
         self.client.force_authenticate(user=self.users[0])
         response = self.client.post(self.groups_url, self.new_public_group_data)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        self.assertEqual(response.data['private'], False)
+        self.assertEqual(response.data['is_private'], False)
 
     #### Modification requests
     def test_update_unauthed(self):

@@ -15,7 +15,7 @@ class Cluster(Group):
         """
         Clusters are special groups: some params cannot be specified by user.
         """
-        self.private = False
+        self.is_private = False
         self.default_member_rank = -1
         self.req_rank_invite = Group.ADMINISTRATOR_RANK
         self.req_rank_kick = Group.ADMINISTRATOR_RANK
@@ -24,6 +24,6 @@ class Cluster(Group):
         self.req_rank_demote = Group.ADMINISTRATOR_RANK
         self.req_rank_modify_group_infos = Group.ADMINISTRATOR_RANK
         self.resp_group = None
-        self.protected = True
+        self.is_protected = True
 
         return super().save(*args, **kwargs)

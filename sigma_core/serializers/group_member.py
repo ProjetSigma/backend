@@ -7,6 +7,7 @@ from sigma_core.models.group_member import GroupMember
 
 class GroupMemberSerializerMeta(object):
     model = GroupMember
+    exclude = ('user', 'group', )
     read_only_fields = ('perm_rank', )
 
 
