@@ -89,7 +89,7 @@ class UserViewSet(mixins.CreateModelMixin,      # Only Cluster admins can create
         elif request.user.has_common_cluster(user):
             user = qs.prefetch_related(
                 Prefetch('memberships', queryset=gm.filter(
-                    Q(group__private=False) | Q(group__in=request.user.get_groups_with_confirmed_membership()))
+                    Q(group__is_private=False) | Q(group__in=request.user.get_groups_with_confirmed_membership()))
                 )
             ).get(pk=pk)
         # In the general case, we only see common Group memberships
