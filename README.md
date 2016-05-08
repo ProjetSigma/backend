@@ -53,9 +53,7 @@ Fixtures
 A few fixtures are loaded when `resetdb.sh` is executed. You have several users, whose credentials are (login/password):
 * admin@sigma.fr / admin
 * user@sigma.fr / user
-* ntag@sigma.fr / ntag
-* ensta@sigma.fr / ensta
-* and some others (see the database, the password is always the username in the email adress).
+* and many others (see the database, the password is always the username in the email adress).
 
 An OAuth client application is also created (see below for further information), with data:
 * `clientId`: `bJeSCIWpvjbYCuXZNxMzVz0wglX8mHR2ZTKHxaDv`
