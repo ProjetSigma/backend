@@ -19,6 +19,20 @@ Please see the [provisioning repository](https://github.com/ProjetSigma/provisio
 Installation (standalone version)
 ---------------------------------
 
+**Python 3 is required.**  
+We recommend to use a virtualenv for python. If you have python3 installed, it should had come with it.  
+After you have cloned the repository, you can execute the following commands in your shell:
+```[sh]
+cd /path/to/sigma/backend
+virtualenv --python=python3 python3 .env
+source .env/bin/activate
+pip install -r requirements/{prod,dev}.txt
+cp sigma/settings.py.local sigma/settings.py
+./resetdb.sh
+./manage.py runserver
+```
+
+If you don't want to use a virtualenv, follow these instructions to setup the project.
 
 Install requirements  
 `pip install -r requirements/prod.txt`
@@ -28,7 +42,7 @@ If problems to install mysqlclient
 `apt-get install python-dev libmysqlclient-dev` or `yum install python-devel mysql-devel`
 
 Since you don't use the vagrant, you have to use the local settings file:  
-`mv sigma/settings.py.local sigma/settings.py`  
+`cp sigma/settings.py.local sigma/settings.py`  
 
 For a first installation, or if you have broken your database, reset it !  
 `./resetdb.sh`
