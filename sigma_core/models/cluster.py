@@ -7,6 +7,7 @@ class Cluster(Group):
     design = models.CharField(max_length=255)
 
     DEFAULT_MEMBER_RANK = 1
+    ADMINISTRATOR_RANK = Group.ADMINISTRATOR_RANK
 
     # Related fields:
     #   - cluster_users (model User.clusters)

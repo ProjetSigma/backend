@@ -10,7 +10,7 @@ class Group(models.Model):
     #########################
     # Constants and choices #
     #########################
-    ADMINISTRATOR_RANK  = 10
+    ADMINISTRATOR_RANK = 10
 
     ##########
     # Fields #
