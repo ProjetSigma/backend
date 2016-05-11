@@ -7,7 +7,7 @@ from dry_rest_permissions.generics import allow_staff_or_superuser
 
 class UserManager(BaseUserManager):
     def get_queryset(self):
-        return super().get_queryset().prefetch_related('clusters')
+        return super().get_queryset().prefetch_related('clusters__group_ptr')
 
     def create_user(self, email, lastname, firstname, password=None):
         """

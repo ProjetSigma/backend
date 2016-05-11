@@ -1,5 +1,4 @@
 from rest_framework import serializers
-from dry_rest_permissions.generics import DRYPermissionsField
 
 from sigma_core.models.user import User
 from sigma_core.models.cluster import Cluster
@@ -14,6 +13,16 @@ class UserSerializerMeta():
     extra_kwargs = {'password': {'write_only': True, 'required': False}}
 
 
+class MinimalUserSerializer(serializers.ModelSerializer):
+    """
+    Serialize an User with minimal data.
+    """
+    class Meta(UserSerializerMeta):
+        pass
+
+    clusters_ids = serializers.PrimaryKeyRelatedField(queryset=Cluster.objects.all(), many=True, source='clusters')
+
+
 class UserSerializer(serializers.ModelSerializer):
     """
     Serialize an User with related keys.
@@ -24,36 +33,26 @@ class UserSerializer(serializers.ModelSerializer):
     photo = ImageSerializer(read_only=True)
     clusters_ids = serializers.PrimaryKeyRelatedField(queryset=Cluster.objects.all(), many=True, source='clusters')
 
-    def create(self, fields):
+    def create(self, validated_data):
         from sigma_core.models.group_member import GroupMember
         from sigma_core.models.cluster import Cluster
         try:
             request = self.context['request']
-            input_clusters = request.data.get('clusters_ids')
+            input_clusters_ids = request.data.get('clusters_ids', [])
             if request.user.is_sigma_admin():
-                fields['clusters_ids'] = Cluster.objects.filter(pk__in=input_clusters).values_list('id', flat=True)
+                valid_clusters_ids = Cluster.objects.filter(pk__in=input_clusters_ids).values_list('id', flat=True)
             else:
-                fields['clusters_ids'] = GroupMember.objects.filter(user=request.user, group__in=input_clusters).values_list('group', flat=True)
+                valid_clusters_ids = GroupMember.objects.filter(user=request.user, group__in=input_clusters_ids, perm_rank__gte=Cluster.ADMINISTRATOR_RANK).values_list('group', flat=True)
         except ValueError:
             raise serializers.ValidationError("Cluster list: bad format")
-        if input_clusters != list(fields['clusters_ids']):
+        if set(input_clusters_ids) != set(valid_clusters_ids):
             raise serializers.ValidationError("Cluster list: incorrect values")
-        return super().create(fields)
+        return super().create(validated_data)
 
 
-class UserWithPermsSerializer(UserSerializer):
+class MyUserSerializer(UserSerializer):
     """
-    Serialize an User with related keys and add current user's permissions on the serialized User.
-    """
-    class Meta(UserSerializerMeta):
-        pass
-
-    permissions = DRYPermissionsField(read_only=True)
-
-
-class MyUserWithPermsSerializer(UserWithPermsSerializer):
-    """
-    Serialize current User (with permissions).
+    Serialize current User with related keys.
     """
     class Meta(UserSerializerMeta):
         pass

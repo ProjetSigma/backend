@@ -15,7 +15,7 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 
 from sigma_core.models.user import User
 from sigma_core.models.group_member import GroupMember
-from sigma_core.serializers.user import UserSerializer, MyUserWithPermsSerializer
+from sigma_core.serializers.user import UserSerializer, MyUserSerializer
 
 
 reset_mail = {
@@ -48,9 +48,7 @@ class UserViewSet(mixins.CreateModelMixin,      # Only Cluster admins can create
         # Create related GroupMember associations
         # TODO: Looks like a hacky-way to do this.
         # But how to do it properly ?
-        memberships = []
-        for cluster in serializer.data['clusters_ids']:
-            memberships += [GroupMember(group=Group(id=cluster), user=User(id=serializer.data['id']), perm_rank=Cluster.DEFAULT_MEMBER_RANK)]
+        memberships = [GroupMember(group=Group(id=c), user=User(id=serializer.data['id']), perm_rank=Cluster.DEFAULT_MEMBER_RANK) for c in serializer.data['clusters_ids']]
         GroupMember.objects.bulk_create(memberships)
 
     def list(self, request, *args, **kwargs):
@@ -67,7 +65,7 @@ class UserViewSet(mixins.CreateModelMixin,      # Only Cluster admins can create
         users_ids = User.objects.all().prefetch_related('memberships').filter(memberships__group__id__in=groups_ids).distinct().values_list('id', flat=True)
 
         qs = User.objects.filter(id__in=users_ids)
-        s =UserSerializer(qs, many=True, context={'request': request})
+        s = UserSerializer(qs, many=True, context={'request': request})
         return Response(s.data, status=status.HTTP_200_OK)
 
     def retrieve(self, request, pk=None):
@@ -104,10 +102,17 @@ class UserViewSet(mixins.CreateModelMixin,      # Only Cluster admins can create
         s =UserSerializer(user, context={'request': request})
         return Response(s.data, status=status.HTTP_200_OK)
 
-    def destroy(self, request, pk=None):
-        if not request.user.is_sigma_admin() and int(pk) != request.user.id:
-            return Response(status=status.HTTP_404_NOT_FOUND)
-        super().destroy(request, pk)
+    # def create(self, request):
+    #     """
+    #     ---
+    #     parameters_strategy:
+    #         form: merge
+    #     parameters:
+    #         - name: clusters_ids
+    #           type: array[integer]
+    #           required: true
+    #     """
+    #     return super(UserViewSet, self).create(request)
 
     def update(self, request, pk=None):
         if not request.user.is_sigma_admin() and int(pk) != request.user.id:
@@ -124,12 +129,17 @@ class UserViewSet(mixins.CreateModelMixin,      # Only Cluster admins can create
 
         return super(UserViewSet, self).update(request, pk)
 
+    def destroy(self, request, pk=None):
+        if not request.user.is_sigma_admin() and int(pk) != request.user.id:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        super().destroy(request, pk)
+
     @decorators.list_route(methods=['get'])
     def me(self, request):
         """
         Give the data of the current user.
         ---
-        response_serializer: MyUserWithPermsSerializer
+        response_serializer: MyUserSerializer
         """
         if request.user.__class__.__name__ == 'AnonymousUser':
             return Response(status=status.HTTP_401_UNAUTHORIZED)
@@ -137,7 +147,7 @@ class UserViewSet(mixins.CreateModelMixin,      # Only Cluster admins can create
             user = User.objects.all().select_related('photo').prefetch_related(
                 Prefetch('memberships', queryset=GroupMember.objects.all().select_related('group'))
             ).get(pk=request.user.id)
-            s = MyUserWithPermsSerializer(user, context={'request': request})
+            s = MyUserSerializer(user, context={'request': request})
             return Response(s.data, status=status.HTTP_200_OK)
 
     @decorators.list_route(methods=['put'])
@@ -203,11 +213,11 @@ class UserViewSet(mixins.CreateModelMixin,      # Only Cluster admins can create
 
         return Response('Password reset', status=status.HTTP_200_OK)
 
-    @decorators.detail_route(methods=['post'])
+    @decorators.list_route(methods=['post'])
     @decorators.parser_classes([parsers.MultiPartParser, ])
-    def addphoto(self, request, pk=None):
+    def addphoto(self, request):
         """
-        Add a profile photo to user "pk".
+        Add a profile photo to my profile.
         ---
         omit_serializer: true
         parameters_strategy:
@@ -220,10 +230,10 @@ class UserViewSet(mixins.CreateModelMixin,      # Only Cluster admins can create
         from sigma_files.models import Image
         from sigma_files.serializers import ImageSerializer_WithoutPerms as ImageSerializer
 
-        try:
-            user = User.objects.get(pk=pk)
-        except User.DoesNotExist:
-            raise Http404()
+        if request.user.__class__.__name__ == 'AnonymousUser':
+            return Response(status=status.HTTP_401_UNAUTHORIZED)
+        else:
+            user = request.user
 
         s = ImageSerializer(data=request.data, context={'request': request})
         s.is_valid(raise_exception=True)
