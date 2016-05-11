@@ -15,7 +15,7 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 
 from sigma_core.models.user import User
 from sigma_core.models.group_member import GroupMember
-from sigma_core.serializers.user import UserSerializer, MyUserSerializer
+from sigma_core.serializers.user import UserSerializer, MinimalUserSerializer, MyUserSerializer
 
 
 reset_mail = {
@@ -33,8 +33,8 @@ L'équipe Sigma.
 
 class UserViewSet(mixins.CreateModelMixin,      # Only Cluster admins can create users
                     mixins.ListModelMixin,      # Can only see members within same cluster or group
-                    mixins.RetrieveModelMixin,  # Idem
-                    mixins.UpdateModelMixin,    # Only self
+                    mixins.RetrieveModelMixin,  # Can see anybody but with different serializations
+                    mixins.UpdateModelMixin,    # Only self or cluster admin
                     mixins.DestroyModelMixin,   # Only self or Sigma admin
                     viewsets.GenericViewSet):
     permission_classes = [IsAuthenticated, ]
@@ -53,18 +53,16 @@ class UserViewSet(mixins.CreateModelMixin,      # Only Cluster admins can create
 
     def list(self, request, *args, **kwargs):
         """
-        Get the list of users that you are allowed to see.
+        Get the list of users that you are allowed to see w.r.t. the Normal Rules of Visibility.
         """
         # Sigma admins can list all the users
         if request.user.is_sigma_admin():
             return super().list(self, request, args, kwargs)
 
-        # We get visible users ids, based on their belongings to common clusters/groups (let's anticipate the pagination)
+        # We get visible users ids w.r.t. the Normal Rules of Visibility, based on their belongings to common clusters/groups (let's anticipate the pagination)
         # Since clusters are groups, we only check that condition for groups
-        groups_ids = request.user.memberships.all().values_list('group_id', flat=True)
-        users_ids = User.objects.all().prefetch_related('memberships').filter(memberships__group__id__in=groups_ids).distinct().values_list('id', flat=True)
-
-        qs = User.objects.filter(id__in=users_ids)
+        groups_ids = request.user.memberships.filter(perm_rank__gte=1).values_list('group_id', flat=True)
+        qs = User.objects.prefetch_related('memberships').filter(is_active=True, memberships__group__id__in=groups_ids).distinct()
         s = UserSerializer(qs, many=True, context={'request': request})
         return Response(s.data, status=status.HTTP_200_OK)
 
@@ -72,59 +70,33 @@ class UserViewSet(mixins.CreateModelMixin,      # Only Cluster admins can create
         """
         Retrieve an User according to its id (pk).
         """
-        # 1. Check if we are allowed to see this user
-        user = User.objects.only('id').filter(pk=pk).prefetch_related('clusters').get()
-
-        # 2. Check what we can see from this User
-        qs = User.objects.all().select_related('photo').prefetch_related('clusters')
-        gm = GroupMember.objects.select_related('group')
-        # Admin: can see everything
-        if request.user.is_sigma_admin() or user.id == request.user.id:
-            user = qs.prefetch_related(
-                Prefetch('memberships', queryset=gm)
-            ).get(pk=pk)
-        # Same cluster: can see public groups memberships
-        elif request.user.has_common_cluster(user):
-            user = qs.prefetch_related(
-                Prefetch('memberships', queryset=gm.filter(
-                    Q(group__is_private=False) | Q(group__in=request.user.get_groups_with_confirmed_membership()))
-                )
-            ).get(pk=pk)
-        # In the general case, we only see common Group memberships
-        # Also verify that we are on the same Group
-        else:
-            user = qs.prefetch_related(
-                Prefetch('memberships', queryset=gm.filter(group__in=request.user.get_groups_with_confirmed_membership()))
-            ).get(pk=pk)
-            if not user.memberships.exists(): # No membership visible => User not visible
-                return Response(status=status.HTTP_404_NOT_FOUND)
-
-        s =UserSerializer(user, context={'request': request})
-        return Response(s.data, status=status.HTTP_200_OK)
-
-    # def create(self, request):
-    #     """
-    #     ---
-    #     parameters_strategy:
-    #         form: merge
-    #     parameters:
-    #         - name: clusters_ids
-    #           type: array[integer]
-    #           required: true
-    #     """
-    #     return super(UserViewSet, self).create(request)
-
-    def update(self, request, pk=None):
-        if not request.user.is_sigma_admin() and int(pk) != request.user.id:
+        # 1. Retrieve user
+        try:
+            user = User.objects.all().prefetch_related('clusters').select_related('photo').get(pk=pk)
+        except User.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
 
-        try:
-            user = User.objects.get(pk=pk)
-        except User.DoesNotExist:
-            raise Http404()
+        # 2. Check permissions to choose serializer
+        # Admin, oneself, common cluster or common group: can see detailed user
+        if request.user.is_sigma_admin() or user.id == request.user.id or request.user.has_common_cluster(user) or request.user.has_common_group(user):
+            s = UserSerializer(user, context={'request': request})
+        else : # Others can only see minimal information
+            s = MinimalUserSerializer(user, context={'request': request})
 
-        # Names edition is allowed to Sigma admins only
-        if ((request.data['lastname'] != user.lastname or request.data['firstname'] != user.firstname)) and not request.user.is_sigma_admin():
+        return Response(s.data, status=status.HTTP_200_OK)
+
+    def update(self, request, pk=None):
+        try:
+            user = User.objects.prefetch_related('clusters').get(pk=pk)
+        except User.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+
+        # I can update my own profile, or another's profile if I'm a sigma/cluster admin
+        if not (request.user.is_sigma_admin() or int(pk) == request.user.id or request.user.is_admin_of_one_cluster(user.clusters.all())):
+            return Response(status=status.HTTP_403_FORBIDDEN)
+
+        # Names edition is allowed to sigma/clusters admins only
+        if (request.data['lastname'] != user.lastname or request.data['firstname'] != user.firstname) and not request.user.is_sigma_admin() and not request.user.is_admin_of_one_cluster(user.clusters.all()):
             return Response('You cannot change your lastname or firstname', status=status.HTTP_400_BAD_REQUEST)
 
         return super(UserViewSet, self).update(request, pk)

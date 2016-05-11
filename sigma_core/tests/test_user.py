@@ -105,13 +105,13 @@ class UserTests(APITestCase):
         response = self.client.get(self.user_url)
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
-    def test_get_user_1_req_2(self):
+    def test_get_user_1_req_5(self):
         # Client authenticated: request user in same cluster
         self.client.force_authenticate(user=self.users[0])
-        response = self.client.get(self.user_url + "%d/" % self.users[1].id)
+        response = self.client.get(self.user_url + "%d/" % self.users[4].id)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data['lastname'], self.users[1].lastname)
-        self.assertEqual(response.data['email'], self.users[1].email)
+        self.assertEqual(response.data['lastname'], self.users[4].lastname)
+        self.assertEqual(response.data['email'], self.users[4].email)
         self.assertEqual(response.data['clusters_ids'], [c.id for c in self.clusters])
 
     def test_get_user_3_req_7(self):
@@ -138,17 +138,26 @@ class UserTests(APITestCase):
         self.client.force_authenticate(user=self.users[1])
         response = self.client.get(self.user_url + "%d/" % self.users[5].id)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data['lastname'], self.users[1].lastname)
+        self.assertEqual(response.data['lastname'], self.users[5].lastname)
         self.assertEqual(response.data['clusters_ids'], [self.clusters[1].id])
-        self.assertNotIn('email', response.data)
-        self.assertNotIn('photo', response.data)
+        self.assertIn('email', response.data)
 
     def test_get_user_8_req_3(self):
-        # Client authenticated: request user in a group he's invited
+        # Client authenticated: request a user who is in a group I'm invited
         self.client.force_authenticate(user=self.users[7])
         response = self.client.get(self.user_url + "%d/" % self.users[2].id)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data['lastname'], self.users[2].lastname)
+        self.assertEqual(response.data['clusters_ids'], [self.clusters[0].id])
+        self.assertNotIn('email', response.data)
+        self.assertNotIn('photo', response.data)
+
+    def test_get_user_3_req_8(self):
+        # Client authenticated: request a user who is invited in a group whose I'm a member
+        self.client.force_authenticate(user=self.users[2])
+        response = self.client.get(self.user_url + "%d/" % self.users[7].id)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data['lastname'], self.users[7].lastname)
         self.assertEqual(response.data['clusters_ids'], [self.clusters[1].id])
         self.assertNotIn('email', response.data)
         self.assertNotIn('photo', response.data)
@@ -229,19 +238,19 @@ class UserTests(APITestCase):
 #### Modification requests
     def test_edit_email_wrong_permission(self):
         # Client wants to change another user's email
-        self.client.force_authenticate(user=self.users[0])
-        user_data = UserSerializer(self.users[1]).data
+        self.client.force_authenticate(user=self.users[1])
+        user_data = UserSerializer(self.users[0]).data
         user_data['email'] = "pi@random.org"
-        response = self.client.put(self.user_url + "%d/" % self.users[1].id, user_data)
+        response = self.client.put(self.user_url + "%d/" % self.users[0].id, user_data)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_edit_is_superuser_no_permission(self):
         # Client can't set himself as administrator !
-        self.client.force_authenticate(user=self.users[0])
-        user_data = UserSerializer(self.users[0]).data
+        self.client.force_authenticate(user=self.users[1])
+        user_data = UserSerializer(self.users[1]).data
         user_data['is_superuser'] = True
-        response = self.client.put(self.user_url + "%d/" % self.users[0].id, user_data)
-        self.assertFalse(self.users[0].is_superuser);
+        response = self.client.put(self.user_url + "%d/" % self.users[1].id, user_data)
+        self.assertFalse(self.users[1].is_superuser)
 
     def test_edit_email_nonvalid_email(self):
         # Client wants to change his email with a non valid value
@@ -253,24 +262,24 @@ class UserTests(APITestCase):
 
     def test_edit_email_ok(self):
         # Client wants to change his email and succeed in
-        self.client.force_authenticate(user=self.users[0])
-        user_data = UserSerializer(self.users[0]).data
+        self.client.force_authenticate(user=self.users[1])
+        user_data = UserSerializer(self.users[1]).data
         old_email = user_data['email']
         user_data['email'] = "pi@random.org"
-        response = self.client.put(self.user_url + "%d/" % self.users[0].id, user_data)
+        response = self.client.put(self.user_url + "%d/" % self.users[1].id, user_data)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data['email'], user_data['email'])
         # Guarantee that tests are independant
-        self.users[0].email = old_email
-        self.users[0].save()
+        self.users[1].email = old_email
+        self.users[1].save()
 
     def test_edit_profile_wrong_permission(self):
         # Client wants to change another user's phone number
-        self.client.force_authenticate(user=self.users[0])
-        user_data = UserSerializer(self.users[1]).data
+        self.client.force_authenticate(user=self.users[1])
+        user_data = UserSerializer(self.users[0]).data
         user_data['phone'] = "0123456789"
-        response = self.client.put(self.user_url + "%d/" % self.users[1].id, user_data)
-        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+        response = self.client.put(self.user_url + "%d/" % self.users[0].id, user_data)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_edit_profile_ok(self):
         # Client wants to change his phone number
@@ -287,11 +296,24 @@ class UserTests(APITestCase):
 
     def test_edit_lastname_oneself(self):
         # Client wants to change his lastname
+        self.client.force_authenticate(user=self.users[1])
+        user_data = UserSerializer(self.users[1]).data
+        user_data['lastname'] = "Daudet"
+        response = self.client.put(self.user_url + "%d/" % self.users[1].id, user_data)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_edit_lastname_oneself_clusteradmin(self):
+        # Client wants to change his lastname
         self.client.force_authenticate(user=self.users[0])
         user_data = UserSerializer(self.users[0]).data
+        old_lastname = user_data['lastname']
         user_data['lastname'] = "Daudet"
         response = self.client.put(self.user_url + "%d/" % self.users[0].id, user_data)
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data['lastname'], user_data['lastname'])
+        # Guarantee that tests are independant
+        self.users[1].lastname = old_lastname
+        self.users[1].save()
 
     def test_edit_lastname_cluster_admin(self):
         # Cluster admin wants to change the lastname of one cluster's member
@@ -303,8 +325,8 @@ class UserTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data['lastname'], user_data['lastname'])
         # Guarantee that tests are independant
-        self.users[1].lastname = old_lastname
-        self.users[1].save()
+        self.users[0].lastname = old_lastname
+        self.users[0].save()
 
     def test_edit_lastname_sigma_admin(self):
         # Admin wants to change an user's lastname

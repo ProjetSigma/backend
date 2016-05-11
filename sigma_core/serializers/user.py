@@ -17,8 +17,10 @@ class MinimalUserSerializer(serializers.ModelSerializer):
     """
     Serialize an User with minimal data.
     """
-    class Meta(UserSerializerMeta):
-        pass
+    class Meta:
+        model = User
+        fields = ('id', 'lastname', 'firstname', 'is_active', 'clusters_ids', )
+        read_only_fields = ('is_active', )
 
     clusters_ids = serializers.PrimaryKeyRelatedField(queryset=Cluster.objects.all(), many=True, source='clusters')
 
