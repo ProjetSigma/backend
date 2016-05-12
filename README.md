@@ -19,6 +19,12 @@ Please see the [provisioning repository](https://github.com/ProjetSigma/provisio
 Installation (standalone version)
 ---------------------------------
 
+**Requirements.**  
+On Debian-based distribution, you will need the following librairies:
+```[sh]
+apt-get install python-dev libmysqlclient-dev libjpeg-dev
+```
+
 **Python 3 is required.**  
 We recommend to use a virtualenv for python. If you have python3 installed, it should had come with it.  
 After you have cloned the repository, you can execute the following commands in your shell:
