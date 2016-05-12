@@ -599,6 +599,7 @@
         "subgroup": 12,
         "parent_group": 1,
         "validated": true,
+        "delegate_admin": true,
         "created": "2016-05-08T15:33:29.607Z",
         "updated": "2016-05-08T15:33:29.607Z"
     }
@@ -609,6 +610,7 @@
         "subgroup": 13,
         "parent_group": 2,
         "validated": false,
+        "delegate_admin": true,
         "created": "2016-05-08T15:33:42.954Z",
         "updated": "2016-05-08T15:33:42.954Z"
     }
@@ -619,6 +621,7 @@
         "subgroup": 14,
         "parent_group": 1,
         "validated": true,
+        "delegate_admin": true,
         "created": "2016-05-08T15:34:02.312Z",
         "updated": "2016-05-08T15:34:02.312Z"
     }
@@ -629,6 +632,7 @@
         "subgroup": 1,
         "parent_group": 17,
         "validated": true,
+        "delegate_admin": true,
         "created": "2016-05-08T15:34:09.955Z",
         "updated": "2016-05-08T15:34:09.955Z"
     }
@@ -639,6 +643,7 @@
         "subgroup": 2,
         "parent_group": 17,
         "validated": true,
+        "delegate_admin": true,
         "created": "2016-05-08T15:34:15.470Z",
         "updated": "2016-05-08T15:34:15.470Z"
     }
@@ -649,6 +654,7 @@
         "subgroup": 11,
         "parent_group": 17,
         "validated": true,
+        "delegate_admin": true,
         "created": "2016-05-08T15:34:20.626Z",
         "updated": "2016-05-08T15:34:20.626Z"
     }
@@ -659,6 +665,7 @@
         "subgroup": 15,
         "parent_group": 1,
         "validated": false,
+        "delegate_admin": true,
         "created": "2016-05-08T15:34:27.495Z",
         "updated": "2016-05-08T15:34:27.495Z"
     }
