@@ -1,6 +1,7 @@
 machine:
   python:
     version: 3.4.1
+
 dependencies:
   pre:
     - pip install -r requirements/prod.txt
@@ -9,6 +10,12 @@ dependencies:
 checkout:
   post:
     - cp ./sigma/settings_default.py ./sigma/settings.py
+
 test:
+  pre:
+    - pip install python-coveralls -U
   override:
-    - coverage ./manage.py clean_pyc && ./manage.py test
+    - coverage run ./manage.py clean_pyc && ./manage.py test
+  post:
+    - coverage html -d coverage_html
+    - coveralls
