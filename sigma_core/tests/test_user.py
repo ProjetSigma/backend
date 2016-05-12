@@ -45,7 +45,7 @@ class UserTests(APITestCase):
             GroupMemberFactory(group=self.clusters[1], user=self.users[4+i], perm_rank=(Group.ADMINISTRATOR_RANK if i == 1 else 1))
 
         # Add users in group #1
-        GroupMemberFactory(group=self.groups[0], user=self.users[0], perm_rank=1)
+        GroupMemberFactory(group=self.groups[0], user=self.users[0], perm_rank=Group.ADMINISTRATOR_RANK)
         GroupMemberFactory(group=self.groups[0], user=self.users[1], perm_rank=1)
         GroupMemberFactory(group=self.groups[0], user=self.users[5], perm_rank=0) # pending request
 
@@ -64,16 +64,16 @@ class UserTests(APITestCase):
         except ValueError:
             user = User.objects.create_user(email="sherlock@holmes.co.uk", lastname="Holmes", firstname="Sherlock")
 
-        try:
-            user_admin = User.objects.create_superuser(email="", lastname="Holmes", firstname="Mycroft")
-        except ValueError:
-            user_admin = User.objects.create_superuser(email="mycroft@holmes.co.uk", lastname="Holmes", firstname="Mycroft")
+        self.assertRaises(ValueError, User.objects.create_superuser, email="", lastname="", firstname="", password="pass")
+        user_admin = User.objects.create_superuser(email="mycroft@holmes.co.uk", lastname="Holmes", firstname="Mycroft", password="pass")
+        self.assertTrue(user_admin.is_superuser)
 
         self.assertEqual(user.email, 'sherlock@holmes.co.uk')
         self.assertEqual(user.get_full_name(), 'Holmes Sherlock')
         self.assertEqual(user.get_short_name(), 'sherlock@holmes.co.uk')
         self.assertFalse(user.is_sigma_admin())
         self.assertEqual(user.__str__(), 'sherlock@holmes.co.uk')
+        self.assertTrue(self.users[0].is_in_cluster(self.clusters[0]))
         # Cluster admin
         self.assertTrue(self.users[0].is_cluster_admin(self.clusters[0]))
         self.assertFalse(self.users[1].is_cluster_admin(self.clusters[0]))
@@ -103,6 +103,8 @@ class UserTests(APITestCase):
         self.assertFalse(self.users[1].has_group_admin_perm(self.groups[0]))
         self.assertTrue(self.users[7].is_invited_to_group_id(self.groups[1].id))
         self.assertEqual(len(self.users[0].get_groups_with_confirmed_membership()), 2)
+        self.assertTrue(user_admin.can_accept_join_requests(self.groups[0]))
+        self.assertTrue(user_admin.has_group_admin_perm(self.groups[0]))
 
 #### List requests
     def test_get_users_list_unauthed(self):
@@ -157,6 +159,12 @@ class UserTests(APITestCase):
         # Client is not authenticated
         response = self.client.get(self.user_url)
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    def test_get_user_not_found(self):
+        # Client authenticated: request inexistant user
+        self.client.force_authenticate(user=self.users[0])
+        response = self.client.get(self.user_url + "%d/" % 404)
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_get_user_1_req_5(self):
         # Client authenticated: request user in same cluster
@@ -289,6 +297,13 @@ class UserTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
 #### Modification requests
+    def test_get_user_not_found(self):
+        # Client authenticated: request inexistant user
+        self.client.force_authenticate(user=self.users[0])
+        user_data = UserSerializer(self.users[0]).data
+        response = self.client.put(self.user_url + "%d/" % 404, user_data)
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
     def test_edit_email_wrong_permission(self):
         # Client wants to change another user's email
         self.client.force_authenticate(user=self.users[1])
@@ -442,4 +457,39 @@ class UserTests(APITestCase):
             response = self.client.post(self.user_url + "addphoto/", {'file': img}, format='multipart')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
-# #### Deletion requests
+#### Deletion requests
+    def test_destroy_user_unauthed(self):
+        # Client is not authenticated
+        response = self.client.delete(self.user_url + "%d/" % self.users[0].id)
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    def test_destroy_user_wrong_perms(self):
+        # Client wants to delete another user but is not sigma or cluster admin
+        self.client.force_authenticate(user=self.users[1])
+        response = self.client.delete(self.user_url + "%d/" % self.users[2].id)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    # def test_destroy_user_oneself(self): # TODO
+    #     # Client wants to delete its own user profile
+    #     self.client.force_authenticate(user=self.users[3])
+    #     user_id = self.users[3].id
+    #     response = self.client.delete(self.user_url + "%d/" % self.users[3].id)
+    #     self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+    #     self.assertFalse(User.objects.filter(pk=user_id).exists())
+    #     # Guarantee independance of tests
+    #
+    # def test_destroy_user_cluster_admin(self): # TODO
+    #     # Client wants to delete a user in a cluster whose he's admin
+    #     self.client.force_authenticate(user=self.users[0])
+    #     user_id = self.users[3].id
+    #     response = self.client.delete(self.user_url + "%d/" % self.users[3].id)
+    #     self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+    #     # Guarantee independance of tests
+    #
+    # def test_destroy_user_sigma_admin(self): # TODO
+    #     # Client is Sigma admin and wants to delete a user
+    #     self.client.force_authenticate(user=self.users[-1])
+    #     user_id = self.users[3].id
+    #     response = self.client.delete(self.user_url + "%d/" % self.users[3].id)
+    #     self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+    #     # Guarantee independance of tests

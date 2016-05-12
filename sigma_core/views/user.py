@@ -103,7 +103,7 @@ class UserViewSet(mixins.CreateModelMixin,      # Only Cluster admins can create
 
     def destroy(self, request, pk=None):
         if not request.user.is_sigma_admin() and int(pk) != request.user.id:
-            return Response(status=status.HTTP_404_NOT_FOUND)
+            return Response(status=status.HTTP_403_FORBIDDEN)
         super().destroy(request, pk)
 
     @decorators.list_route(methods=['get'])
@@ -113,14 +113,11 @@ class UserViewSet(mixins.CreateModelMixin,      # Only Cluster admins can create
         ---
         response_serializer: MyUserSerializer
         """
-        if request.user.__class__.__name__ == 'AnonymousUser':
-            return Response(status=status.HTTP_401_UNAUTHORIZED)
-        else:
-            user = User.objects.all().select_related('photo').prefetch_related(
-                Prefetch('memberships', queryset=GroupMember.objects.all().select_related('group'))
-            ).get(pk=request.user.id)
-            s = MyUserSerializer(user, context={'request': request})
-            return Response(s.data, status=status.HTTP_200_OK)
+        user = User.objects.all().select_related('photo').prefetch_related(
+            Prefetch('memberships', queryset=GroupMember.objects.all().select_related('group'))
+        ).get(pk=request.user.id)
+        s = MyUserSerializer(user, context={'request': request})
+        return Response(s.data, status=status.HTTP_200_OK)
 
     @decorators.list_route(methods=['put'])
     def change_password(self, request):
@@ -137,9 +134,6 @@ class UserViewSet(mixins.CreateModelMixin,      # Only Cluster admins can create
               type: string
         """
         PASSWORD_MIN_LENGTH = 8
-
-        if request.user.__class__.__name__ == 'AnonymousUser':
-            return Response(status=status.HTTP_401_UNAUTHORIZED)
 
         user = request.user
         data = request.data
@@ -202,17 +196,12 @@ class UserViewSet(mixins.CreateModelMixin,      # Only Cluster admins can create
         from sigma_files.models import Image
         from sigma_files.serializers import ImageSerializer_WithoutPerms as ImageSerializer
 
-        if request.user.__class__.__name__ == 'AnonymousUser':
-            return Response(status=status.HTTP_401_UNAUTHORIZED)
-        else:
-            user = request.user
-
         s = ImageSerializer(data=request.data, context={'request': request})
         s.is_valid(raise_exception=True)
         img = s.save()
-        img.owner = user
+        img.owner = request.user
         img.save()
-        user.photo = img
-        user.save()
+        request.user.photo = img
+        request.user.save()
 
         return Response(status=status.HTTP_201_CREATED)

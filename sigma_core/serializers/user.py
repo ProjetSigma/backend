@@ -38,15 +38,14 @@ class UserSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         from sigma_core.models.group_member import GroupMember
         from sigma_core.models.cluster import Cluster
-        try:
-            request = self.context['request']
-            input_clusters_ids = request.data.get('clusters_ids', [])
-            if request.user.is_sigma_admin():
-                valid_clusters_ids = Cluster.objects.filter(pk__in=input_clusters_ids).values_list('id', flat=True)
-            else:
-                valid_clusters_ids = GroupMember.objects.filter(user=request.user, group__in=input_clusters_ids, perm_rank__gte=Cluster.ADMINISTRATOR_RANK).values_list('group', flat=True)
-        except ValueError:
-            raise serializers.ValidationError("Cluster list: bad format")
+
+        request = self.context['request']
+        input_clusters_ids = request.data.get('clusters_ids', [])
+        if request.user.is_sigma_admin():
+            valid_clusters_ids = Cluster.objects.filter(pk__in=input_clusters_ids).values_list('id', flat=True)
+        else:
+            valid_clusters_ids = GroupMember.objects.filter(user=request.user, group__in=input_clusters_ids, perm_rank__gte=Cluster.ADMINISTRATOR_RANK).values_list('group', flat=True)
+
         if set(input_clusters_ids) != set(valid_clusters_ids):
             raise serializers.ValidationError("Cluster list: incorrect values")
         return super().create(validated_data)
