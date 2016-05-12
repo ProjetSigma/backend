@@ -7,6 +7,8 @@ omit =
     *wsgi.py*
     *admin.py*
     *apps.py*
+    */site-packages/*
+    */virtualenv*
 
 [report]
 omit =
@@ -18,6 +20,8 @@ omit =
     *wsgi.py*
     *admin.py*
     *apps.py*
+    */site-packages/*
+    */virtualenv*
 exclude_lines =
     import
     from

@@ -17,5 +17,6 @@ test:
   override:
     - coverage run ./manage.py clean_pyc && ./manage.py test
   post:
-    - coverage html -d coverage_html
-    - coveralls
+    - mkdir $CIRCLE_ARTIFACTS/coverage_html
+    - coverage html -d $CIRCLE_ARTIFACTS/coverage_html
+    - coveralls --data_file .coverage --config_file .coveragerc --coveralls_yaml .coveralls.yml
