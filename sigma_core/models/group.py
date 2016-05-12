@@ -1,7 +1,5 @@
 from django.db import models
 
-from dry_rest_permissions.generics import allow_staff_or_superuser
-
 from sigma_core.models.custom_field import CustomField
 from sigma_core.models.group_field import GroupField
 

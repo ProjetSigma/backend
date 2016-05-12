@@ -194,7 +194,7 @@ class UserViewSet(mixins.CreateModelMixin,      # Only Cluster admins can create
               required: true
         """
         from sigma_files.models import Image
-        from sigma_files.serializers import ImageSerializer_WithoutPerms as ImageSerializer
+        from sigma_files.serializers import ImageSerializer
 
         s = ImageSerializer(data=request.data, context={'request': request})
         s.is_valid(raise_exception=True)

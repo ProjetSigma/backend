@@ -7,9 +7,9 @@ from rest_framework import status
 from rest_framework.test import APITestCase, force_authenticate
 
 from sigma_core.tests.factories import UserFactory
-from sigma_core.serializers.user import DetailedUserSerializer as UserSerializer
+from sigma_core.serializers.user import UserSerializer
 from sigma_files.models import Image
-from sigma_files.serializers import ImageSerializer_WithoutPerms, ImageSerializer
+from sigma_files.serializers import ImageSerializer
 
 
 class ImageTests(APITestCase):
@@ -25,7 +25,7 @@ class ImageTests(APITestCase):
         self.user.photo = self.profile_image
         self.user.save()
 
-        serializer = ImageSerializer_WithoutPerms(self.profile_image)
+        serializer = ImageSerializer(self.profile_image)
         self.profile_data = serializer.data
         self.profiles_url = '/image/'
         self.profile_url = self.profiles_url + '%d/' % self.profile_image.id

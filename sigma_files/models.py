@@ -2,8 +2,6 @@ import os.path
 
 from django.db import models
 
-from dry_rest_permissions.generics import allow_staff_or_superuser
-
 from sigma_core.models.user import User
 from sigma_core.models.group import Group
 
@@ -25,18 +23,3 @@ class Image(models.Model):
     def delete(self, *args, **kwargs):
         self.file.delete(save=False)
         return super(Image, self).delete(*args, **kwargs)
-
-    # Permissions
-    @staticmethod
-    def has_read_permission(request):
-        return True
-
-    def has_object_read_permission(self, request):
-        return True
-
-    @staticmethod
-    def has_write_permission(request):
-        return True
-
-    def has_object_write_permission(self, request):
-        return request.user == self.owner

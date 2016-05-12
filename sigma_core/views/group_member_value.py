@@ -5,7 +5,6 @@ from django.db.models import Q
 from rest_framework import viewsets, decorators, status, mixins
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
-from dry_rest_permissions.generics import DRYPermissions
 
 from sigma_core.models.group_field import GroupField
 from sigma_core.models.group_member import GroupMember
@@ -28,7 +27,7 @@ class GroupMemberValueViewSet(
     queryset = GroupMemberValue.objects.all()
     available_memberships = GroupMember.objects.all()
     serializer_class = GroupMemberValueSerializer
-    permission_classes = [IsAuthenticated, DRYPermissions, ]
+    permission_classes = [IsAuthenticated, ]
     filter_fields = ('membership__user', 'membership__group', 'membership', 'field', 'value')
 
     # HERE we handle permissions filtering

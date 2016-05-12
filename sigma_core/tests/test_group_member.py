@@ -8,7 +8,7 @@ from rest_framework.test import APITestCase
 from sigma_core.models.user import User
 from sigma_core.models.group import Group
 from sigma_core.models.group_member import GroupMember
-from sigma_core.serializers.user import DetailedUserSerializer as UserSerializer
+from sigma_core.serializers.user import UserSerializer
 from sigma_core.tests.factories import UserFactory, AdminUserFactory, GroupFactory, GroupMemberFactory
 
 # Test /rank, /kick

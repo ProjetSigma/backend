@@ -2,7 +2,6 @@ from django.db import models
 from django.db.models import Q
 
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
-from dry_rest_permissions.generics import allow_staff_or_superuser
 
 
 class UserManager(BaseUserManager):

@@ -4,7 +4,6 @@ from django.core.exceptions import ValidationError
 from rest_framework import viewsets, decorators, status, mixins
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
-from dry_rest_permissions.generics import DRYPermissions
 
 from sigma_core.models.group_field import GroupField
 from sigma_core.serializers.group_field import GroupFieldSerializer
@@ -17,7 +16,7 @@ class GroupFieldViewSet(mixins.CreateModelMixin,    # Only Group admin
                    viewsets.GenericViewSet):
     queryset = GroupField.objects.all()
     serializer_class = GroupFieldSerializer
-    permission_classes = [IsAuthenticated, DRYPermissions, ]
+    permission_classes = [IsAuthenticated, ]
     filter_fields = ('name', )
 
     # You will never see fields for groups you are not a member of
