@@ -45,11 +45,17 @@ class Group(models.Model):
     #   - memberships (model GroupMember)
     #   - users (model User)
     #   - fields (model GroupField)
+    #   - subgroups (model Group)
+    #   - group_parents (model Group)
     # TODO: Determine whether 'memberships' fields needs to be retrieved every time or not...
 
     @property
-    def subgroups(self):
+    def subgroups_list(self):
         return [ga.subgroup for ga in self.subgroups.filter(validated=True).select_related('subgroup')]
+
+    @property
+    def group_parents_list(self):
+        return [ga.parent_group for ga in self.group_parents.filter(validated=True).select_related('parent_group')]
 
     @property
     def members_count(self):
@@ -61,7 +67,7 @@ class Group(models.Model):
     def can_anyone_join(self):
         return self.default_member_rank >= 0
 
-    def __str__(self):
+    def __str__(self): # pragma: no cover
         return self.name
 
     ###############
@@ -75,53 +81,16 @@ class Group(models.Model):
     def has_module_perms(self, app_label): # pragma: no cover
         return True
 
-    # DRY Permissions
-    @staticmethod
-    def has_read_permission(request):
-        """
-        All groups are visible by default.
-        """
-        return True
-
-    def has_object_read_permission(self, request):
-        """
-        Public groups are visible by everybody. Private groups are only visible by members.
-        """
-        # Handled in View directly with queryset override
-        return True
-
-    @staticmethod
-    def has_write_permission(request):
-        return True
-
-    @staticmethod
-    @allow_staff_or_superuser
-    def has_create_permission(request):
-        """
-        Everybody can create a group.
-        """
-        return True
-
-    @allow_staff_or_superuser
-    def has_object_write_permission(self, request):
-        return request.user.has_group_admin_perm(self)
-
-    @allow_staff_or_superuser
-    def has_object_update_permission(self, request):
-        """
-        Only group's admins and Sigma admins can edit a group.
-        """
-        return request.user.can_modify_group_infos(self)
-
 
 class GroupAcknowledgment(models.Model):
     subgroup = models.ForeignKey(Group, related_name='group_parents')
     parent_group = models.ForeignKey(Group, related_name='subgroups')
     validated = models.BooleanField(default=False)
+    delegate_admin = models.BooleanField(default=True)
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
 
-    def __str__(self):
+    def __str__(self): # pragma: no cover
         if self.validated:
             return "Group %s acknowledged by Group %s" % (self.subgroup.__str__(), self.parent_group.__str__())
         else:

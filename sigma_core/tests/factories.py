@@ -4,7 +4,7 @@ from faker import Factory as FakerFactory
 from django.utils.text import slugify
 
 from sigma_core.models.user import User
-from sigma_core.models.group import Group
+from sigma_core.models.group import Group, GroupAcknowledgment
 from sigma_core.models.cluster import Cluster
 from sigma_core.models.group_member import GroupMember
 from sigma_core.models.group_member_value import GroupMemberValue
@@ -31,6 +31,15 @@ class GroupFactory(factory.django.DjangoModelFactory):
         model = Group
 
     name = factory.Sequence(lambda n: 'Group %d' % n)
+
+
+class GroupAcknowledgmentFactory(factory.django.DjangoModelFactory):
+    class Meta:
+        model = GroupAcknowledgment
+
+    subgroup = factory.SubFactory(GroupFactory)
+    parent_group = factory.SubFactory(GroupFactory)
+
 
 class GroupFieldFactory(factory.django.DjangoModelFactory):
     class Meta:

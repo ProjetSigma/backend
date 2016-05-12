@@ -4,7 +4,7 @@ from django.db.models import Q
 from rest_framework import viewsets, decorators, status
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
-from dry_rest_permissions.generics import DRYPermissions, DRYPermissionFiltersBase
+from dry_rest_permissions.generics import DRYPermissionFiltersBase
 
 from sigma_core.models.user import User
 from sigma_core.models.group import Group
@@ -19,17 +19,29 @@ class GroupFilterBackend(DRYPermissionFiltersBase):
         """
         if request.user.is_sigma_admin():
             return queryset
+
         invited_to_groups_ids = request.user.invited_to_groups.all().values_list('id', flat=True)
-        return queryset.prefetch_related('memberships') \
-            .filter(Q(is_private=False) | Q(memberships__user=request.user) | Q(id__in=invited_to_groups_ids)) \
-            .distinct()  # add: Q(parents__in=request.user.memberships__group) when GroupAcknowledgment is set up
+        user_groups_ids = request.user.memberships.filter(perm_rank__gte=1).values_list('group_id', flat=True)
+        return queryset.prefetch_related('memberships', 'group_parents') \
+            .filter(Q(is_private=False) | Q(memberships__user=request.user) | Q(id__in=invited_to_groups_ids) | Q(group_parents__id__in=user_groups_ids)) \
+            .distinct()
 
 
 class GroupViewSet(viewsets.ModelViewSet):
     queryset = Group.objects.all()
     serializer_class = GroupSerializer
-    permission_classes = [IsAuthenticated, DRYPermissions, ]
+    permission_classes = [IsAuthenticated, ]
     filter_backends = (GroupFilterBackend, )
+
+    def update(self, request, pk=None):
+        try:
+            group = Group.objects.get(pk=pk)
+        except Group.DoesNotExist:
+            raise Http404("Group %d not found" % pk)
+
+        if not request.user.can_modify_group_infos(group):
+            return Response(status=status.HTTP_403_FORBIDDEN)
+        return super(GroupViewSet, self).update(request, pk)
 
     @decorators.detail_route(methods=['put'])
     def invite(self, request, pk=None):

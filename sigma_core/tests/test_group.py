@@ -5,7 +5,7 @@ from rest_framework.test import APITestCase, force_authenticate
 
 from sigma_core.models.group import Group
 from sigma_core.serializers.group import GroupSerializer
-from sigma_core.tests.factories import UserFactory, AdminUserFactory, GroupFactory, GroupMemberFactory, ClusterFactory
+from sigma_core.tests.factories import UserFactory, AdminUserFactory, GroupFactory, GroupAcknowledgmentFactory, GroupMemberFactory, ClusterFactory
 
 
 def reload(obj):
@@ -56,7 +56,8 @@ class GroupTests(APITestCase):
         # User #1 is invited to group #5
         self.users[0].invited_to_groups.add(self.groups[4])
 
-        # TODO: GroupAcknowledgment
+        # GroupAcknowledgment
+        GroupAcknowledgmentFactory(subgroup=self.groups[3], parent_group=self.clusters[0].group_ptr, validated=True)
 
         self.groups_url = "/group/"
         self.group_url = self.groups_url + "%d/"
@@ -71,6 +72,8 @@ class GroupTests(APITestCase):
         self.assertFalse(self.groups[1].can_anyone_join())
         self.assertTrue(self.groups[0].can_anyone_join())
         self.assertEqual(self.groups[0].__str__(), "Public group without invitation")
+        self.assertSetEqual(set(self.clusters[0].subgroups_list), set([self.groups[3]]))
+        self.assertSetEqual(set(self.groups[3].group_parents_list), set([self.clusters[0].group_ptr]))
 
 #### List requests
     def test_get_groups_list_unauthed(self):
@@ -188,7 +191,7 @@ class GroupTests(APITestCase):
         self.groups[2].name = old_name
         self.groups[2].save()
 
-    def test_update_group_by_acknowledgment_delegation(self):
+    def test_update_group_by_acknowledgment_delegation(self): # TODO
         pass
 
 #### Deletion requests

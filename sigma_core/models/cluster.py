@@ -28,3 +28,7 @@ class Cluster(Group):
         self.is_protected = True
 
         return super().save(*args, **kwargs)
+
+    @property
+    def subgroups_list(self):
+        return self.group_ptr.subgroups_list
