@@ -11,6 +11,11 @@ from sigma_core.models.user import User
 from sigma_core.models.group import Group
 from sigma_core.models.group_member import GroupMember
 
+
+def reload(obj):
+    return obj.__class__.objects.get(pk=obj.pk)
+
+
 class UserTests(APITestCase):
     @classmethod
     def setUpTestData(self):
@@ -59,10 +64,16 @@ class UserTests(APITestCase):
         except ValueError:
             user = User.objects.create_user(email="sherlock@holmes.co.uk", lastname="Holmes", firstname="Sherlock")
 
+        try:
+            user_admin = User.objects.create_superuser(email="", lastname="Holmes", firstname="Mycroft")
+        except ValueError:
+            user_admin = User.objects.create_superuser(email="mycroft@holmes.co.uk", lastname="Holmes", firstname="Mycroft")
+
         self.assertEqual(user.email, 'sherlock@holmes.co.uk')
         self.assertEqual(user.get_full_name(), 'Holmes Sherlock')
         self.assertEqual(user.get_short_name(), 'sherlock@holmes.co.uk')
         self.assertFalse(user.is_sigma_admin())
+        self.assertEqual(user.__str__(), 'sherlock@holmes.co.uk')
         # Cluster admin
         self.assertTrue(self.users[0].is_cluster_admin(self.clusters[0]))
         self.assertFalse(self.users[1].is_cluster_admin(self.clusters[0]))
@@ -310,7 +321,7 @@ class UserTests(APITestCase):
         user_data['email'] = "pi@random.org"
         response = self.client.put(self.user_url + "%d/" % self.users[1].id, user_data)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data['email'], user_data['email'])
+        self.assertEqual(reload(self.users[1]).email, user_data['email'])
         # Guarantee that tests are independant
         self.users[1].email = old_email
         self.users[1].save()
@@ -331,7 +342,7 @@ class UserTests(APITestCase):
         user_data['phone'] = "0123456789"
         response = self.client.put(self.user_url + "%d/" % self.users[0].id, user_data)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data['phone'], user_data['phone'])
+        self.assertEqual(reload(self.users[0]).phone, user_data['phone'])
         # Guarantee that tests are independant
         self.users[0].phone = old_phone
         self.users[0].save()
@@ -352,7 +363,7 @@ class UserTests(APITestCase):
         user_data['lastname'] = "Daudet"
         response = self.client.put(self.user_url + "%d/" % self.users[0].id, user_data)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data['lastname'], user_data['lastname'])
+        self.assertEqual(reload(self.users[0]).lastname, user_data['lastname'])
         # Guarantee that tests are independant
         self.users[1].lastname = old_lastname
         self.users[1].save()
@@ -365,10 +376,10 @@ class UserTests(APITestCase):
         user_data['lastname'] = "Daudet"
         response = self.client.put(self.user_url + "%d/" % self.users[1].id, user_data)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data['lastname'], user_data['lastname'])
+        self.assertEqual(reload(self.users[1]).lastname, user_data['lastname'])
         # Guarantee that tests are independant
-        self.users[0].lastname = old_lastname
-        self.users[0].save()
+        self.users[1].lastname = old_lastname
+        self.users[1].save()
 
     def test_edit_lastname_sigma_admin(self):
         # Admin wants to change an user's lastname
@@ -378,7 +389,7 @@ class UserTests(APITestCase):
         user_data['lastname'] = "Daudet"
         response = self.client.put(self.user_url + "%d/" % self.users[0].id, user_data)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data['lastname'], user_data['lastname'])
+        self.assertEqual(reload(self.users[0]).lastname, user_data['lastname'])
         # Guarantee that tests are independant
         self.users[0].lastname = old_lastname
         self.users[0].save()
