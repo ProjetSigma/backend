@@ -23,6 +23,7 @@ omit =
     */site-packages/*
     */virtualenv*
 exclude_lines =
+    pragma: no cover
     import
     from
     def __str__(self)

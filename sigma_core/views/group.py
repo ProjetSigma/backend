@@ -15,11 +15,14 @@ from sigma_core.serializers.group import GroupSerializer
 class GroupFilterBackend(DRYPermissionFiltersBase):
     def filter_queryset(self, request, queryset, view):
         """
-        Limits all list requests to only be seen by the members or public groups.
+        Limits all list requests w.r.t the Normal Rules of Visibility.
         """
         if request.user.is_sigma_admin():
             return queryset
-        return queryset.prefetch_related('memberships').filter(Q(is_private=False) | Q(memberships__user=request.user)).distinct()
+        invited_to_groups_ids = request.user.invited_to_groups.all().values_list('id', flat=True)
+        return queryset.prefetch_related('memberships') \
+            .filter(Q(is_private=False) | Q(memberships__user=request.user) | Q(id__in=invited_to_groups_ids)) \
+            .distinct()  # add: Q(parents__in=request.user.memberships__group) when GroupAcknowledgment is set up
 
 
 class GroupViewSet(viewsets.ModelViewSet):

@@ -11,5 +11,4 @@ class GroupSerializer(serializers.ModelSerializer):
         model = Group
         exclude = ('resp_group', )
 
-    resp_group_id = serializers.PrimaryKeyRelatedField(queryset=Group.objects.all(), source='resp_group')
     members_count = serializers.IntegerField(read_only=True)

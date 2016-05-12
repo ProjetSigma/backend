@@ -69,10 +69,10 @@ class Group(models.Model):
     ###############
 
     # Perms for admin site
-    def has_perm(self, perm, obj=None):
+    def has_perm(self, perm, obj=None): # pragma: no cover
         return True
 
-    def has_module_perms(self, app_label):
+    def has_module_perms(self, app_label): # pragma: no cover
         return True
 
     # DRY Permissions
