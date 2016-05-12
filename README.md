@@ -24,7 +24,7 @@ We recommend to use a virtualenv for python. If you have python3 installed, it s
 After you have cloned the repository, you can execute the following commands in your shell:
 ```[sh]
 cd /path/to/sigma/backend
-virtualenv --python=python3 python3 .env
+virtualenv --python=python3 .env
 source .env/bin/activate
 pip install -r requirements/{prod,dev}.txt
 cp sigma/settings.py.local sigma/settings.py
