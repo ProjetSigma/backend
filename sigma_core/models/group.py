@@ -18,9 +18,6 @@ class Group(models.Model):
     description = models.TextField(blank=True)
     is_protected = models.BooleanField(default=False) # if True, the Group cannot be deleted
 
-    # The cluster responsible of the group in case of admin conflict (can be null for non-cluster-related groups)
-    resp_group = models.ForeignKey('Group', null=True, blank=True, on_delete=models.SET_NULL)
-
     # The permission a member has upon joining
     # A value of -1 means that no one can join the group.
     # A value of 0 means that anyone can request to join the group
