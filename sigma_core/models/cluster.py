@@ -24,7 +24,6 @@ class Cluster(Group):
         self.req_rank_promote = Group.ADMINISTRATOR_RANK
         self.req_rank_demote = Group.ADMINISTRATOR_RANK
         self.req_rank_modify_group_infos = Group.ADMINISTRATOR_RANK
-        self.resp_group = None
         self.is_protected = True
 
         return super().save(*args, **kwargs)

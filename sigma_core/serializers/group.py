@@ -9,6 +9,5 @@ class GroupSerializer(serializers.ModelSerializer):
     """
     class Meta:
         model = Group
-        exclude = ('resp_group', )
 
     members_count = serializers.IntegerField(read_only=True)
