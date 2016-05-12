@@ -10,7 +10,5 @@ checkout:
   post:
     - cp ./sigma/settings_default.py ./sigma/settings.py
 test:
-    pre:
-        - pip install python-coveralls -U
-    post:
-        - coveralls
+  override:
+    - coverage ./manage.py clean_pyc && ./manage.py test

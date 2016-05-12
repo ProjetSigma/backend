@@ -7,6 +7,7 @@ from rest_framework.test import APITestCase, force_authenticate
 
 from sigma_core.tests.factories import UserFactory, AdminUserFactory, GroupMemberFactory, GroupFactory, ClusterFactory
 from sigma_core.serializers.user import MinimalUserSerializer, UserSerializer, MyUserSerializer
+from sigma_core.models.user import User
 from sigma_core.models.group import Group
 from sigma_core.models.group_member import GroupMember
 
@@ -50,6 +51,47 @@ class UserTests(APITestCase):
 
         self.user_url = '/user/'
         self.new_user_data = {'lastname': 'Doe', 'firstname': 'John', 'email': 'john.doe@newschool.edu', 'password': 'password', 'clusters_ids' : {self.clusters[0].id}}
+
+#### Model methods test
+    def test_model_user(self):
+        try:
+            user = User.objects.create_user(email="", lastname="Holmes", firstname="Sherlock")
+        except ValueError:
+            user = User.objects.create_user(email="sherlock@holmes.co.uk", lastname="Holmes", firstname="Sherlock")
+
+        self.assertEqual(user.email, 'sherlock@holmes.co.uk')
+        self.assertEqual(user.get_full_name(), 'Holmes Sherlock')
+        self.assertEqual(user.get_short_name(), 'sherlock@holmes.co.uk')
+        self.assertFalse(user.is_sigma_admin())
+        # Cluster admin
+        self.assertTrue(self.users[0].is_cluster_admin(self.clusters[0]))
+        self.assertFalse(self.users[1].is_cluster_admin(self.clusters[0]))
+        self.assertTrue(self.users[0].is_admin_of_one_cluster(self.clusters))
+        self.assertFalse(self.users[1].is_admin_of_one_cluster(self.clusters))
+        # Common cluster
+        self.assertTrue(self.users[0].has_common_cluster(self.users[1]))
+        self.assertFalse(self.users[0].has_common_cluster(self.users[5]))
+        # Common group
+        self.assertTrue(self.users[2].has_common_group(self.users[6]))
+        self.assertFalse(self.users[1].has_common_group(self.users[6]))
+        self.assertTrue(self.users[0].has_common_group(self.users[5]))
+        self.assertFalse(self.users[5].has_common_group(self.users[0]))
+        # Group membership
+        self.assertIsNone(self.users[0].get_group_membership(self.groups[1]))
+        self.assertIsNotNone(self.users[0].get_group_membership(self.groups[0]))
+        self.assertIsNotNone(self.users[5].get_group_membership(self.groups[0]))
+        self.assertFalse(self.users[0].is_group_member(self.groups[1]))
+        self.assertTrue(self.users[0].is_group_member(self.groups[0]))
+        self.assertFalse(self.users[5].is_group_member(self.groups[0]))
+        # Group perms
+        self.assertTrue(self.users[0].can_invite(self.clusters[0].group_ptr))
+        self.assertFalse(self.users[1].can_invite(self.clusters[0].group_ptr))
+        self.assertTrue(self.users[0].can_accept_join_requests(self.groups[0]))
+        self.assertTrue(self.users[0].can_modify_group_infos(self.groups[0]))
+        self.assertTrue(self.users[0].has_group_admin_perm(self.groups[0]))
+        self.assertFalse(self.users[1].has_group_admin_perm(self.groups[0]))
+        self.assertTrue(self.users[7].is_invited_to_group_id(self.groups[1].id))
+        self.assertEqual(len(self.users[0].get_groups_with_confirmed_membership()), 2)
 
 #### List requests
     def test_get_users_list_unauthed(self):
