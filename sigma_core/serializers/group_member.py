@@ -5,15 +5,11 @@ from sigma_core.models.group import Group
 from sigma_core.models.group_member import GroupMember
 
 
-class GroupMemberSerializerMeta(object):
-    model = GroupMember
-    exclude = ('user', 'group', )
-    read_only_fields = ('perm_rank', )
-
-
 class GroupMemberSerializer(serializers.ModelSerializer):
-    class Meta(GroupMemberSerializerMeta):
-        pass
+    class Meta:
+        model = GroupMember
+        exclude = ('user', 'group', )
+        read_only_fields = ('perm_rank', )
 
     user_id = serializers.PrimaryKeyRelatedField(queryset=User.objects.all(), source='user')
     group_id = serializers.PrimaryKeyRelatedField(queryset=Group.objects.all(), source='group')

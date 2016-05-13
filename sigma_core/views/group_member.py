@@ -1,19 +1,55 @@
 from django.http import Http404
+from django.db.models import Prefetch, Q
 
 from rest_framework import viewsets, decorators, status, mixins
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.filters import BaseFilterBackend
 
 from sigma_core.models.user import User
+from sigma_core.models.group import GroupAcknowledgment
 from sigma_core.models.group_member import GroupMember
 from sigma_core.serializers.group_member import GroupMemberSerializer
+
+
+class GroupMemberFilterBackend(BaseFilterBackend):
+    filter_q = {
+        'user': lambda u: Q(user=u),
+        'group': lambda g: Q(group=g)
+    }
+
+    def filter_queryset(self, request, queryset, view):
+        """
+        Limits all list requests w.r.t the Normal Rules of Visibility.
+        """
+        if not request.user.is_sigma_admin():
+            invited_to_groups_ids = request.user.invited_to_groups.all().values_list('id', flat=True)
+            user_groups_ids = request.user.memberships.filter(perm_rank__gte=1).values_list('group_id', flat=True)
+            # I can see a GroupMember if one of the following conditions is met:
+            #  - I am member of the group
+            #  - I am invited to the group
+            #  - (the group is public OR acknowledged by one of my groups) AND I can see the user w.r.t. NRVU
+            queryset = queryset.prefetch_related(
+                Prefetch('user__memberships', queryset=GroupMember.objects.filter(perm_rank__gte=1)),
+                Prefetch('group__group_parents', queryset=GroupAcknowledgment.objects.filter(validated=True))
+            ).filter(Q(group_id__in=user_groups_ids) | Q(group_id__in=invited_to_groups_ids) | (
+                (Q(group__is_private=False) | Q(group__group_parents__id__in=user_groups_ids)) &
+                    Q(user__memberships__group_id__in=user_groups_ids)
+            ))
+
+        for (param, q) in self.filter_q.items():
+            x = request.query_params.get(param, None)
+            if x is not None:
+                queryset = queryset.filter(q(x))
+
+        return queryset.distinct()
 
 
 class GroupMemberViewSet(viewsets.ModelViewSet):
     queryset = GroupMember.objects.select_related('group', 'user')
     serializer_class = GroupMemberSerializer
     permission_classes = [IsAuthenticated, ]
-    filter_fields = ('user', 'group', )
+    filter_backends = (GroupMemberFilterBackend, )
 
     def list(self, request): # TODO: filter on groups request.user belongs to
         """
