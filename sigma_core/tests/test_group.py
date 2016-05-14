@@ -64,7 +64,7 @@ class GroupTests(APITestCase):
 
         self.new_private_group_data = {"name": "New private group", "is_private": True}
         self.new_public_group_data = {"name": "New public group", "is_private": False}
-        self.invite_data = {"user": self.users[0].id}
+        self.invite_data = {"user_id": self.users[0].id}
 
 #### Model methods test
     def test_model_group(self):

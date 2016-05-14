@@ -30,7 +30,7 @@ class GroupMember(models.Model):
     def is_accepted(self):
         return self.perm_rank > 0
 
-    def __str__(self): # pragma: no cover
+    def __str__(self):
         return "User \"%s\" r%d in Group \"%s\"" % (self.user.__str__(), self.perm_rank, self.group.__str__())
 
     # Perms for admin site

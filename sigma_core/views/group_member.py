@@ -7,7 +7,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.filters import BaseFilterBackend
 
 from sigma_core.models.user import User
-from sigma_core.models.group import GroupAcknowledgment
+from sigma_core.models.group import Group, GroupAcknowledgment
 from sigma_core.models.group_member import GroupMember
 from sigma_core.serializers.group_member import GroupMemberSerializer
 
@@ -51,7 +51,7 @@ class GroupMemberViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated, ]
     filter_backends = (GroupMemberFilterBackend, )
 
-    def list(self, request): # TODO: filter on groups request.user belongs to
+    def list(self, request):
         """
         ---
         parameters_strategy:
@@ -70,6 +70,17 @@ class GroupMemberViewSet(viewsets.ModelViewSet):
         serializer = GroupMemberSerializer(data=request.data)
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        if request.data.get('user_id', None) != request.user.id and not request.user.is_sigma_admin():
+            return Response('You cannot add someone else to a group', status=status.HTTP_403_FORBIDDEN)
+
+        try:
+            group = Group.objects.get(pk=request.data.get('group_id', None))
+        except Group.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+
+        if group.default_member_rank < 0:
+            return Response('You cannot join this group without an invitation', status=status.HTTP_403_FORBIDDEN)
 
         mem = serializer.save()
         return Response(serializer.data, status=status.HTTP_201_CREATED)

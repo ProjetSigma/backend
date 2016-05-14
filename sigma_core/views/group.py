@@ -52,13 +52,13 @@ class GroupViewSet(viewsets.ModelViewSet):
         parameters_strategy:
             form: replace
         parameters:
-            - name: user
+            - name: user_id
               type: integer
               required: true
         """
         try:
             group = Group.objects.get(pk=pk)
-            user = User.objects.get(pk=request.data.get('user', None))
+            user = User.objects.get(pk=request.data.get('user_id', None))
             if not request.user.can_invite(group):
                 return Response(status=status.HTTP_403_FORBIDDEN)
 
@@ -77,4 +77,4 @@ class GroupViewSet(viewsets.ModelViewSet):
         except Group.DoesNotExist:
             raise Http404("Group %d not found" % pk)
         except User.DoesNotExist:
-            raise Http404("User %d not found" % request.data.get('user', None))
+            raise Http404("User %d not found" % request.data.get('user_id', None))
