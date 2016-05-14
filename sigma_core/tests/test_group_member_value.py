@@ -29,7 +29,7 @@ class GroupFieldTests(APITestCase):
         # User[1]: Requested join, not accepted
         # User[2]: Group member
         # User[3]: Group admin
-        self.users = [UserFactory(), UserFactory(), UserFactory(), UserFactory(), UserFactory(), AdminUserFactory()]
+        self.users = UserFactory.create_batch(5) + [AdminUserFactory()]
 
         # Associated GroupMember
         self.group_member = [
