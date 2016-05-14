@@ -4,7 +4,7 @@ from faker import Factory as FakerFactory
 from django.utils.text import slugify
 
 from sigma_core.models.user import User
-from sigma_core.models.group import Group
+from sigma_core.models.group import Group, GroupAcknowledgment
 from sigma_core.models.cluster import Cluster
 from sigma_core.models.group_member import GroupMember
 from sigma_core.models.group_member_value import GroupMemberValue
@@ -32,11 +32,21 @@ class GroupFactory(factory.django.DjangoModelFactory):
 
     name = factory.Sequence(lambda n: 'Group %d' % n)
 
+
+class GroupAcknowledgmentFactory(factory.django.DjangoModelFactory):
+    class Meta:
+        model = GroupAcknowledgment
+
+    subgroup = factory.SubFactory(GroupFactory)
+    parent_group = factory.SubFactory(GroupFactory)
+
+
 class GroupFieldFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = GroupField
 
     name = factory.Sequence(lambda n: 'Field %d' % n)
+
 
 class ClusterFactory(factory.django.DjangoModelFactory):
     class Meta:
@@ -45,6 +55,7 @@ class ClusterFactory(factory.django.DjangoModelFactory):
     name = factory.Sequence(lambda n: 'Cluster %d' % n)
     design = "default"
 
+
 class GroupMemberFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = GroupMember
@@ -52,6 +63,7 @@ class GroupMemberFactory(factory.django.DjangoModelFactory):
     user = factory.SubFactory(UserFactory)
     group = factory.SubFactory(GroupFactory)
     join_date = factory.LazyAttribute(lambda obj: faker.date())
+
 
 class GroupMemberValueFactory(factory.django.DjangoModelFactory):
     class Meta:

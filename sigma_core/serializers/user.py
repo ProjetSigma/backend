@@ -1,79 +1,61 @@
 from rest_framework import serializers
-from dry_rest_permissions.generics import DRYPermissionsField
 
 from sigma_core.models.user import User
-from sigma_core.serializers.group_member import GroupMemberSerializer_Group
+from sigma_core.models.cluster import Cluster
 from sigma_files.models import Image
 from sigma_files.serializers import ImageSerializer
 
 
-class BasicUserSerializerMeta():
+class UserSerializerMeta():
     model = User
-    exclude = ('is_staff', 'is_superuser', 'invited_to_groups', )
-    read_only_fields = ('last_login', 'is_active', 'photo', 'clusters', ) # TODO: serialize invited_to_groups correctly
+    exclude = ('is_staff', 'is_superuser', 'invited_to_groups', 'clusters', 'groups', )
+    read_only_fields = ('last_login', 'is_active', 'photo', )
     extra_kwargs = {'password': {'write_only': True, 'required': False}}
 
 
-class BasicUserSerializer(serializers.ModelSerializer):
+class MinimalUserSerializer(serializers.ModelSerializer):
     """
-    Serialize an User without relations.
+    Serialize an User with minimal data.
     """
-    class Meta(BasicUserSerializerMeta):
+    class Meta:
+        model = User
+        fields = ('id', 'lastname', 'firstname', 'is_active', 'clusters_ids', )
+        read_only_fields = ('is_active', )
+
+    clusters_ids = serializers.PrimaryKeyRelatedField(queryset=Cluster.objects.all(), many=True, source='clusters')
+
+
+class UserSerializer(serializers.ModelSerializer):
+    """
+    Serialize an User with related keys.
+    """
+    class Meta(UserSerializerMeta):
         pass
 
     photo = ImageSerializer(read_only=True)
+    clusters_ids = serializers.PrimaryKeyRelatedField(queryset=Cluster.objects.all(), many=True, source='clusters')
 
-
-class BasicUserWithPermsSerializer(BasicUserSerializer):
-    """
-    Serialize an User without relations and add current user's permissions on the serialized User.
-    """
-    class Meta(BasicUserSerializerMeta):
-        pass
-
-    permissions = DRYPermissionsField(read_only=True)
-
-    def create(self, fields):
+    def create(self, validated_data):
         from sigma_core.models.group_member import GroupMember
         from sigma_core.models.cluster import Cluster
-        try:
-            request = self.context['request']
-            input_clusters = request.data.get('clusters')
-            if request.user.is_sigma_admin():
-                fields['clusters'] = Cluster.objects.filter(pk__in=input_clusters).values_list('id', flat=True)
-            else:
-                fields['clusters'] = GroupMember.objects.filter(user=request.user, group__in=input_clusters).values_list('group', flat=True)
-        except ValueError:
-            raise serializers.ValidationError("Cluster list: bad format")
-        if input_clusters != list(fields['clusters']):
+
+        request = self.context['request']
+        input_clusters_ids = request.data.get('clusters_ids', [])
+        if request.user.is_sigma_admin():
+            valid_clusters_ids = Cluster.objects.filter(pk__in=input_clusters_ids).values_list('id', flat=True)
+        else:
+            valid_clusters_ids = GroupMember.objects.filter(user=request.user, group__in=input_clusters_ids, perm_rank__gte=Cluster.ADMINISTRATOR_RANK).values_list('group', flat=True)
+
+        if set(input_clusters_ids) != set(valid_clusters_ids):
             raise serializers.ValidationError("Cluster list: incorrect values")
-        return super().create(fields)
+        return super().create(validated_data)
 
 
-class DetailedUserSerializer(BasicUserSerializer):
+class MyUserSerializer(UserSerializer):
     """
-    Serialize full data about an User.
+    Serialize current User with related keys.
     """
-    class Meta(BasicUserSerializerMeta):
+    class Meta(UserSerializerMeta):
         pass
 
-    memberships = GroupMemberSerializer_Group(read_only=True, many=True)
-
-
-class DetailedUserWithPermsSerializer(DetailedUserSerializer):
-    """
-    Serialize full data about an User and add current user's permissions on the serialized User.
-    """
-    class Meta(BasicUserSerializerMeta):
-        pass
-
-    permissions = DRYPermissionsField(read_only=True)
-
-
-class MyUserDetailsWithPermsSerializer(DetailedUserWithPermsSerializer):
-    """
-    Serialize full data about current User (with permissions).
-    """
-    class Meta(BasicUserSerializerMeta):
-        exclude = ('is_staff', 'is_superuser', )
-        read_only_fields = BasicUserSerializerMeta.read_only_fields + ('invited_to_groups', )
+    invited_to_groups_ids = serializers.PrimaryKeyRelatedField(read_only=True, many=True, source='invited_to_groups')

@@ -1,25 +1,86 @@
 from django.http import Http404
+from django.db.models import Prefetch, Q
 
 from rest_framework import viewsets, decorators, status, mixins
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
-from dry_rest_permissions.generics import DRYPermissions
+from rest_framework.filters import BaseFilterBackend
 
 from sigma_core.models.user import User
+from sigma_core.models.group import Group, GroupAcknowledgment
 from sigma_core.models.group_member import GroupMember
-from sigma_core.serializers.user import BasicUserWithPermsSerializer, DetailedUserWithPermsSerializer, DetailedUserSerializer
 from sigma_core.serializers.group_member import GroupMemberSerializer
+
+
+class GroupMemberFilterBackend(BaseFilterBackend):
+    filter_q = {
+        'user': lambda u: Q(user=u),
+        'group': lambda g: Q(group=g)
+    }
+
+    def filter_queryset(self, request, queryset, view):
+        """
+        Limits all list requests w.r.t the Normal Rules of Visibility.
+        """
+        if not request.user.is_sigma_admin():
+            invited_to_groups_ids = request.user.invited_to_groups.all().values_list('id', flat=True)
+            user_groups_ids = request.user.memberships.filter(perm_rank__gte=1).values_list('group_id', flat=True)
+            # I can see a GroupMember if one of the following conditions is met:
+            #  - I am member of the group
+            #  - I am invited to the group
+            #  - (the group is public OR acknowledged by one of my groups) AND I can see the user w.r.t. NRVU
+            queryset = queryset.prefetch_related(
+                Prefetch('user__memberships', queryset=GroupMember.objects.filter(perm_rank__gte=1)),
+                Prefetch('group__group_parents', queryset=GroupAcknowledgment.objects.filter(validated=True))
+            ).filter(Q(group_id__in=user_groups_ids) | Q(group_id__in=invited_to_groups_ids) | (
+                (Q(group__is_private=False) | Q(group__group_parents__id__in=user_groups_ids)) &
+                    Q(user__memberships__group_id__in=user_groups_ids)
+            ))
+
+        for (param, q) in self.filter_q.items():
+            x = request.query_params.get(param, None)
+            if x is not None:
+                queryset = queryset.filter(q(x))
+
+        return queryset.distinct()
+
 
 class GroupMemberViewSet(viewsets.ModelViewSet):
     queryset = GroupMember.objects.select_related('group', 'user')
     serializer_class = GroupMemberSerializer
-    permission_classes = [IsAuthenticated, DRYPermissions, ]
-    filter_fields = ('user', 'group', )
+    permission_classes = [IsAuthenticated, ]
+    filter_backends = (GroupMemberFilterBackend, )
+
+    def list(self, request):
+        """
+        ---
+        parameters_strategy:
+            query: replace
+        parameters:
+            - name: user
+              type: integer
+              paramType: query
+            - name: group
+              type: integer
+              paramType: query
+        """
+        return super().list(request)
 
     def create(self, request):
         serializer = GroupMemberSerializer(data=request.data)
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        if request.data.get('user_id', None) != request.user.id and not request.user.is_sigma_admin():
+            return Response('You cannot add someone else to a group', status=status.HTTP_403_FORBIDDEN)
+
+        try:
+            group = Group.objects.get(pk=request.data.get('group_id', None))
+        except Group.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+
+        if group.default_member_rank < 0:
+            return Response('You cannot join this group without an invitation', status=status.HTTP_403_FORBIDDEN)
 
         mem = serializer.save()
         return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -67,6 +128,18 @@ class GroupMemberViewSet(viewsets.ModelViewSet):
 
     @decorators.detail_route(methods=['put'])
     def rank(self, request, pk=None):
+        """
+        Change the perm_rank of a member of the group pk.
+        ---
+        request_serializer: null
+        response_serializer: GroupMemberSerializer
+        parameters_strategy:
+            form: replace
+        parameters:
+            - name: perm_rank
+              type: integer
+              required: true
+        """
         from sigma_core.models.group import Group
         try:
             modified_mship = GroupMember.objects.all().select_related('group').get(pk=pk)
@@ -92,6 +165,12 @@ class GroupMemberViewSet(viewsets.ModelViewSet):
 
     @decorators.detail_route(methods=['put'])
     def accept_join_request(self, request, pk=None):
+        """
+        Validate a pending membership request.
+        ---
+        request_serializer: null
+        response_serializer: GroupMemberSerializer
+        """
         try:
             gm = GroupMember.objects.select_related('group').get(pk=pk)
         except GroupMember.DoesNotExist:

@@ -9,7 +9,7 @@ class BasicClusterSerializer(serializers.ModelSerializer):
     """
     class Meta:
         model = Cluster
-        exclude = ('resp_group',
+        exclude = (
             'req_rank_invite',
             'req_rank_kick',
             'req_rank_accept_join_requests',
@@ -17,11 +17,11 @@ class BasicClusterSerializer(serializers.ModelSerializer):
             'req_rank_demote',
             'req_rank_modify_group_infos',
             'default_member_rank',
-            'protected',
-            'private')
+            'is_protected',
+            'is_private',
+        )
 
 
-from sigma_core.serializers.user import BasicUserWithPermsSerializer
 class ClusterSerializer(BasicClusterSerializer):
     """
     Serialize Cluster model with memberships.
@@ -29,4 +29,4 @@ class ClusterSerializer(BasicClusterSerializer):
     class Meta(BasicClusterSerializer.Meta):
         pass
 
-    users = BasicUserWithPermsSerializer(read_only=True, many=True)
+    users_ids = serializers.PrimaryKeyRelatedField(read_only=True, many=True, source='users')

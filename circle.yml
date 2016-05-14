@@ -1,6 +1,7 @@
 machine:
   python:
     version: 3.4.1
+
 dependencies:
   pre:
     - pip install -r requirements/prod.txt
@@ -9,8 +10,13 @@ dependencies:
 checkout:
   post:
     - cp ./sigma/settings_default.py ./sigma/settings.py
+
 test:
-    pre:
-        - pip install python-coveralls -U
-    post:
-        - coveralls
+  pre:
+    - pip install python-coveralls -U
+  override:
+    - coverage run ./manage.py clean_pyc && ./manage.py test
+  post:
+    - mkdir $CIRCLE_ARTIFACTS/coverage_html
+    - coverage html -d $CIRCLE_ARTIFACTS/coverage_html
+    - coveralls --data_file .coverage --config_file .coveragerc --coveralls_yaml .coveralls.yml

@@ -2,12 +2,11 @@ from django.db import models
 from django.db.models import Q
 
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
-from dry_rest_permissions.generics import allow_staff_or_superuser
 
 
 class UserManager(BaseUserManager):
     def get_queryset(self):
-        return super().get_queryset().prefetch_related('clusters')
+        return super().get_queryset().prefetch_related('clusters__group_ptr')
 
     def create_user(self, email, lastname, firstname, password=None):
         """
@@ -86,6 +85,16 @@ class User(AbstractBaseUser):
     def is_in_cluster(self, cluster):
         return cluster in self.clusters.all()
 
+    def is_cluster_admin(self, cluster):
+        from sigma_core.models.cluster import Cluster
+        ms = self.get_group_membership(cluster.group_ptr)
+        return (ms is not None and ms.perm_rank == Cluster.ADMINISTRATOR_RANK)
+
+    def is_admin_of_one_cluster(self, clusters):
+        from functools import reduce
+        import operator
+        return reduce(operator.or_, [self.is_cluster_admin(c) for c in clusters])
+
     def has_common_cluster(self, user):
         """
         Return True iff self has a cluster in common with user.
@@ -95,8 +104,11 @@ class User(AbstractBaseUser):
     def has_common_group(self, user):
         """
         Return True iff self has a group in common with user.
+        Warning: non symmetric function! u1.has_common_group(u2) may be different of u2.has_common_group(u1)
         """
-        return len(set(self.memberships.all().values_list('group', flat=True)).intersection(user.memberships.all().values_list('group', flat=True))) > 0
+        # We filter on self.memberships.perm_rank: we are really in the same group if you ARE really in the group.
+        # But, on the other hand, you can "see" pending request of other members.
+        return len(set(self.memberships.filter(perm_rank__gte=1).values_list('group', flat=True)).intersection(user.memberships.all().values_list('group', flat=True))) > 0
 
     def get_group_membership(self, group):
         from sigma_core.models.group_member import GroupMember
@@ -148,8 +160,8 @@ class User(AbstractBaseUser):
     ###############
 
     # Perms for admin site
-    def has_perm(self, perm, obj=None):
+    def has_perm(self, perm, obj=None): # pragma: no cover
         return True
 
-    def has_module_perms(self, app_label):
+    def has_module_perms(self, app_label): # pragma: no cover
         return True

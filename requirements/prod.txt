@@ -2,7 +2,7 @@ Django == 1.9
 
 djangorestframework == 3.3.2
 djangorestframework-jwt == 1.7.2
-django-rest-swagger == 0.3.4
+django-rest-swagger == 0.3.6
 dry-rest-permissions == 0.1.6
 git+https://github.com/chibisov/drf-extensions@master
 
