@@ -3,7 +3,7 @@ Sigma - Backend
 
 [![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/ProjetSigma/backend/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/ProjetSigma/backend/?branch=master)
 [![Circle CI](https://circleci.com/gh/ProjetSigma/backend.svg?style=svg)](https://circleci.com/gh/ProjetSigma/backend)
-[![Coverage Status](https://coveralls.io/repos/ProjetSigma/backend/badge.svg?branch=add-coverage&service=github)](https://coveralls.io/github/ProjetSigma/backend?branch=add-coverage)
+[![Coverage Status](https://coveralls.io/repos/github/ProjetSigma/backend/badge.svg?branch=master)](https://coveralls.io/github/ProjetSigma/backend?branch=master)
 
 ## Licence
 <a href="https://github.com/ProjetSigma/backend/blob/master/LICENSE.md">
