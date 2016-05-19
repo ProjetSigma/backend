@@ -43,6 +43,7 @@ class GroupMemberVisibilityTests(APITestCase):
             GroupMemberFactory(user=self.users[8], group=self.groups[3], perm_rank=1),
             GroupMemberFactory(user=self.users[4], group=self.groups[4], perm_rank=1),
             GroupMemberFactory(user=self.users[7], group=self.groups[4], perm_rank=1),
+            GroupMemberFactory(user=self.users[9], group=self.groups[4], perm_rank=0), # pending request
         ]
 
         # User #5 is invited to group #2
@@ -78,7 +79,8 @@ class GroupMemberVisibilityTests(APITestCase):
 
     def test_get_mship_groupmember(self):
         # Client is member of the group he requests
-        self.try_get(reqId=4, gid=4, expectedLength=2)
+        self.try_get(reqId=4, gid=4, expectedLength=3)
+        self.try_get(reqId=9, gid=4, expectedLength=1)
 
     def test_get_mship_invited(self):
         self.try_get(reqId=5, gid=2, expectedLength=2)

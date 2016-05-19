@@ -32,7 +32,7 @@ class GroupMemberFilterBackend(BaseFilterBackend):
             queryset = queryset.prefetch_related(
                 Prefetch('user__memberships', queryset=GroupMember.objects.filter(perm_rank__gte=1)),
                 Prefetch('group__group_parents', queryset=GroupAcknowledgment.objects.filter(validated=True))
-            ).filter(Q(group_id__in=user_groups_ids) | Q(group_id__in=invited_to_groups_ids) | (
+            ).filter(Q(user_id=request.user.id) | Q(group_id__in=user_groups_ids) | Q(group_id__in=invited_to_groups_ids) | (
                 (Q(group__is_private=False) | Q(group__group_parents__id__in=user_groups_ids)) &
                     Q(user__memberships__group_id__in=user_groups_ids)
             ))
