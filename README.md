@@ -22,7 +22,7 @@ Installation (standalone version)
 **Requirements.**  
 On Debian-based distribution, you will need the following librairies:
 ```[sh]
-apt-get install python-dev libmysqlclient-dev libjpeg-dev
+apt-get install python-dev libmysqlclient-dev libjpeg-dev python3.5-dev
 ```
 
 **Python 3 is required.**  
