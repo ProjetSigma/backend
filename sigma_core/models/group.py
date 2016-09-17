@@ -17,6 +17,7 @@ class Group(models.Model):
     description = models.TextField(blank=True)
     is_protected = models.BooleanField(default=False) # if True, the Group cannot be deleted
     can_anyone_join = models.BooleanField(default=False) #if True, people don't need invitation
+    need_validation_to_join = models.BooleanField(default=False)
 
     # Related fields:
     #   - invited_users (model User)
