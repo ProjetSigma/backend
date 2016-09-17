@@ -10,13 +10,7 @@ class BasicClusterSerializer(serializers.ModelSerializer):
     class Meta:
         model = Cluster
         exclude = (
-            'req_rank_invite',
-            'req_rank_kick',
-            'req_rank_accept_join_requests',
-            'req_rank_promote',
-            'req_rank_demote',
-            'req_rank_modify_group_infos',
-            'default_member_rank',
+            'can_anyone_join',
             'is_protected',
             'is_private',
         )

@@ -9,13 +9,13 @@ class GroupMemberSerializer(serializers.ModelSerializer):
     class Meta:
         model = GroupMember
         exclude = ('user', 'group', )
-        read_only_fields = ('perm_rank', )
+        #read_only_fields = ('perm_rank', )
 
     user_id = serializers.PrimaryKeyRelatedField(queryset=User.objects.all(), source='user')
     group_id = serializers.PrimaryKeyRelatedField(queryset=Group.objects.all(), source='group')
 
     def create(self, validated_data):
         mem = GroupMember(**validated_data)
-        mem.perm_rank = mem.group.default_member_rank
+        #mem.perm_rank = mem.group.default_member_rank
         mem.save()
         return mem

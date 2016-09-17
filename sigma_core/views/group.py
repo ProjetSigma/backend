@@ -21,7 +21,7 @@ class GroupFilterBackend(DRYPermissionFiltersBase):
             return queryset
 
         invited_to_groups_ids = request.user.invited_to_groups.all().values_list('id', flat=True)
-        user_groups_ids = request.user.memberships.filter(perm_rank__gte=1).values_list('group_id', flat=True)
+        user_groups_ids = request.user.memberships.filter(is_accepted=True).values_list('group_id', flat=True)
         return queryset.prefetch_related('memberships', 'group_parents') \
             .filter(Q(is_private=False) | Q(memberships__user=request.user) | Q(id__in=invited_to_groups_ids) | Q(group_parents__id__in=user_groups_ids)) \
             .distinct()

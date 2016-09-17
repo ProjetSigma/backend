@@ -40,7 +40,7 @@ class GroupMemberValueViewSet(
         if self.request.user.is_sigma_admin():
             return self.queryset
         # @sqlperf: Find which one is the most efficient
-        my_groups = self.available_memberships.filter(user=self.request.user.id).filter(perm_rank__gte=1).values_list('group', flat=True)
+        my_groups = self.available_memberships.filter(user=self.request.user.id).filter(is_accepted=True).values_list('group', flat=True)
         #my_groups = GroupMember.objects.filter(user=self.request.user.id)
         # But can always see your own custom fields
         return self.queryset.filter(Q(membership__group__in=my_groups) | Q(membership__user=self.request.user.id))

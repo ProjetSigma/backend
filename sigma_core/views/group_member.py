@@ -24,13 +24,13 @@ class GroupMemberFilterBackend(BaseFilterBackend):
         """
         if not request.user.is_sigma_admin():
             invited_to_groups_ids = request.user.invited_to_groups.all().values_list('id', flat=True)
-            user_groups_ids = request.user.memberships.filter(perm_rank__gte=1).values_list('group_id', flat=True)
+            user_groups_ids = request.user.memberships.filter(is_accepted=True).values_list('group_id', flat=True)
             # I can see a GroupMember if one of the following conditions is met:
             #  - I am member of the group
             #  - I am invited to the group
             #  - (the group is public OR acknowledged by one of my groups) AND I can see the user w.r.t. NRVU
             queryset = queryset.prefetch_related(
-                Prefetch('user__memberships', queryset=GroupMember.objects.filter(perm_rank__gte=1)),
+                Prefetch('user__memberships', queryset=GroupMember.objects.filter(is_accepted=True)),
                 Prefetch('group__group_parents', queryset=GroupAcknowledgment.objects.filter(validated=True))
             ).filter(Q(user_id=request.user.id) | Q(group_id__in=user_groups_ids) | Q(group_id__in=invited_to_groups_ids) | (
                 (Q(group__is_private=False) | Q(group__group_parents__id__in=user_groups_ids)) &
@@ -79,7 +79,7 @@ class GroupMemberViewSet(viewsets.ModelViewSet):
         except Group.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
 
-        if group.default_member_rank < 0:
+        if not group.can_anyone_join:
             return Response('You cannot join this group without an invitation', status=status.HTTP_403_FORBIDDEN)
 
         mem = serializer.save()
@@ -96,48 +96,55 @@ class GroupMemberViewSet(viewsets.ModelViewSet):
 
         # You can always quit the Group (ie destroy YOUR membership)
         if my_mship.id != modified_mship.id:
-            # Can't modify someone higher than you
-            if my_mship.perm_rank <= modified_mship.perm_rank:
+            # Can't modify a admin if you're not superadmin
+            if not my_mship.is_super_administrator and modified_mship.is_administrator:
                 return Response(status=status.HTTP_403_FORBIDDEN)
 
             # Check permission
-            if group.req_rank_kick > my_mship.perm_rank:
+            if not my_mship.can_kick:
                 return Response(status=status.HTTP_403_FORBIDDEN)
 
         modified_mship.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
-    def can_rank(self, request, modified_mship, my_mship, perm_rank_new):
-        # You can demote yourself:
-        demote_self = modified_mship.id == my_mship.id and perm_rank_new < my_mship.perm_rank
-        group = modified_mship.group
+    def can_modify_basic_rights(self, request, modified_mship, my_mship):
+        #trights to become superadmin or admin are not concerned
+        if my_mship.is_super_administrator:
+            return True
 
-        # Can't modify someone higher than you, or set rank to higher than you
-        if (my_mship.perm_rank <= modified_mship.perm_rank or my_mship.perm_rank <= perm_rank_new) and not demote_self:
-            return False
+        if my_mship.is_administrator and not modified_mship.is_administrator:
+            return True
 
-        # promote
-        if perm_rank_new > modified_mship.perm_rank:
-            if group.req_rank_promote > my_mship.perm_rank:
-                return False
-        # demote
-        else:
-            if group.req_rank_demote > my_mship.perm_rank and not demote_self:
-                return False
-        return True
+        return False
+
+    def can_promote_admin_or_superadmin(self,request,modified_mship,my_mship):
+        #only a super_administrator can do that
+        return my_mship.is_super_administrator
+
+    # def can_be_contacted(self,request,modified_mship,my_mship):
+    #
+    #     if my_mship.id == modified_mship.id:
+    #         return True
+    #
+    #     if my_mship.is_administrator:
+    #         return True
+
 
     @decorators.detail_route(methods=['put'])
-    def rank(self, request, pk=None):
+    def give_rights(self, request, pk=None):
         """
-        Change the perm_rank of a member of the group pk.
+        Change the rights of a member of the group pk.
         ---
         request_serializer: null
         response_serializer: GroupMemberSerializer
         parameters_strategy:
             form: replace
         parameters:
-            - name: perm_rank
-              type: integer
+            - name: right_to_change
+              type: string
+              possible values : is_administrator, is_super_administrator,
+              can_invite, can_be_contacted, can_kick, can_modify_group_infos,
+              can_publish
               required: true
         """
         from sigma_core.models.group import Group
@@ -147,18 +154,38 @@ class GroupMemberViewSet(viewsets.ModelViewSet):
         except GroupMember.DoesNotExist:
             raise Http404()
 
-        perm_rank_new = request.data.get('perm_rank', None)
+        right_to_change = request.data.get('right_to_change', None)
 
-        try:
-            if perm_rank_new > Group.ADMINISTRATOR_RANK or perm_rank_new < 1 or perm_rank_new == modified_mship.perm_rank:
-                return Response(status=status.HTTP_400_BAD_REQUEST)
-        except TypeError:
-            return Response(status=status.HTTP_400_BAD_REQUEST)
+        if my_mship.can_modify_basic_rights and right_to_change in basic_rights_string:
+            if right_to_change=="can_invite":
+                modified_mship.can_invite= not modified_mship.can_invite
+            elif right_to_change=="can_kick":
+                modified_mship.can_kick= not modified_mship.can_kick
+            elif right_to_change=="can_publish":
+                modified_mship.can_publish= not modified_mship.can_publish
+            elif right_to_change=="can_modify_group_infos":
+                modified_mship.can_modify_group_infos= not modified_mship.can_modify_group_infos
+            elif right_to_change=="can_be_contacted":
+                modified_mship.can_be_contacted= not modified_mship.can_be_contacted
 
-        if not self.can_rank(request, modified_mship, my_mship, perm_rank_new):
+        elif my_mship.can_promote_admin_or_superadmin:
+            if right_to_change=="is_administrator":
+                modified_mship.is_administrator= not modified_mship.is_administrator
+            else:
+                #there can only be one super admin
+                modified_mship.is_super_administrator=True
+                my_mship.is_super_administrator=False
+
+            if modified_mship.is_administrator:
+                #we give him all the rights (except can_be_contacted, he gets to choose)
+                modified_mship.can_invite=True
+                modified_mship.can_kick=True
+                modified_mship.can_publish=True
+
+        else:
             return Response(status=status.HTTP_403_FORBIDDEN)
 
-        modified_mship.perm_rank = perm_rank_new
+        my_mship.save()
         modified_mship.save()
 
         return Response(GroupMemberSerializer(modified_mship).data, status=status.HTTP_200_OK)
@@ -179,7 +206,7 @@ class GroupMemberViewSet(viewsets.ModelViewSet):
         if not request.user.can_accept_join_requests(gm.group):
             return Response(status=status.HTTP_403_FORBIDDEN)
 
-        gm.perm_rank = 1 # default_perm_rank should be 0, so validation is to set perm_rank to 1
+        gm.is_accepted = True
         gm.save()
 
         # TODO: notify user of that change

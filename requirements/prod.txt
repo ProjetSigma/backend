@@ -4,7 +4,7 @@ djangorestframework == 3.3.2
 djangorestframework-jwt == 1.7.2
 django-rest-swagger == 0.3.6
 dry-rest-permissions == 0.1.6
-git+https://github.com/chibisov/drf-extensions@master
+
 
 # django-cors-headers == 1.1.0
 django-cors-middleware # Fork of django-cors-header with Django 1.9 support

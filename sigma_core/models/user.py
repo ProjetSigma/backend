@@ -106,9 +106,9 @@ class User(AbstractBaseUser):
         Return True iff self has a group in common with user.
         Warning: non symmetric function! u1.has_common_group(u2) may be different of u2.has_common_group(u1)
         """
-        # We filter on self.memberships.perm_rank: we are really in the same group if you ARE really in the group.
+        # We filter on is_accepted : we are really in the same group if you ARE really in the group.
         # But, on the other hand, you can "see" pending request of other members.
-        return len(set(self.memberships.filter(perm_rank__gte=1).values_list('group', flat=True)).intersection(user.memberships.all().values_list('group', flat=True))) > 0
+        return len(set(self.memberships.filter(is_accepted=True).values_list('group', flat=True)).intersection(user.memberships.all().values_list('group', flat=True))) > 0
 
     def get_group_membership(self, group):
         from sigma_core.models.group_member import GroupMember
@@ -126,19 +126,20 @@ class User(AbstractBaseUser):
     def can_invite(self, group):
         from sigma_core.models.group_member import GroupMember
         mem = self.get_group_membership(group)
-        return mem is not None and mem.perm_rank >= group.req_rank_invite
+        return mem is not None and mem.can_invite
 
     def can_accept_join_requests(self, group):
+        # Considered that someone who can invite can also accept join requests
         from sigma_core.models.group_member import GroupMember
         if self.is_sigma_admin():
             return True
         mem = self.get_group_membership(group)
-        return mem is not None and mem.perm_rank >= group.req_rank_accept_join_requests
+        return mem is not None and mem.can_invite
 
     def can_modify_group_infos(self, group):
         from sigma_core.models.group_member import GroupMember
         mem = self.get_group_membership(group)
-        return mem is not None and mem.perm_rank >= group.req_rank_modify_group_infos
+        return mem is not None and mem.can_modify_group_infos
 
     def has_group_admin_perm(self, group):
         from sigma_core.models.group_member import GroupMember
@@ -146,14 +147,14 @@ class User(AbstractBaseUser):
         if self.is_sigma_admin():
             return True
         mem = self.get_group_membership(group)
-        return mem is not None and mem.perm_rank == Group.ADMINISTRATOR_RANK
+        return mem is not None and (mem.is_administrator or mem.is_superadministrator)
 
     def is_invited_to_group_id(self, groupId):
         return self.invited_to_groups.filter(pk=groupId).exists()
 
     def get_groups_with_confirmed_membership(self):
         from sigma_core.models.group_member import GroupMember
-        return GroupMember.objects.filter(Q(user=self) & Q(perm_rank__gte=1)).values_list('group', flat=True)
+        return GroupMember.objects.filter(Q(user=self) & Q(is_accepted=True)).values_list('group', flat=True)
 
     ###############
     # Permissions #

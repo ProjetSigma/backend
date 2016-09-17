@@ -48,7 +48,7 @@ class UserViewSet(mixins.CreateModelMixin,      # Only Cluster admins can create
         # Create related GroupMember associations
         # TODO: Looks like a hacky-way to do this.
         # But how to do it properly ?
-        memberships = [GroupMember(group=Group(id=c), user=User(id=serializer.data['id']), perm_rank=Cluster.DEFAULT_MEMBER_RANK) for c in serializer.data['clusters_ids']]
+        memberships = [GroupMember(group=Group(id=c), user=User(id=serializer.data['id']),) for c in serializer.data['clusters_ids']]
         GroupMember.objects.bulk_create(memberships)
 
     def list(self, request, *args, **kwargs):
@@ -61,7 +61,7 @@ class UserViewSet(mixins.CreateModelMixin,      # Only Cluster admins can create
 
         # We get visible users ids w.r.t. the Normal Rules of Visibility, based on their belongings to common clusters/groups (let's anticipate the pagination)
         # Since clusters are groups, we only check that condition for groups
-        groups_ids = request.user.memberships.filter(perm_rank__gte=1).values_list('group_id', flat=True)
+        groups_ids = request.user.memberships.filter(is_accepted=True).values_list('group_id', flat=True)
         qs = User.objects.prefetch_related('memberships').filter(is_active=True, memberships__group__id__in=groups_ids).distinct()
         s = UserSerializer(qs, many=True, context={'request': request})
         return Response(s.data, status=status.HTTP_200_OK)

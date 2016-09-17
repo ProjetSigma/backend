@@ -8,7 +8,6 @@ class Group(models.Model):
     #########################
     # Constants and choices #
     #########################
-    ADMINISTRATOR_RANK = 10
 
     ##########
     # Fields #
@@ -17,23 +16,7 @@ class Group(models.Model):
     is_private = models.BooleanField(default=False)
     description = models.TextField(blank=True)
     is_protected = models.BooleanField(default=False) # if True, the Group cannot be deleted
-
-    # The permission a member has upon joining
-    # A value of -1 means that no one can join the group.
-    # A value of 0 means that anyone can request to join the group
-    default_member_rank = models.SmallIntegerField(default=-1)
-    # Invite new members on the group
-    req_rank_invite = models.SmallIntegerField(default=1)
-    # Remove a member from the group
-    req_rank_kick = models.SmallIntegerField(default=ADMINISTRATOR_RANK)
-    # Upgrade someone rank 0 to rank 1
-    req_rank_accept_join_requests = models.SmallIntegerField(default=1)
-    # Upgrade other users (up to $yourRank - 1)
-    req_rank_promote = models.SmallIntegerField(default=ADMINISTRATOR_RANK)
-    # Downgrade someone (to rank 1 minimum)
-    req_rank_demote = models.SmallIntegerField(default=ADMINISTRATOR_RANK)
-    # Modify group description
-    req_rank_modify_group_infos = models.SmallIntegerField(default=ADMINISTRATOR_RANK)
+    can_anyone_join = models.BooleanField(default=False) #if True, people don't need invitation
 
     # Related fields:
     #   - invited_users (model User)
@@ -60,7 +43,7 @@ class Group(models.Model):
     # Model methods #
     #################
     def can_anyone_join(self):
-        return self.default_member_rank >= 0
+        return self.can_anyone_join
 
     def __str__(self): # pragma: no cover
         return self.name
