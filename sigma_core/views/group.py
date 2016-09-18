@@ -4,12 +4,18 @@ from django.db.models import Q
 from rest_framework import viewsets, decorators, status
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.decorators import detail_route, list_route
 from dry_rest_permissions.generics import DRYPermissionFiltersBase
 
-from sigma_core.models.user import User
+
 from sigma_core.models.group import Group
-from sigma_core.models.group_member import GroupMember
 from sigma_core.serializers.group import GroupSerializer
+
+from sigma_core.models.group_field import GroupField
+from sigma_core.serializers.group_field import GroupFieldSerializer
+
+from sigma_core.models.user import User
+from sigma_core.models.group_member import GroupMember
 
 
 class GroupFilterBackend(DRYPermissionFiltersBase):
@@ -42,8 +48,26 @@ class GroupViewSet(viewsets.ModelViewSet):
         if not request.user.can_modify_group_infos(group):
             return Response(status=status.HTTP_403_FORBIDDEN)
         return super(GroupViewSet, self).update(request, pk)
+        
+        
+    @detail_route(methods=['get'])
+    def fields(self, request, pk=None):
+        try:
+            group = Group.objects.get(pk=pk)
+        except Group.DoesNotExist:
+            raise Http404("Group %d not found" % pk)
+            
+        if GroupField.has_bygroup_permission(request, group):
+            fields = GroupField.objects.filter(group=pk)
+            serializer = GroupFieldSerializer(fields, many=True)
+            return Response(serializer.data)
+        else:
+            return Response("You are not allowed to access this group", status=status.HTTP_403_FORBIDDEN)
+            
+        
+        
 
-    @decorators.detail_route(methods=['put'])
+    @detail_route(methods=['put'])
     def invite(self, request, pk=None):
         """
         Invite an user in group pk.

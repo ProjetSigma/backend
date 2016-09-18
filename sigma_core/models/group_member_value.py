@@ -9,7 +9,7 @@ class GroupMemberValue(models.Model):
 
     membership = models.ForeignKey('GroupMember', related_name='values')
     field = models.ForeignKey('GroupField', related_name='+')
-    value = models.CharField(max_length=GroupField.FIELD_VALUE_MAX_LENGTH)
+    value = models.TextField()
 
     ################################################################
     # PERMISSIONS                                                  #
