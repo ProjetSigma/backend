@@ -7,7 +7,7 @@ from sigma_core.models.user import User
 from sigma_core.models.group import Group, GroupAcknowledgment
 from sigma_core.models.cluster import Cluster
 from sigma_core.models.group_member import GroupMember
-from sigma_core.models.group_member_value import GroupMemberValue
+from sigma_core.models.group_field_value import GroupFieldValue
 from sigma_core.models.group_field import GroupField
 
 faker = FakerFactory.create('fr_FR')
@@ -41,13 +41,6 @@ class GroupAcknowledgmentFactory(factory.django.DjangoModelFactory):
     parent_group = factory.SubFactory(GroupFactory)
 
 
-class GroupFieldFactory(factory.django.DjangoModelFactory):
-    class Meta:
-        model = GroupField
-
-    name = factory.Sequence(lambda n: 'Field %d' % n)
-
-
 class ClusterFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = Cluster
@@ -63,8 +56,3 @@ class GroupMemberFactory(factory.django.DjangoModelFactory):
     user = factory.SubFactory(UserFactory)
     group = factory.SubFactory(GroupFactory)
     join_date = factory.LazyAttribute(lambda obj: faker.date())
-
-
-class GroupMemberValueFactory(factory.django.DjangoModelFactory):
-    class Meta:
-        model = GroupMemberValue

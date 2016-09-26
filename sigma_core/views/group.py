@@ -38,13 +38,17 @@ class GroupViewSet(viewsets.ModelViewSet):
     serializer_class = GroupSerializer
     permission_classes = [IsAuthenticated, ]
     filter_backends = (GroupFilterBackend, )
-
-    def update(self, request, pk=None):
+    
+    @staticmethod
+    def getGroup(pk):
         try:
             group = Group.objects.get(pk=pk)
         except Group.DoesNotExist:
             raise Http404("Group %d not found" % pk)
+        return group
 
+    def update(self, request, pk=None):
+        group = getGroup(pk)
         if not request.user.can_modify_group_infos(group):
             return Response(status=status.HTTP_403_FORBIDDEN)
         return super(GroupViewSet, self).update(request, pk)
@@ -52,18 +56,18 @@ class GroupViewSet(viewsets.ModelViewSet):
         
     @detail_route(methods=['get'])
     def fields(self, request, pk=None):
-        try:
-            group = Group.objects.get(pk=pk)
-        except Group.DoesNotExist:
-            raise Http404("Group %d not found" % pk)
-            
-        if GroupField.has_bygroup_permission(request, group):
+        group = getGroup(pk)
+        if GroupField.__has_access_permission(request.user.id, group):
             fields = GroupField.objects.filter(group=pk)
             serializer = GroupFieldSerializer(fields, many=True)
             return Response(serializer.data)
         else:
             return Response("You are not allowed to access this group", status=status.HTTP_403_FORBIDDEN)
             
+        
+    @detail_route(methods=['get'])
+    def members(self, request, pk=None):
+        group = getGroup(pk)
         
         
 

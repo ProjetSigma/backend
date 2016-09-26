@@ -25,13 +25,13 @@ from sigma_core.views.user import UserViewSet
 from sigma_core.views.group import GroupViewSet
 from sigma_core.views.cluster import ClusterViewSet
 from sigma_core.views.group_member import GroupMemberViewSet
-from sigma_core.views.group_member_value import GroupMemberValueViewSet
+from sigma_core.views.group_field_value import GroupFieldValueViewSet
 from sigma_core.views.group_field import GroupFieldViewSet
 
 router.register(r'group', GroupViewSet)
 router.register(r'group-field', GroupFieldViewSet)
 router.register(r'group-member', GroupMemberViewSet)
-router.register(r'group-member-value', GroupMemberValueViewSet)
+router.register(r'group-field-value', GroupFieldValueViewSet)
 router.register(r'cluster', ClusterViewSet)
 router.register(r'user', UserViewSet)
 

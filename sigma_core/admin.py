@@ -6,7 +6,7 @@ from sigma_core.models.cluster import Cluster
 from sigma_core.models.group import Group, GroupAcknowledgment
 from sigma_core.models.group_field import GroupField
 from sigma_core.models.group_member import GroupMember
-from sigma_core.models.group_member_value import GroupMemberValue
+from sigma_core.models.group_field_value import GroupFieldValue
 
 
 admin.site.unregister(AuthGroup)
@@ -16,4 +16,4 @@ admin.site.register(Cluster)
 admin.site.register(GroupAcknowledgment)
 admin.site.register(GroupMember)
 admin.site.register(GroupField)
-admin.site.register(GroupMemberValue)
+admin.site.register(GroupFieldValue)

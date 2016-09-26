@@ -16,6 +16,7 @@ class GroupMember(models.Model):
     created = models.DateTimeField(auto_now_add=True)
     join_date = models.DateField(blank=True, null=True)
     leave_date = models.DateField(blank=True, null=True)
+    is_accepted = models.BooleanField(default=False)
 
     # if super_administrator = True then is_administrator = True
     # administrators must have all the rights below
@@ -25,7 +26,6 @@ class GroupMember(models.Model):
     can_be_contacted = models.BooleanField(default=False)
     can_publish = models.BooleanField(default=False)
     can_kick = models.BooleanField(default=False)
-    is_accepted = models.BooleanField(default=False)
     can_modify_group_infos = models.BooleanField(default=False)
 
     # Related fields:
