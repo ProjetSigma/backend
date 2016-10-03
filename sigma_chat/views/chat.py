@@ -129,7 +129,7 @@ class ChatViewSet(viewsets.ModelViewSet):
                 chatmember.is_admin = True
                 chatmember.is_member = True
                 changed = True
-            if role == "member" and (may_change or has_rage_quit):
+            if role == "member" and (may_change or has_ragequit):
                 chatmember.is_member = True
                 changed = True
             if(role == "banned" and may_change):
