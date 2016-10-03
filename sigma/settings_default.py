@@ -45,6 +45,7 @@ INSTALLED_APPS = (
     'rest_framework_swagger',
     'oauth2_provider',
     'django_nose',
+    'tornado_websockets',
 
     'sigma_core.apps.SigmaCoreConfig',
     'sigma_files.apps.SigmaFilesConfig',
@@ -146,9 +147,11 @@ USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.8/howto/static-files/
-STATIC_URL = '/static/'
-
 ENV_PATH = os.path.abspath(os.path.dirname(__file__))
+
+STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(ENV_PATH, 'static')
+
 MEDIA_ROOT = os.path.join(ENV_PATH, '../media/')
 MEDIA_URL = '/media/'
 
@@ -160,3 +163,23 @@ TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
 NOSE_ARGS = ['--nocapture', '--nologcapture', '--with-coverage', '--cover-package=sigma,sigma_core,sigma_files', ] # To display debug during testing
 
 AUTH_USER_MODEL = 'sigma_core.User'
+
+import tornado_websockets
+from tornado import websocket
+from tornado.web import StaticFileHandler
+from tornado_chat import MainHandler, ClientWSConnection, ChatHandler
+
+ch = ChatHandler()
+
+TORNADO = {
+    'port': 8000,    # 8000 by default
+    'handlers': [
+        (r'/tornado/chat/', MainHandler, {'chat_handler': ch}),
+        (r"/tornado/ws/(.*)", ClientWSConnection, {'chat_handler': ch}),
+        (r'%s(.*)' % STATIC_URL, StaticFileHandler, {'path': STATIC_ROOT}),
+        tornado_websockets.django_app
+    ],  # [] by default
+    'settings': {
+        'debug': True,
+    },  # {} by default
+}

@@ -1,8 +1,13 @@
 # -*- coding: utf-8 -*-
 from rest_framework import serializers
 
+from sigma_chat.models.chat import Chat
 from sigma_chat.models.message import Message
+from sigma_core.models.user import User
 from rest_framework.serializers import ValidationError
+
+import requests
+import json
 
 class MessageSerializer(serializers.ModelSerializer):
     """
@@ -22,3 +27,24 @@ class MessageSerializer(serializers.ModelSerializer):
             raise ValidationError("You must send either a text or a file.")
 
         return data
+
+    ################################################################
+    # CHAT                                                         #
+    ################################################################
+
+    def save(self, *args, **kwargs):
+        super(MessageSerializer, self).save(*args, **kwargs)
+        """
+        NO_PROXY = {
+            'no': 'pass',
+        }
+        message = {'message': json.dumps({
+                    'chat':{'id': self.data['chat_id']},
+                    'chatmember':{'id': self.data['chatmember_id']},
+                    'text': self.data['text'],
+                    'attachment': self.data['attachment'],
+                    'date': self.data['date']
+                })
+            }
+        requests.post('http://localhost:8000/tornado/chat/?secret_key=', data=message, proxies=NO_PROXY)
+        """
