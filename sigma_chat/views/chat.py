@@ -10,6 +10,7 @@ from sigma_core.models.user import User
 from sigma_chat.models.chat import Chat
 from sigma_chat.models.chat_member import ChatMember
 from sigma_chat.serializers.chat import ChatSerializer
+from sigma_chat.serializers.chat_member import ChatMemberSerializer
 
 
 class ChatFilterBackend(DRYPermissionFiltersBase):
@@ -35,7 +36,7 @@ class ChatViewSet(viewsets.ModelViewSet):
         except Chat.DoesNotExist:
             raise Http404("Chat %d not found" % pk)
 
-        if not request.user.is_admin(chat):
+        if not request.user.is_chat_admin(chat):
             return Response(status=status.HTTP_403_FORBIDDEN)
         return super(ChatViewSet, self).update(request, pk)
 
@@ -135,7 +136,7 @@ class ChatViewSet(viewsets.ModelViewSet):
             if(role == "banned" and may_change):
                 chatmember.is_banned = True
                 changed = True
-            if(role == "leave" and not request.user.is_chat_banned()):
+            if(role == "leave" and not request.user.is_chat_banned(chat)):
                 changed = True
             if changed:
                 chatmember.save()
