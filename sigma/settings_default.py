@@ -48,6 +48,7 @@ INSTALLED_APPS = (
 
     'sigma_core.apps.SigmaCoreConfig',
     'sigma_files.apps.SigmaFilesConfig',
+    'sigma_chat.apps.SigmaChatConfig',
 )
 
 MIDDLEWARE_CLASSES = (
