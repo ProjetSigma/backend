@@ -11,3 +11,18 @@ class ChatSerializer(serializers.ModelSerializer):
     """
     class Meta:
         model = Chat
+
+    def create(self, data):
+        chat = Chat(**data)
+        if 'user' in self.initial_data:
+            try:
+                user = User.objects.get(pk=self.initial_data['user'])
+                chat.save()
+                creator = ChatMember(user=user, is_creator=True, is_admin=True, chat=chat)
+                creator.save()
+                chat.chatmember.add(creator)
+                chat.save()
+                return chat
+            except User.DoesNotExist:
+                return None
+        return None
