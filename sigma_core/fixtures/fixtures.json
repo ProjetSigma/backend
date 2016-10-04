@@ -423,14 +423,7 @@
         "name": "\u00c9cole polytechnique",
         "is_private": false,
         "description": "",
-        "is_protected": true,
-        "default_member_rank": -1,
-        "req_rank_invite": 10,
-        "req_rank_kick": 10,
-        "req_rank_accept_join_requests": 10,
-        "req_rank_promote": 10,
-        "req_rank_demote": 10,
-        "req_rank_modify_group_infos": 10
+        "is_protected": true
     }
 }, {
     "model": "sigma_core.group",
@@ -439,14 +432,7 @@
         "name": "ENSTA",
         "is_private": false,
         "description": "",
-        "is_protected": true,
-        "default_member_rank": -1,
-        "req_rank_invite": 10,
-        "req_rank_kick": 10,
-        "req_rank_accept_join_requests": 10,
-        "req_rank_promote": 10,
-        "req_rank_demote": 10,
-        "req_rank_modify_group_infos": 10
+        "is_protected": true
     }
 }, {
     "model": "sigma_core.group",
@@ -455,14 +441,7 @@
         "name": "ENS Cachan",
         "is_private": false,
         "description": "L'\u00c9cole normale sup\u00e9rieure de Cachan (aussi appel\u00e9e ENS Cachan ou Normale Sup' Cachan, prochainement ENS Paris-Saclay3, autrefois \u00c9cole normale sup\u00e9rieure de l'enseignement technique (ENSET)4), est une grande \u00e9cole fran\u00e7aise, faisant partie du r\u00e9seau des \u00c9coles normales sup\u00e9rieures.",
-        "is_protected": true,
-        "default_member_rank": -1,
-        "req_rank_invite": 10,
-        "req_rank_kick": 10,
-        "req_rank_accept_join_requests": 10,
-        "req_rank_promote": 10,
-        "req_rank_demote": 10,
-        "req_rank_modify_group_infos": 10
+        "is_protected": true
     }
 }, {
     "model": "sigma_core.group",
@@ -471,14 +450,7 @@
         "name": "Supoptique",
         "is_private": false,
         "description": "L\u2019Institut d'optique Graduate School (IOGS) (officiellement Institut d'optique th\u00e9orique et appliqu\u00e9e7, aussi connue sous le nom d'\u00c9cole sup\u00e9rieure d'optique ou SupOptique) est l'une des 210 \u00e9coles d'ing\u00e9nieurs fran\u00e7aises habilit\u00e9es \u00e0 d\u00e9livrer un dipl\u00f4me d'ing\u00e9nieur.",
-        "is_protected": true,
-        "default_member_rank": -1,
-        "req_rank_invite": 10,
-        "req_rank_kick": 10,
-        "req_rank_accept_join_requests": 10,
-        "req_rank_promote": 10,
-        "req_rank_demote": 10,
-        "req_rank_modify_group_infos": 10
+        "is_protected": true
     }
 }, {
     "model": "sigma_core.group",
@@ -487,14 +459,7 @@
         "name": "Binet R\u00e9seau",
         "is_private": false,
         "description": "Le binet qui d\u00e9veloppe les outils informatiques n\u00e9cessaires \u00e0 la vie en campus et entretient le r\u00e9seau \u00e9l\u00e8ve !",
-        "is_protected": false,
-        "default_member_rank": -1,
-        "req_rank_invite": 1,
-        "req_rank_kick": 10,
-        "req_rank_accept_join_requests": 1,
-        "req_rank_promote": 10,
-        "req_rank_demote": 10,
-        "req_rank_modify_group_infos": 10
+        "is_protected": false
     }
 }, {
     "model": "sigma_core.group",
@@ -503,14 +468,7 @@
         "name": "DaTA",
         "is_private": false,
         "description": "Association d'informatique de l'ENSTA Paristech, groupe de passion\u00e9s, de tous niveaux, ayant comme point commun d'aller toujours plus loin dans l'apprentissage des possibilit\u00e9s infinies offertes par les nouvelles technologies.",
-        "is_protected": false,
-        "default_member_rank": -1,
-        "req_rank_invite": 1,
-        "req_rank_kick": 10,
-        "req_rank_accept_join_requests": 1,
-        "req_rank_promote": 10,
-        "req_rank_demote": 10,
-        "req_rank_modify_group_infos": 10
+        "is_protected": false
     }
 }, {
     "model": "sigma_core.group",
@@ -519,14 +477,7 @@
         "name": "JTX",
         "is_private": false,
         "description": "Association vid\u00e9o de l'X.",
-        "is_protected": false,
-        "default_member_rank": -1,
-        "req_rank_invite": 1,
-        "req_rank_kick": 10,
-        "req_rank_accept_join_requests": 1,
-        "req_rank_promote": 10,
-        "req_rank_demote": 10,
-        "req_rank_modify_group_infos": 10
+        "is_protected": false
     }
 }, {
     "model": "sigma_core.group",
@@ -535,14 +486,7 @@
         "name": "X2013",
         "is_private": false,
         "description": "",
-        "is_protected": false,
-        "default_member_rank": -1,
-        "req_rank_invite": 1,
-        "req_rank_kick": 10,
-        "req_rank_accept_join_requests": 1,
-        "req_rank_promote": 10,
-        "req_rank_demote": 10,
-        "req_rank_modify_group_infos": 10
+        "is_protected": false
     }
 }, {
     "model": "sigma_core.group",
@@ -551,14 +495,7 @@
         "name": "X2014",
         "is_private": false,
         "description": "",
-        "is_protected": false,
-        "default_member_rank": -1,
-        "req_rank_invite": 1,
-        "req_rank_kick": 10,
-        "req_rank_accept_join_requests": 1,
-        "req_rank_promote": 10,
-        "req_rank_demote": 10,
-        "req_rank_modify_group_infos": 10
+        "is_protected": false
     }
 }, {
     "model": "sigma_core.group",
@@ -567,14 +504,7 @@
         "name": "Projet Sigma",
         "is_private": false,
         "description": "Groupe des d\u00e9veloppeurs du projet Sigma",
-        "is_protected": false,
-        "default_member_rank": -1,
-        "req_rank_invite": 1,
-        "req_rank_kick": 10,
-        "req_rank_accept_join_requests": 1,
-        "req_rank_promote": 10,
-        "req_rank_demote": 10,
-        "req_rank_modify_group_infos": 10
+        "is_protected": false
     }
 }, {
     "model": "sigma_core.group",
@@ -583,14 +513,7 @@
         "name": "Discussion",
         "is_private": false,
         "description": "Le groupe des membres d'un chat.",
-        "is_protected": false,
-        "default_member_rank": -1,
-        "req_rank_invite": 1,
-        "req_rank_kick": 10,
-        "req_rank_accept_join_requests": 1,
-        "req_rank_promote": 10,
-        "req_rank_demote": 10,
-        "req_rank_modify_group_infos": 10
+        "is_protected": false
     }
 }, {
     "model": "sigma_core.groupacknowledgment",
@@ -711,8 +634,7 @@
         "group": 1,
         "created": "2016-02-05T15:39:52.907Z",
         "join_date": "2013-09-01",
-        "leave_date": null,
-        "perm_rank": 1
+        "leave_date": null
     }
 }, {
     "model": "sigma_core.groupmember",
@@ -722,8 +644,7 @@
         "group": 1,
         "created": "2016-05-08T14:28:03.054Z",
         "join_date": "2016-05-08",
-        "leave_date": null,
-        "perm_rank": 1
+        "leave_date": null
     }
 }, {
     "model": "sigma_core.groupmember",
@@ -733,8 +654,7 @@
         "group": 1,
         "created": "2016-05-08T14:28:09.167Z",
         "join_date": "2016-05-08",
-        "leave_date": null,
-        "perm_rank": 1
+        "leave_date": null
     }
 }, {
     "model": "sigma_core.groupmember",
@@ -744,8 +664,7 @@
         "group": 1,
         "created": "2016-05-08T14:28:14.985Z",
         "join_date": "2016-05-08",
-        "leave_date": null,
-        "perm_rank": 1
+        "leave_date": null
     }
 }, {
     "model": "sigma_core.groupmember",
@@ -755,8 +674,7 @@
         "group": 1,
         "created": "2016-05-08T14:28:28.703Z",
         "join_date": "2016-05-08",
-        "leave_date": null,
-        "perm_rank": 1
+        "leave_date": null
     }
 }, {
     "model": "sigma_core.groupmember",
@@ -766,8 +684,7 @@
         "group": 1,
         "created": "2016-05-08T14:28:41.826Z",
         "join_date": "2016-05-08",
-        "leave_date": null,
-        "perm_rank": 1
+        "leave_date": null
     }
 }, {
     "model": "sigma_core.groupmember",
@@ -777,8 +694,7 @@
         "group": 1,
         "created": "2016-05-08T14:28:46.857Z",
         "join_date": "2016-05-08",
-        "leave_date": null,
-        "perm_rank": 1
+        "leave_date": null
     }
 }, {
     "model": "sigma_core.groupmember",
@@ -788,8 +704,7 @@
         "group": 1,
         "created": "2016-05-08T14:28:52.686Z",
         "join_date": "2016-05-08",
-        "leave_date": null,
-        "perm_rank": 1
+        "leave_date": null
     }
 }, {
     "model": "sigma_core.groupmember",
@@ -799,8 +714,7 @@
         "group": 10,
         "created": "2016-05-08T14:29:04.410Z",
         "join_date": "2016-05-08",
-        "leave_date": null,
-        "perm_rank": 1
+        "leave_date": null
     }
 }, {
     "model": "sigma_core.groupmember",
@@ -810,8 +724,7 @@
         "group": 2,
         "created": "2016-05-08T14:29:11.524Z",
         "join_date": "2016-05-08",
-        "leave_date": null,
-        "perm_rank": 1
+        "leave_date": null
     }
 }, {
     "model": "sigma_core.groupmember",
@@ -821,8 +734,7 @@
         "group": 2,
         "created": "2016-05-08T14:29:16.897Z",
         "join_date": null,
-        "leave_date": null,
-        "perm_rank": 1
+        "leave_date": null
     }
 }, {
     "model": "sigma_core.groupmember",
@@ -832,8 +744,7 @@
         "group": 1,
         "created": "2016-05-08T14:29:21.477Z",
         "join_date": "2016-05-08",
-        "leave_date": null,
-        "perm_rank": 1
+        "leave_date": null
     }
 }, {
     "model": "sigma_core.groupmember",
@@ -843,8 +754,7 @@
         "group": 1,
         "created": "2016-05-08T14:29:28.184Z",
         "join_date": "2016-05-08",
-        "leave_date": null,
-        "perm_rank": 1
+        "leave_date": null
     }
 }, {
     "model": "sigma_core.groupmember",
@@ -854,8 +764,7 @@
         "group": 11,
         "created": "2016-05-08T14:29:38.073Z",
         "join_date": "2016-05-08",
-        "leave_date": null,
-        "perm_rank": 1
+        "leave_date": null
     }
 }, {
     "model": "sigma_core.groupmember",
@@ -865,8 +774,7 @@
         "group": 11,
         "created": "2016-05-08T14:29:42.536Z",
         "join_date": "2016-05-08",
-        "leave_date": null,
-        "perm_rank": 1
+        "leave_date": null
     }
 }, {
     "model": "sigma_core.groupmember",
@@ -876,8 +784,7 @@
         "group": 1,
         "created": "2016-05-08T14:29:48.274Z",
         "join_date": "2013-09-01",
-        "leave_date": null,
-        "perm_rank": 1
+        "leave_date": null
     }
 }, {
     "model": "sigma_core.groupmember",
@@ -887,8 +794,7 @@
         "group": 1,
         "created": "2016-05-08T14:29:54.006Z",
         "join_date": "2016-05-08",
-        "leave_date": null,
-        "perm_rank": 1
+        "leave_date": null
     }
 }, {
     "model": "sigma_core.groupmember",
@@ -898,8 +804,7 @@
         "group": 2,
         "created": "2016-05-08T14:30:15.034Z",
         "join_date": "2016-05-08",
-        "leave_date": null,
-        "perm_rank": 1
+        "leave_date": null
     }
 }, {
     "model": "sigma_core.groupmember",
@@ -909,8 +814,7 @@
         "group": 2,
         "created": "2016-05-08T14:30:30.672Z",
         "join_date": "2016-05-08",
-        "leave_date": null,
-        "perm_rank": 1
+        "leave_date": null
     }
 }, {
     "model": "sigma_core.groupmember",
@@ -920,8 +824,7 @@
         "group": 11,
         "created": "2016-05-08T14:30:53.431Z",
         "join_date": "2016-05-08",
-        "leave_date": null,
-        "perm_rank": 1
+        "leave_date": null
     }
 }, {
     "model": "sigma_core.groupmember",
@@ -931,8 +834,7 @@
         "group": 11,
         "created": "2016-05-08T14:31:07.452Z",
         "join_date": "2016-05-08",
-        "leave_date": null,
-        "perm_rank": 1
+        "leave_date": null
     }
 }, {
     "model": "sigma_core.groupmember",
@@ -942,8 +844,7 @@
         "group": 12,
         "created": "2016-05-08T15:15:10.726Z",
         "join_date": "2014-10-01",
-        "leave_date": null,
-        "perm_rank": 1
+        "leave_date": null
     }
 }, {
     "model": "sigma_core.groupmember",
@@ -953,8 +854,7 @@
         "group": 12,
         "created": "2016-05-08T15:15:18.626Z",
         "join_date": "2014-10-01",
-        "leave_date": null,
-        "perm_rank": 1
+        "leave_date": null
     }
 }, {
     "model": "sigma_core.groupmember",
@@ -964,8 +864,7 @@
         "group": 12,
         "created": "2016-05-08T15:15:30.285Z",
         "join_date": "2015-10-01",
-        "leave_date": null,
-        "perm_rank": 1
+        "leave_date": null
     }
 }, {
     "model": "sigma_core.groupmember",
@@ -975,8 +874,7 @@
         "group": 12,
         "created": "2016-05-08T15:15:36.145Z",
         "join_date": "2014-10-01",
-        "leave_date": null,
-        "perm_rank": 1
+        "leave_date": null
     }
 }, {
     "model": "sigma_core.groupmember",
@@ -986,8 +884,7 @@
         "group": 12,
         "created": "2016-05-08T15:15:45.927Z",
         "join_date": "2014-10-01",
-        "leave_date": null,
-        "perm_rank": 1
+        "leave_date": null
     }
 }, {
     "model": "sigma_core.groupmember",
@@ -997,8 +894,7 @@
         "group": 12,
         "created": "2016-05-08T15:15:51.738Z",
         "join_date": "2015-10-01",
-        "leave_date": null,
-        "perm_rank": 1
+        "leave_date": null
     }
 }, {
     "model": "sigma_core.groupmember",
@@ -1008,8 +904,7 @@
         "group": 13,
         "created": "2016-05-08T15:16:00.273Z",
         "join_date": "2016-05-08",
-        "leave_date": null,
-        "perm_rank": 1
+        "leave_date": null
     }
 }, {
     "model": "sigma_core.groupmember",
@@ -1019,8 +914,7 @@
         "group": 13,
         "created": "2016-05-08T15:16:07.916Z",
         "join_date": "2016-05-08",
-        "leave_date": null,
-        "perm_rank": 1
+        "leave_date": null
     }
 }, {
     "model": "sigma_core.groupmember",
@@ -1030,8 +924,7 @@
         "group": 14,
         "created": "2016-05-08T15:17:05.995Z",
         "join_date": "2014-11-01",
-        "leave_date": null,
-        "perm_rank": 1
+        "leave_date": null
     }
 }, {
     "model": "sigma_core.groupmember",
@@ -1041,8 +934,7 @@
         "group": 14,
         "created": "2016-05-08T15:17:12.286Z",
         "join_date": "2014-11-01",
-        "leave_date": null,
-        "perm_rank": 1
+        "leave_date": null
     }
 }, {
     "model": "sigma_core.groupmember",
@@ -1052,8 +944,7 @@
         "group": 14,
         "created": "2016-05-08T15:17:18.682Z",
         "join_date": "2014-10-01",
-        "leave_date": null,
-        "perm_rank": 1
+        "leave_date": null
     }
 }, {
     "model": "sigma_core.groupmember",
@@ -1063,8 +954,7 @@
         "group": 15,
         "created": "2016-05-08T15:18:10.703Z",
         "join_date": "2013-09-01",
-        "leave_date": null,
-        "perm_rank": 1
+        "leave_date": null
     }
 }, {
     "model": "sigma_core.groupmember",
@@ -1074,8 +964,7 @@
         "group": 15,
         "created": "2016-05-08T15:18:16.688Z",
         "join_date": "2013-09-01",
-        "leave_date": null,
-        "perm_rank": 1
+        "leave_date": null
     }
 }, {
     "model": "sigma_core.groupmember",
@@ -1085,8 +974,7 @@
         "group": 15,
         "created": "2016-05-08T15:18:21.929Z",
         "join_date": "2013-09-01",
-        "leave_date": null,
-        "perm_rank": 1
+        "leave_date": null
     }
 }, {
     "model": "sigma_core.groupmember",
@@ -1096,8 +984,7 @@
         "group": 15,
         "created": "2016-05-08T15:18:27.453Z",
         "join_date": "2013-09-01",
-        "leave_date": null,
-        "perm_rank": 1
+        "leave_date": null
     }
 }, {
     "model": "sigma_core.groupmember",
@@ -1107,8 +994,7 @@
         "group": 16,
         "created": "2016-05-08T15:18:34.227Z",
         "join_date": "2014-09-01",
-        "leave_date": null,
-        "perm_rank": 1
+        "leave_date": null
     }
 }, {
     "model": "sigma_core.groupmember",
@@ -1118,8 +1004,7 @@
         "group": 15,
         "created": "2016-05-08T15:18:41.064Z",
         "join_date": "2013-09-01",
-        "leave_date": null,
-        "perm_rank": 1
+        "leave_date": null
     }
 }, {
     "model": "sigma_core.groupmember",
@@ -1129,8 +1014,7 @@
         "group": 16,
         "created": "2016-05-08T15:18:46.183Z",
         "join_date": "2014-09-01",
-        "leave_date": null,
-        "perm_rank": 1
+        "leave_date": null
     }
 }, {
     "model": "sigma_core.groupmember",
@@ -1140,8 +1024,7 @@
         "group": 15,
         "created": "2016-05-08T15:18:54.935Z",
         "join_date": "2013-09-01",
-        "leave_date": null,
-        "perm_rank": 1
+        "leave_date": null
     }
 }, {
     "model": "sigma_core.groupmember",
@@ -1151,8 +1034,7 @@
         "group": 16,
         "created": "2016-05-08T15:19:01.282Z",
         "join_date": "2014-09-01",
-        "leave_date": null,
-        "perm_rank": 1
+        "leave_date": null
     }
 }, {
     "model": "sigma_core.groupmember",
@@ -1162,8 +1044,7 @@
         "group": 15,
         "created": "2016-05-08T15:19:09.497Z",
         "join_date": "2013-09-01",
-        "leave_date": null,
-        "perm_rank": 1
+        "leave_date": null
     }
 }, {
     "model": "sigma_core.groupmember",
@@ -1173,8 +1054,7 @@
         "group": 16,
         "created": "2016-05-08T15:19:18.055Z",
         "join_date": "2014-09-01",
-        "leave_date": null,
-        "perm_rank": 1
+        "leave_date": null
     }
 }, {
     "model": "sigma_core.groupmember",
@@ -1184,8 +1064,7 @@
         "group": 17,
         "created": "2016-05-08T15:21:18.928Z",
         "join_date": "2016-05-08",
-        "leave_date": null,
-        "perm_rank": 1
+        "leave_date": null
     }
 }, {
     "model": "sigma_core.groupmember",
@@ -1195,8 +1074,7 @@
         "group": 17,
         "created": "2016-05-08T15:21:25.989Z",
         "join_date": "2016-05-08",
-        "leave_date": null,
-        "perm_rank": 1
+        "leave_date": null
     }
 }, {
     "model": "sigma_core.groupmember",
@@ -1206,8 +1084,7 @@
         "group": 17,
         "created": "2016-05-08T15:21:32.301Z",
         "join_date": "2016-02-24",
-        "leave_date": null,
-        "perm_rank": 1
+        "leave_date": null
     }
 }, {
     "model": "sigma_core.groupmember",
@@ -1217,8 +1094,7 @@
         "group": 17,
         "created": "2016-05-08T15:21:41.262Z",
         "join_date": "2016-05-08",
-        "leave_date": null,
-        "perm_rank": 1
+        "leave_date": null
     }
 }, {
     "model": "sigma_core.groupmember",
@@ -1228,8 +1104,7 @@
         "group": 17,
         "created": "2016-05-08T15:21:54.595Z",
         "join_date": "2016-03-15",
-        "leave_date": null,
-        "perm_rank": 1
+        "leave_date": null
     }
 }, {
     "model": "sigma_core.groupmember",
@@ -1239,8 +1114,7 @@
         "group": 18,
         "created": "2016-05-08T15:35:49.250Z",
         "join_date": "2016-05-03",
-        "leave_date": null,
-        "perm_rank": 1
+        "leave_date": null
     }
 }, {
     "model": "sigma_core.groupmember",
@@ -1250,8 +1124,7 @@
         "group": 18,
         "created": "2016-05-08T15:35:59.028Z",
         "join_date": "2016-05-08",
-        "leave_date": null,
-        "perm_rank": 1
+        "leave_date": null
     }
 }, {
     "model": "sigma_core.groupmember",
@@ -1261,8 +1134,7 @@
         "group": 18,
         "created": "2016-05-08T15:36:07.857Z",
         "join_date": "2016-05-08",
-        "leave_date": null,
-        "perm_rank": 1
+        "leave_date": null
     }
 }, {
     "model": "oauth2_provider.application",
