@@ -79,7 +79,7 @@ class ChatViewSet(viewsets.ModelViewSet):
 
             c = ChatMember(chat=chat, user=user, is_creator=False, is_admin=False)
             c.save()
-            s = ChatSerializer(chat)
+            s = ChatMemberSerializer(c)
             return Response(s.data, status=status.HTTP_200_OK)
 
         except Chat.DoesNotExist:
