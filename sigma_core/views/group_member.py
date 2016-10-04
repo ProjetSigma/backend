@@ -108,7 +108,7 @@ class GroupMemberViewSet(viewsets.ModelViewSet):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
     def can_modify_basic_rights(self, request, modified_mship, my_mship):
-        #trights to become superadmin or admin are not concerned
+        #rights to become superadmin or admin are not concerned
         if my_mship.is_super_administrator:
             return True
 
