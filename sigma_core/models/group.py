@@ -18,7 +18,7 @@ class Group(models.Model):
     description = models.TextField(blank=True)
     is_protected = models.BooleanField(default=False) # if True, the Group cannot be deleted
     can_anyone_ask = models.BooleanField(default=False) #if True, people don't need invitation to ask to join
-    need_validation_to_join = models.BooleanField(default=False) #if True, people from the group who can invite need to accept the asker 
+    need_validation_to_join = models.BooleanField(default=False) #if True, people from the group who can invite need to accept the asker
 
     """ Set the confidentiality of the group's members
         If set to :

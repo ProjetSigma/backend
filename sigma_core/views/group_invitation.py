@@ -9,7 +9,8 @@ class GroupInvitationViewSet(viewsets.ModelViewSet):
     queryset = GroupInvitation.objects.all()
     serializer_class = GroupInvitationSerializer
     permission_classes = [IsAuthenticated, DRYPermissions]
-    
+
     # @detail_route(method=['post'])
     # def confirm(self, request, pk):
-        # pass
+
+    
