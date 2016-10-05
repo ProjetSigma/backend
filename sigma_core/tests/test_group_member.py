@@ -15,8 +15,7 @@ from sigma_core.tests.factories import UserFactory, AdminUserFactory, GroupFacto
 class GroupMemberVisibilityTests(APITestCase):
     @classmethod
     def setUpTestData(self):
-        # Summary: 1 Sigma admin + 10 users, 4 groups, 2 clusters
-        super().setUpTestData()
+        self.group_member_url = "/group-member/"
 
         self.users = [AdminUserFactory()] + UserFactory.create_batch(10)
         self.clusters = ClusterFactory.create_batch(2)
@@ -51,9 +50,7 @@ class GroupMemberVisibilityTests(APITestCase):
 
         # GroupAcknowledgments
         GroupAcknowledgmentFactory(parent_group=self.clusters[0].group_ptr, subgroup=self.groups[1], validated=True)
-
-        # Misc
-        self.mship_url = "/group-member/?"
+        
 
     def try_get(self, reqId=-1, uid=-1, gid=-1, expectedStatus=status.HTTP_200_OK, expectedLength=1):
         """

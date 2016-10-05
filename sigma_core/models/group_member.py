@@ -8,7 +8,6 @@ class GroupMember(models.Model):
     Modelize a membership relation between an User and a Group.
     """
     class Meta:
-        # TODO: Make a primary key once Django supports it
         unique_together = (("user", "group"),)
 
     user = models.ForeignKey('User', related_name='memberships')
@@ -29,7 +28,7 @@ class GroupMember(models.Model):
     can_modify_group_infos = models.BooleanField(default=False)
 
     # Related fields:
-    #   - values (model GroupMemberValue)
+    #   - field_values (model GroupFieldValue)
 
     def __str__(self):
         return "User \"%s\" in Group \"%s\"" % (self.user.__str__(), self.group.__str__())

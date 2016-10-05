@@ -156,6 +156,30 @@ class User(AbstractBaseUser):
         from sigma_core.models.group_member import GroupMember
         return GroupMember.objects.filter(Q(user=self) & Q(is_accepted=True)).values_list('group', flat=True)
 
+    
+    # is_related_to(user, group)
+    # Check if a user is related to a group by recursively checking if it is a member of the group, or related to the parent groups
+    def is_related_to(group):
+        already_checked = []
+        def rec(group):
+            try:
+                GroupMember.objects.get(group=group.id, user=self.id)
+                return True
+            except GroupMember.DoesNotExist:
+                parents = group.group_parents_list()
+                for p in parents:
+                    if not p.id in already_checked:
+                        if rec(p):
+                            return True
+                already_checked.insert(group.id)
+                return False
+        
+        if type(group) == int:
+            group = Group.objects.get(id=group)        
+        return rec(group)
+        
+        
+        
     ###############
     # Permissions #
     ###############

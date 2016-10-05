@@ -114,7 +114,7 @@ class GroupFieldValueTests(APITestCase):
         self.try_update(self.admin, self.protectedValueAdmin, status.HTTP_200_OK)
         
         
-                
+    
     ###############################################################################################
     ##     DESTROY TESTS                                                                         ##
     ###############################################################################################

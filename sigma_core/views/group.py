@@ -52,17 +52,6 @@ class GroupViewSet(viewsets.ModelViewSet):
         if not request.user.can_modify_group_infos(group):
             return Response(status=status.HTTP_403_FORBIDDEN)
         return super(GroupViewSet, self).update(request, pk)
-        
-        
-    @detail_route(methods=['get'])
-    def fields(self, request, pk=None):
-        group = getGroup(pk)
-        if GroupField.__has_access_permission(request.user.id, group):
-            fields = GroupField.objects.filter(group=pk)
-            serializer = GroupFieldSerializer(fields, many=True)
-            return Response(serializer.data)
-        else:
-            return Response("You are not allowed to access this group", status=status.HTTP_403_FORBIDDEN)
             
         
     @detail_route(methods=['get'])

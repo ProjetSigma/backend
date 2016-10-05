@@ -4,9 +4,10 @@ from django.contrib.auth.models import Group as AuthGroup
 from sigma_core.models.user import User
 from sigma_core.models.cluster import Cluster
 from sigma_core.models.group import Group, GroupAcknowledgment
-from sigma_core.models.group_field import GroupField
 from sigma_core.models.group_member import GroupMember
+from sigma_core.models.group_field import GroupField
 from sigma_core.models.group_field_value import GroupFieldValue
+from sigma_core.models.group_invitation import GroupInvitation
 
 
 admin.site.unregister(AuthGroup)
@@ -17,3 +18,4 @@ admin.site.register(GroupAcknowledgment)
 admin.site.register(GroupMember)
 admin.site.register(GroupField)
 admin.site.register(GroupFieldValue)
+admin.site.register(GroupInvitation)
