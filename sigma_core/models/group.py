@@ -5,7 +5,7 @@ class Group(models.Model):
     #########################
     # Constants and choices #
     #########################
-    
+
     CONF_PUBLIC = 0
     CONF_NORMAL = 1
     CONF_SECRET = 2
@@ -17,16 +17,16 @@ class Group(models.Model):
     is_private = models.BooleanField(default=False)
     description = models.TextField(blank=True)
     is_protected = models.BooleanField(default=False) # if True, the Group cannot be deleted
-    can_anyone_join = models.BooleanField(default=False) #if True, people don't need invitation
-    need_validation_to_join = models.BooleanField(default=False)
-    
+    can_anyone_ask = models.BooleanField(default=False) #if True, people don't need invitation to ask to join
+    need_validation_to_join = models.BooleanField(default=False) #if True, people from the group who can invite need to accept the asker 
+
     """ Set the confidentiality of the group's members
         If set to :
             CONF_PUBLIC -> The group is public (all members can be seen)
             CONF_NORMAL -> The group is normal (all members that I am connected to can be seen)
             CONF_SECRET -> The group is private (only the members can see themselves) """
     confidentiality = models.PositiveSmallIntegerField(default=CONF_NORMAL)
-    
+
 
     # Related fields:
     #   - invited_users (model User)
