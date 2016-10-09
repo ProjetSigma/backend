@@ -40,3 +40,9 @@ class MessageViewSet(viewsets.ModelViewSet):
     serializer_class = MessageSerializer
     permission_classes = [IsAuthenticated, ]
     filter_backends = (MessageFilterBackend, )
+
+    def create(self, request):
+        return Response("You're not authorized to create a new Message this way, please use the website.", status=status.HTTP_403_FORBIDDEN)
+
+    def update(self, request, pk=None):
+        return Response("You're not authorized to update a new Message this way, please use the website.", status=status.HTTP_403_FORBIDDEN)

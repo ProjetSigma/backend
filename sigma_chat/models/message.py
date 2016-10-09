@@ -7,7 +7,7 @@ from sigma_chat.models.chat import Chat
 
 def chat_directory_path(instance, filename):
     # file will be uploaded to MEDIA_ROOT/user_<id>/<filename>
-    return 'uploads/chats/{0}/{1}'.format(instance.chat.id, filename)
+    return 'uploads/chats/{0}/{1}'.format(instance.chat_id.id, filename)
 
 
 class Message(models.Model):

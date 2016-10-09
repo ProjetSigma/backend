@@ -11,8 +11,8 @@ class ChatMember(models.Model):
     is_banned = models.BooleanField(default=False)
     user = models.ForeignKey('sigma_core.User', related_name='user_chatmember')
     chat = models.ForeignKey(Chat, related_name='chatmember')
-    
-    # Related fields : 
+
+    # Related fields :
     #     - member_message (model Message.member)
 
     ################################################################

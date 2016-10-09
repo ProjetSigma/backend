@@ -61,6 +61,12 @@ class ChatMemberViewSet(viewsets.ModelViewSet):
         """
         return super().list(request)
 
+    def create(self, request):
+        return Response("You're not authorized to create a new ChatMember this way, please use the website.", status=status.HTTP_403_FORBIDDEN)
+
+    def update(self, request, pk=None):
+        return Response("You're not authorized to update a new ChatMember this way, please use the website.", status=status.HTTP_403_FORBIDDEN)
+
     @decorators.detail_route(methods=['post'])
     def send_message(self, request, pk=None):
         """
@@ -71,12 +77,15 @@ class ChatMemberViewSet(viewsets.ModelViewSet):
             form: replace
         parameters:
             - name: text
-              type: integer
-              required: true
+              type: string
+              required: false
+            - name: attachments
+              type: string
+              required: false
         """
         try:
             chatmember = ChatMember.objects.get(pk=pk)
-            if not chatmember.is_member :
+            if not chatmember.is_member or chatmember.user != request.user :
                 return Response(status=status.HTTP_403_FORBIDDEN)
 
             request.data['chat_id'] = chatmember.chat.id
@@ -89,5 +98,5 @@ class ChatMemberViewSet(viewsets.ModelViewSet):
                 return Response(message.errors, status=status.HTTP_400_BAD_REQUEST)
 
         except ChatMember.DoesNotExist:
-            raise Http404("ChatMember %d not found" % request.data.get('chatmember_id', None))
+            raise Http404("ChatMember {0} not found".format(request.data.get('chatmember_id', None)))
         return False

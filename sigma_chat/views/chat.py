@@ -83,9 +83,9 @@ class ChatViewSet(viewsets.ModelViewSet):
             return Response(s.data, status=status.HTTP_200_OK)
 
         except Chat.DoesNotExist:
-            raise Http404("Chat %d not found" % pk)
+            raise Http404("Chat {0} not found".format(pk))
         except User.DoesNotExist:
-            raise Http404("User %d not found" % request.data.get('user_id', None))
+            raise Http404("User {0} not found".format(request.data.get('user_id', None)))
 
     @decorators.detail_route(methods=['put'])
     def change_role(self, request, pk=None):
@@ -124,19 +124,26 @@ class ChatViewSet(viewsets.ModelViewSet):
             chatmember.is_member = False
             chatmember.is_banned = False
             changed = False
-            if(role == "admin" and may_change):
+            if role == "admin":
+                if not may_change:
+                    return Response(status=status.HTTP_401_UNAUTHORIZED)
                 if has_ragequit:
                     return Response(status=status.HTTP_400_BAD_REQUEST)
                 chatmember.is_admin = True
                 chatmember.is_member = True
                 changed = True
-            if role == "member" and (may_change or has_ragequit):
+            if role == "member":
+                if not may_change:
+                    if not has_ragequit:
+                        return Response(status=status.HTTP_401_UNAUTHORIZED)
                 chatmember.is_member = True
                 changed = True
-            if(role == "banned" and may_change):
+            if role == "banned":
+                if not may_change:
+                    return Response(status=status.HTTP_401_UNAUTHORIZED)
                 chatmember.is_banned = True
                 changed = True
-            if(role == "leave" and not request.user.is_chat_banned(chat)):
+            if(role == "leave" and request.user == chatmember.user and not request.user.is_chat_banned(chat)):
                 changed = True
             if changed:
                 chatmember.save()
@@ -145,6 +152,6 @@ class ChatViewSet(viewsets.ModelViewSet):
             return Response("Incorrect role.", status=status.HTTP_400_BAD_REQUEST)
 
         except Chat.DoesNotExist:
-            raise Http404("Chat %d not found" % pk)
+            raise Http404("Chat {0} not found".format(pk))
         except ChatMember.DoesNotExist:
             raise Http404("ChatMember %d not found" % request.data.get('chatmember_id', None))

@@ -23,7 +23,7 @@ class MessageSerializer(serializers.ModelSerializer):
             raise ValidationError("No chat given.")
         if data['chat_id'].id != data['chatmember_id'].chat.id:
             raise ValidationError("ChatMember not allowed to publish on this chat.")
-        if data['text'] is None and data['attachment'] is None:
+        if (not "text" in data or data['text'] is None or data['text'] == "") and (not 'attachment' in data or data['attachment'] is None):
             raise ValidationError("You must send either a text or a file.")
 
         return data
