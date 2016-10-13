@@ -26,10 +26,10 @@ class GroupFilterBackend(DRYPermissionFiltersBase):
         if request.user.is_sigma_admin():
             return queryset
 
-        invited_to_groups_ids = request.user.invited_to_groups.all().values_list('id', flat=True)
-        user_groups_ids = request.user.memberships.filter(is_accepted=True).values_list('group_id', flat=True)
+        #invited_to_groups_ids = request.user.invited_to_groups.all().values_list('id', flat=True)
+        user_groups_ids = request.user.memberships.values_list('group_id', flat=True)
         return queryset.prefetch_related('memberships', 'group_parents') \
-            .filter(Q(is_private=False) | Q(memberships__user=request.user) | Q(id__in=invited_to_groups_ids) | Q(group_parents__id__in=user_groups_ids)) \
+            .filter(Q(is_private=False) | Q(memberships__user=request.user) | Q(group_parents__id__in=user_groups_ids)) \
             .distinct()
 
 
@@ -38,7 +38,7 @@ class GroupViewSet(viewsets.ModelViewSet):
     serializer_class = GroupSerializer
     permission_classes = [IsAuthenticated, ]
     filter_backends = (GroupFilterBackend, )
-    
+
     @staticmethod
     def getGroup(pk):
         try:
@@ -52,13 +52,13 @@ class GroupViewSet(viewsets.ModelViewSet):
         if not request.user.can_modify_group_infos(group):
             return Response(status=status.HTTP_403_FORBIDDEN)
         return super(GroupViewSet, self).update(request, pk)
-            
-        
+
+
     @detail_route(methods=['get'])
     def members(self, request, pk=None):
         group = getGroup(pk)
-        
-        
+
+
 
     @detail_route(methods=['put'])
     def invite(self, request, pk=None):

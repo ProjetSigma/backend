@@ -61,7 +61,7 @@ class UserViewSet(mixins.CreateModelMixin,      # Only Cluster admins can create
 
         # We get visible users ids w.r.t. the Normal Rules of Visibility, based on their belongings to common clusters/groups (let's anticipate the pagination)
         # Since clusters are groups, we only check that condition for groups
-        groups_ids = request.user.memberships.filter(is_accepted=True).values_list('group_id', flat=True)
+        groups_ids = request.user.memberships.values_list('group_id', flat=True)
         qs = User.objects.prefetch_related('memberships').filter(is_active=True, memberships__group__id__in=groups_ids).distinct()
         s = UserSerializer(qs, many=True, context={'request': request})
         return Response(s.data, status=status.HTTP_200_OK)

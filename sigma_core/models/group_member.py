@@ -72,8 +72,8 @@ class GroupMember(models.Model):
     ## Read permissions
 
     @staticmethod
-    def has_list_permission(self, request):
-        return False
+    def has_list_permission(request):
+        return True
 
     def has_object_retrieve_permission(self, request):
         try:
