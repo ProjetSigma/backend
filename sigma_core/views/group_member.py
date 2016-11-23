@@ -54,7 +54,6 @@ class GroupMemberViewSet(viewsets.ModelViewSet):
         """
         return super().list(request)
 
-<<<<<<< HEAD
     def create(self, request):
         serializer = GroupMemberSerializer(data=request.data)
         if not serializer.is_valid():
@@ -105,9 +104,6 @@ class GroupMemberViewSet(viewsets.ModelViewSet):
             return True
 
         return False
-=======
->>>>>>> GroupFields2
-
 
     def update(self, request, pk=None):
         """
