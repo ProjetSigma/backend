@@ -9,11 +9,11 @@ class BasicClusterSerializer(serializers.ModelSerializer):
     """
     class Meta:
         model = Cluster
-        exclude = (
-            'can_anyone_join',
-            'is_protected',
-            'is_private',
-        )
+        # exclude = (
+            # 'can_anyone_join',
+            # 'is_protected',
+            # 'is_private',
+        # )
 
 
 class ClusterSerializer(BasicClusterSerializer):

@@ -26,10 +26,10 @@ class GroupFilterBackend(DRYPermissionFiltersBase):
         if request.user.is_sigma_admin():
             return queryset
 
-        invited_to_groups_ids = request.user.invited_to_groups.all().values_list('id', flat=True)
-        user_groups_ids = request.user.memberships.filter(is_accepted=True).values_list('group_id', flat=True)
+        #invited_to_groups_ids = request.user.invited_to_groups.all().values_list('id', flat=True)
+        user_groups_ids = request.user.memberships.values_list('group_id', flat=True)
         return queryset.prefetch_related('memberships', 'group_parents') \
-            .filter(Q(is_private=False) | Q(memberships__user=request.user) | Q(id__in=invited_to_groups_ids) | Q(group_parents__id__in=user_groups_ids)) \
+            .filter(Q(is_private=False) | Q(memberships__user=request.user) | Q(group_parents__id__in=user_groups_ids)) \
             .distinct()
 
 
@@ -38,7 +38,7 @@ class GroupViewSet(viewsets.ModelViewSet):
     serializer_class = GroupSerializer
     permission_classes = [IsAuthenticated, ]
     filter_backends = (GroupFilterBackend, )
-    
+
     @staticmethod
     def getGroup(pk):
         try:
@@ -52,57 +52,12 @@ class GroupViewSet(viewsets.ModelViewSet):
         if not request.user.can_modify_group_infos(group):
             return Response(status=status.HTTP_403_FORBIDDEN)
         return super(GroupViewSet, self).update(request, pk)
-        
-        
-    @detail_route(methods=['get'])
-    def fields(self, request, pk=None):
-        group = getGroup(pk)
-        if GroupField.__has_access_permission(request.user.id, group):
-            fields = GroupField.objects.filter(group=pk)
-            serializer = GroupFieldSerializer(fields, many=True)
-            return Response(serializer.data)
-        else:
-            return Response("You are not allowed to access this group", status=status.HTTP_403_FORBIDDEN)
-            
-        
+
+
     @detail_route(methods=['get'])
     def members(self, request, pk=None):
         group = getGroup(pk)
-        
-        
 
-    @detail_route(methods=['put'])
-    def invite(self, request, pk=None):
-        """
-        Invite an user in group pk.
-        ---
-        omit_serializer: true
-        parameters_strategy:
-            form: replace
-        parameters:
-            - name: user_id
-              type: integer
-              required: true
-        """
-        try:
-            group = Group.objects.get(pk=pk)
-            user = User.objects.get(pk=request.data.get('user_id', None))
-            if not request.user.can_invite(group):
-                return Response(status=status.HTTP_403_FORBIDDEN)
 
-            # Already group member ?
-            try:
-                GroupMember.objects.get(user=user.id, group=group.id)
-                return Response("Already Group member", status=status.HTTP_400_BAD_REQUEST)
-            except GroupMember.DoesNotExist:
-                pass
 
-            group.invited_users.add(user)
-            # user.notify() # TODO: Notification
-            s = GroupSerializer(group)
-            return Response(s.data, status=status.HTTP_200_OK)
-
-        except Group.DoesNotExist:
-            raise Http404("Group %d not found" % pk)
-        except User.DoesNotExist:
-            raise Http404("User %d not found" % request.data.get('user_id', None))
+    

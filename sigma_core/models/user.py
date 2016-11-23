@@ -106,9 +106,9 @@ class User(AbstractBaseUser):
         Return True iff self has a group in common with user.
         Warning: non symmetric function! u1.has_common_group(u2) may be different of u2.has_common_group(u1)
         """
-        # We filter on is_accepted : we are really in the same group if you ARE really in the group.
+        # We are really in the same group if you ARE really in the group.
         # But, on the other hand, you can "see" pending request of other members.
-        return len(set(self.memberships.filter(is_accepted=True).values_list('group', flat=True)).intersection(user.memberships.all().values_list('group', flat=True))) > 0
+        return len(set(self.memberships.values_list('group', flat=True)).intersection(user.memberships.all().values_list('group', flat=True))) > 0
 
     def get_group_membership(self, group):
         from sigma_core.models.group_member import GroupMember
@@ -121,7 +121,7 @@ class User(AbstractBaseUser):
     def is_group_member(self, g):
         from sigma_core.models.group_member import GroupMember
         mem = self.get_group_membership(g)
-        return mem is not None and mem.is_accepted()
+        return mem is not None
 
     def can_invite(self, group):
         from sigma_core.models.group_member import GroupMember
@@ -154,7 +154,31 @@ class User(AbstractBaseUser):
 
     def get_groups_with_confirmed_membership(self):
         from sigma_core.models.group_member import GroupMember
-        return GroupMember.objects.filter(Q(user=self) & Q(is_accepted=True)).values_list('group', flat=True)
+        return GroupMember.objects.filter(Q(user=self)).values_list('group', flat=True)
+
+
+    # is_related_to(user, group)
+    # Check if a user is related to a group by recursively checking if it is a member of the group, or related to the parent groups
+    def is_related_to(group):
+        already_checked = []
+        def rec(group):
+            try:
+                GroupMember.objects.get(group=group.id, user=self.id)
+                return True
+            except GroupMember.DoesNotExist:
+                parents = group.group_parents_list()
+                for p in parents:
+                    if not p.id in already_checked:
+                        if rec(p):
+                            return True
+                already_checked.insert(group.id)
+                return False
+
+        if type(group) == int:
+            group = Group.objects.get(id=group)
+        return rec(group)
+
+
 
     ###############
     # Permissions #

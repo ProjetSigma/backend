@@ -1,5 +1,4 @@
 from django.db import models
-from django.core.exceptions import ValidationError
 
 from sigma_core.models.group import Group
 from sigma_core.models.group_member import GroupMember
@@ -20,7 +19,7 @@ class GroupField(models.Model):
         (TYPE_STRING, "String"),
         (TYPE_CHOICE, "Choice"),
         (TYPE_EMAIL, "Email")
-        )
+    )
 
 
     ################################################################
@@ -33,29 +32,6 @@ class GroupField(models.Model):
     accept = models.TextField(default='', blank=True)
     protected = models.BooleanField(default=False)
     multiple_values_allowed = models.BooleanField(default=False)
-
-
-    ################################################################
-    # VALIDATORS                                                   #
-    ################################################################
-    
-    @staticmethod
-    def validate(type, accept, value):
-        validators = [number_validator, string_validator, email_validator]
-        validators[type](value, accept)
-        return True
-        
-    @staticmethod
-    def number_validator(value, accept):
-        return True
-        
-    @staticmethod
-    def string_validator(value, accept):
-        return True
-        
-    @staticmethod
-    def email_validator(value, accept):
-        return True
     
 
     ################################################################
@@ -92,10 +68,14 @@ class GroupField(models.Model):
         return GroupField.__has_access_permission(request.user.id, self.group)
         
         
-    #   Can not see the complete list of fields, never
+    # Check that the user is related to the group
     @staticmethod
     def has_list_permission(request):
-        return False
+        # if 'group' in request.data:
+        #    gid = request.data['group']
+        #    return request.user.is_related_to_group(gid)
+        # return False
+        return True
         
     
     

@@ -12,7 +12,7 @@ class GroupFieldValue(models.Model):
     # FIELDS                                                       #
     ################################################################
     
-    membership = models.ForeignKey('GroupMember', related_name='values')
+    membership = models.ForeignKey('GroupMember', related_name='field_values')
     field = models.ForeignKey('GroupField', related_name='+')
     value = models.TextField(blank=True)
 
