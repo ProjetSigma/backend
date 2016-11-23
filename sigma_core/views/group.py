@@ -60,38 +60,4 @@ class GroupViewSet(viewsets.ModelViewSet):
 
 
 
-    @detail_route(methods=['put'])
-    def invite(self, request, pk=None):
-        """
-        Invite an user in group pk.
-        ---
-        omit_serializer: true
-        parameters_strategy:
-            form: replace
-        parameters:
-            - name: user_id
-              type: integer
-              required: true
-        """
-        try:
-            group = Group.objects.get(pk=pk)
-            user = User.objects.get(pk=request.data.get('user_id', None))
-            if not request.user.can_invite(group):
-                return Response(status=status.HTTP_403_FORBIDDEN)
-
-            # Already group member ?
-            try:
-                GroupMember.objects.get(user=user.id, group=group.id)
-                return Response("Already Group member", status=status.HTTP_400_BAD_REQUEST)
-            except GroupMember.DoesNotExist:
-                pass
-
-            group.invited_users.add(user)
-            # user.notify() # TODO: Notification
-            s = GroupSerializer(group)
-            return Response(s.data, status=status.HTTP_200_OK)
-
-        except Group.DoesNotExist:
-            raise Http404("Group %d not found" % pk)
-        except User.DoesNotExist:
-            raise Http404("User %d not found" % request.data.get('user_id', None))
+    

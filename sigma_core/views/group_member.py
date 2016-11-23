@@ -56,30 +56,6 @@ class GroupMemberViewSet(viewsets.ModelViewSet):
 
 
 
-    def can_modify_basic_rights(self, request, modified_mship, my_mship):
-        #trights to become superadmin or admin are not concerned
-        if my_mship.is_super_administrator:
-            return True
-
-        if my_mship.is_administrator and not modified_mship.is_administrator:
-            return True
-
-        return False
-
-    def can_promote_admin_or_superadmin(self,request,modified_mship,my_mship):
-        #only a super_administrator can do that
-        return my_mship.is_super_administrator
-
-    # def can_be_contacted(self,request,modified_mship,my_mship):
-    #
-    #     if my_mship.id == modified_mship.id:
-    #         return True
-    #
-    #     if my_mship.is_administrator:
-    #         return True
-
-
-
     def update(self, request, pk=None):
         """
         Change the rights of a member of the group pk.
@@ -95,7 +71,7 @@ class GroupMemberViewSet(viewsets.ModelViewSet):
                 my_mship.is_super_administrator=False
                 my_mship.save()
         except GroupMember.DoesNotExist:
-            return Response(status=status.HTTP_400_BAD_REQUEST)
+            return Response(status=status.HTTP_404_NOT_FOUND)
         except request.data.DoesNotExist:
             return Response(status=status.HTTP_400_BAD_REQUEST)
 

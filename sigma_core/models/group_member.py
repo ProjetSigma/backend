@@ -3,6 +3,8 @@ from django.http import Http404
 
 from sigma_core.models.user import User
 
+
+
 class GroupMember(models.Model):
     """
     Modelize a membership relation between an User and a Group.
@@ -56,6 +58,21 @@ class GroupMember(models.Model):
         super(Model, self).save(*args, **kwargs)
 
 
+
+    def can_modify_basic_rights(self, my_mship):
+        #rights to become superadmin or admin are not concerned
+        #self = membership that's going to be modified
+        #my_mship is the membership of the user who wants to modify right
+
+        if my_mship.is_super_administrator:
+            return True
+
+        if my_mship.is_administrator and (not self.is_administrator or my_ship==self):
+            return True
+
+        return False
+
+
     ################################################################
     # PERMISSIONS                                                  #
     ################################################################
@@ -96,16 +113,16 @@ class GroupMember(models.Model):
 
     def has_object_update_permission(self, request):
         try:
-            #Membership of the one who tries to update a GroupMember the other dude
+            #Membership of the one who tries to update a GroupMember of the other dude
             mb = GroupMember.objects.get(group=self.group.id,user=request.user.id)
             right_to_change = request.data.get('right_to_change', None)
 
-            if self.is_administrator==True:
+            if self.is_administrator:
                 return mb.is_super_administrator
             else:
                 basic_rights = ["can_invite","can_kick","can_publish","can_be_contacted","can_modify_group_infos"]
                 if right_to_change in basic_rights:
-                    return mb.can_modify_basic_rights
+                    return self.can_modify_basic_rights(mb)
                 else:
                     return mb.is_super_administrator
 

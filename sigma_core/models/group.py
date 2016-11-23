@@ -52,8 +52,6 @@ class Group(models.Model):
     #################
     # Model methods #
     #################
-    def can_anyone_join(self):
-        return self.can_anyone_join
 
     def __str__(self): # pragma: no cover
         return self.name

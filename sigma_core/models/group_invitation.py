@@ -81,4 +81,13 @@ class GroupInvitation(models.Model):
         return False
 
     def has_object_destroy_permission(self, request):
-        return False
+        #the people that can destroy the invitation are the invited,
+        #and members of the group that have the adequate right
+
+        if request.user.id==self.user.id:
+            return True
+        try:
+            mb = GroupMember.objects.get(group=self.group.id, user=request.user.id)
+            return mb.can_invite
+        except GroupMember.DoesNotExist:
+            return False
