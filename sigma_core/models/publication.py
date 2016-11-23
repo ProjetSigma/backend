@@ -43,3 +43,6 @@ class Publication(models.Model):
     @staticmethod
     def has_write_permission(request):
         return True
+
+    def __str__(self):
+        return self.name

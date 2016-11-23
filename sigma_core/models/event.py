@@ -1,7 +1,6 @@
 from django.db import models
 
 from sigma_core.models.group import Group
-from sigma_core.models.publication import Publication
 
 class Event(models.Model):
 
@@ -14,7 +13,6 @@ class Event(models.Model):
     ################################################################
 
     name = models.CharField(max_length=255)
-    related_publication = models.ForeignKey(Publication)
     description = models.CharField(max_length=1400)
 
     date_start = models.DateTimeField()
@@ -39,3 +37,6 @@ class Event(models.Model):
     @staticmethod
     def has_write_permission(request):
         return True
+
+    def __str__(self):
+        return self.name
