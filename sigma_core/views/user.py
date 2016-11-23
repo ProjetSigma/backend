@@ -178,30 +178,3 @@ class UserViewSet(mixins.CreateModelMixin,      # Only Cluster admins can create
         user.save()
 
         return Response('Password reset', status=status.HTTP_200_OK)
-
-    @decorators.list_route(methods=['post'])
-    @decorators.parser_classes([parsers.MultiPartParser, ])
-    def addphoto(self, request):
-        """
-        Add a profile photo to my profile.
-        ---
-        omit_serializer: true
-        parameters_strategy:
-            form: replace
-        parameters:
-            - name: file
-              type: file
-              required: true
-        """
-        from sigma_files.models import Image
-        from sigma_files.serializers import ImageSerializer
-
-        s = ImageSerializer(data=request.data, context={'request': request})
-        s.is_valid(raise_exception=True)
-        img = s.save()
-        img.owner = request.user
-        img.save()
-        request.user.photo = img
-        request.user.save()
-
-        return Response(status=status.HTTP_201_CREATED)

@@ -37,10 +37,6 @@ router.register(r'group-invitation', GroupInvitationViewSet)
 router.register(r'cluster', ClusterViewSet)
 router.register(r'user', UserViewSet)
 
-from sigma_files.views import ImageViewSet
-
-router.register(r'image', ImageViewSet)
-
 urlpatterns = [
     url(r'^admin/', include(admin.site.urls)),
     url(r'^api-auth/', include('rest_framework.urls', namespace='rest_framework')),
