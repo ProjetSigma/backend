@@ -55,7 +55,8 @@ class GroupMember(models.Model):
             self.can_kick = True
             self.can_modify_group_infos = True
 
-        super(Model, self).save(*args, **kwargs)
+
+        super(GroupMember, self).save(*args, **kwargs)
 
 
 
