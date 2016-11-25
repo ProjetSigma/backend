@@ -10,4 +10,4 @@ class GroupSerializer(serializers.ModelSerializer):
     class Meta:
         model = Group
 
-    members_count = serializers.IntegerField(read_only=True)
+    #members_count = serializers.IntegerField(read_only=True)

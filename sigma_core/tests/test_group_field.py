@@ -44,27 +44,6 @@ class GroupFieldTests(APITestCase):
         r = self.client.post(self.group_field_url, {'group': g.id, 'name': 'Test', 'type': GroupField.TYPE_STRING, 'accept':''}, format='json')
         self.assertEqual(r.status_code, s)
 
-    def test_create_nomember_in_secretgr(self):
-        self.try_create(self.nomember, self.secretGroup, status.HTTP_403_FORBIDDEN)
-    def test_create_nomember_in_normalgr(self):
-        self.try_create(self.nomember, self.normalGroup, status.HTTP_403_FORBIDDEN)
-    def test_create_nomember_in_publicgr(self):
-        self.try_create(self.nomember, self.publicGroup, status.HTTP_403_FORBIDDEN)
-
-    def test_create_member_in_secretgr(self):
-        self.try_create(self.member, self.secretGroup, status.HTTP_403_FORBIDDEN)
-    def test_create_member_in_normalgr(self):
-        self.try_create(self.member, self.normalGroup, status.HTTP_403_FORBIDDEN)
-    def test_create_member_in_publicgr(self):
-        self.try_create(self.member, self.publicGroup, status.HTTP_403_FORBIDDEN)
-
-    def test_create_admin_in_secretgr(self):
-        self.try_create(self.admin, self.secretGroup, status.HTTP_201_CREATED)
-    def test_create_admin_in_normalgr(self):
-        self.try_create(self.admin, self.normalGroup, status.HTTP_201_CREATED)
-    def test_create_admin_in_publicgr(self):
-        self.try_create(self.admin, self.publicGroup, status.HTTP_201_CREATED)
-
     ###############################################################################################
     ##     UPDATE TESTS                                                                          ##
     ###############################################################################################

@@ -35,12 +35,12 @@ class GroupInvitation(models.Model):
     ## Read permissions
 
     @staticmethod
-    def has_list_permission(self, request):
+    def has_list_permission(request):
         return False
 
     def has_object_retrieve_permission(self, request):
         try:
-            if request.user.id == self.user.id:
+            if request.user.id == self.invitee.id:
                 return True
             else:
                 mb = GroupMember.objects.get(group=self.group.id, user=request.user.id)
@@ -57,7 +57,9 @@ class GroupInvitation(models.Model):
         try:
             if request.data.get('emmited_by_invitee'):
                 #check if the user who is connected is the invitee
-                return request.data.get('invitee') == request.user.id
+                #and if the group can be asked this way
+                group=request.data.get('group')
+                return (request.data.get('invitee').id == request.user.id and group.can_anyone_ask)
             else:
                 #here, the user is the one who created the invitation, not the invitee
                 mb = GroupMember.objects.get(group=request.data.get('group'), user=request.user.id)
@@ -73,7 +75,7 @@ class GroupInvitation(models.Model):
                 mb = GroupMember.objects.get(group=self.group.id, user=request.user.id)
                 return mb.can_invite
             else:
-                return request.user.id == self.user.id
+                return request.user.id == self.invitee.id
         except GroupMember.DoesNotExist:
             return False
 
@@ -84,10 +86,17 @@ class GroupInvitation(models.Model):
         #the people that can destroy the invitation are the invited,
         #and members of the group that have the adequate right
 
-        if request.user.id==self.user.id:
+        if request.user.id==self.invitee.id:
             return True
         try:
             mb = GroupMember.objects.get(group=self.group.id, user=request.user.id)
             return mb.can_invite
         except GroupMember.DoesNotExist:
             return False
+
+    #if not need_validation_to_join then the GroupMember is directly created
+    def save(self, *args, **kwargs):
+        if not need_validation_to_join:
+            GroupMember.objets.create(user=new_member,group=group)
+        else:
+            super(GroupInvitation, self).save(*args, **kwargs)

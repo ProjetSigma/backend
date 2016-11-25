@@ -1,229 +1,246 @@
-import json
-
 from rest_framework import status
-from rest_framework.test import APITestCase, force_authenticate
+from rest_framework.test import APITestCase
 
+from sigma_core.models.user import User
 from sigma_core.models.group import Group
-from sigma_core.serializers.group import GroupSerializer
-from sigma_core.tests.factories import UserFactory, AdminUserFactory, GroupFactory, GroupAcknowledgmentFactory, GroupMemberFactory, ClusterFactory
-
-
-def reload(obj):
-    return obj.__class__.objects.get(pk=obj.pk)
+from sigma_core.models.group_member import GroupMember
+from sigma_core.models.group_field import GroupField
+from sigma_core.serializers.group_field import GroupFieldSerializer
 
 
 class GroupTests(APITestCase):
     @classmethod
     def setUpTestData(self):
-        # Summary: 1 cluster, 4 users + 1 admin, 5 groups (+1 group for the cluster)
-        # Users #1 and #2 are in cluster #1
-        # User #5 is Sigma admin
-        # Group #1 is public, others are private
-        # Users #1 and #2 are members of group #3; user #1 is group admin
-        # Users #3 and #4 are members of group #2; user #3 has invitation clearance, not user #4
-        # User #4 is member of group #5
-        # User #1 is invited to group #5
-        # Group #4 is acknowledged by cluster #1
+        super(APITestCase, self).setUpTestData()
+        self.group_url = '/group/'
 
-        super(GroupTests, self).setUpTestData()
-        self.clusters = ClusterFactory.create_batch(1)
-        self.groups = GroupFactory.create_batch(5, is_private=True)
-        self.users = UserFactory.create_batch(3) + [AdminUserFactory()]
+        self.nomember = User.objects.create(email='nomember@sigma.fr', lastname='Nomembre', firstname='Bemmonre');
+        self.member = User.objects.create(email='member@sigma.fr', lastname='Membre', firstname='Remmeb');
+        self.admin = User.objects.create(email='admin@sigma.fr', lastname='Admin', firstname='Nimad');
 
-        # Group #1 is public
-        self.groups[0].is_private = False
-        self.groups[0].default_member_rank = 1
-        self.groups[0].name = "Public group without invitation"
-        self.groups[0].save()
+        self.secretGroup = Group.objects.create(name="Groupe Secret", description="", confidentiality=Group.CONF_SECRET)
+        self.normalGroup = Group.objects.create(name="Groupe Normal", description="", confidentiality=Group.CONF_NORMAL)
+        self.publicGroup = Group.objects.create(name="Groupe Public", description="", confidentiality=Group.CONF_PUBLIC)
 
-        # Group #2 clearance parameters
-        self.groups[1].req_rank_invite = 5
-        self.groups[1].save()
+        GroupMember.objects.create(user=self.member, group=self.secretGroup)
+        GroupMember.objects.create(user=self.member, group=self.normalGroup)
+        GroupMember.objects.create(user=self.member, group=self.publicGroup)
 
-        # Users in cluster
-        self.users[0].clusters.add(self.clusters[0])
-        self.users[1].clusters.add(self.clusters[0])
-        GroupMemberFactory(user=self.users[0], group=self.clusters[0].group_ptr)
-        GroupMemberFactory(user=self.users[1], group=self.clusters[0].group_ptr)
-        # Users in group #2
-        GroupMemberFactory(user=self.users[2], group=self.groups[1], perm_rank=self.groups[1].req_rank_invite)
-        GroupMemberFactory(user=self.users[3], group=self.groups[1])
-        # Users in group #3
-        GroupMemberFactory(user=self.users[0], group=self.groups[2], perm_rank=Group.ADMINISTRATOR_RANK)
-        GroupMemberFactory(user=self.users[1], group=self.groups[2])
-        # Users in group #5
-        GroupMemberFactory(user=self.users[3], group=self.groups[4])
-        # User #1 is invited to group #5
-        self.users[0].invited_to_groups.add(self.groups[4])
+        GroupMember.objects.create(user=self.admin, group=self.secretGroup, is_super_administrator=True)
+        GroupMember.objects.create(user=self.admin, group=self.normalGroup, is_super_administrator=True)
+        GroupMember.objects.create(user=self.admin, group=self.publicGroup, is_super_administrator=True)
 
-        # GroupAcknowledgment
-        GroupAcknowledgmentFactory(subgroup=self.groups[3], parent_group=self.clusters[0].group_ptr, validated=True)
+        self.secretGroupField = GroupField.objects.create(group=self.secretGroup, name="Champ dans groupe secret", type=GroupField.TYPE_STRING)
+        self.normalGroupField = GroupField.objects.create(group=self.normalGroup, name="Champ dans groupe normal", type=GroupField.TYPE_STRING)
+        self.publicGroupField = GroupField.objects.create(group=self.publicGroup, name="Champ dans groupe public", type=GroupField.TYPE_STRING)
 
-        self.groups_url = "/group/"
-        self.group_url = self.groups_url + "%d/"
 
-        self.new_private_group_data = {"name": "New private group", "is_private": True}
-        self.new_public_group_data = {"name": "New public group", "is_private": False}
-        self.invite_data = {"user_id": self.users[0].id}
+    ###############################################################################################
+    ##     CREATION TESTS                                                                        ##
+    ###############################################################################################
 
-#### Model methods test
-    def test_model_group(self):
-        self.assertEqual(self.clusters[0].group_ptr.members_count, 2)
-        self.assertFalse(self.groups[1].can_anyone_join())
-        self.assertTrue(self.groups[0].can_anyone_join())
-        self.assertEqual(self.groups[0].__str__(), "Public group without invitation")
-        self.assertSetEqual(set(self.clusters[0].subgroups_list), set([self.groups[3]]))
-        self.assertSetEqual(set(self.groups[3].group_parents_list), set([self.clusters[0].group_ptr]))
+    def try_create(self, u, g, s):
+        self.client.force_authenticate(user=u)
+        r = self.client.post(self.group_field_url, {'group': g.id, 'name': 'Test', 'type': GroupField.TYPE_STRING, 'accept':''}, format='json')
+        self.assertEqual(r.status_code, s)
 
-#### List requests
-    def test_get_groups_list_unauthed(self):
-        # Client not authenticated
-        response = self.client.get(self.groups_url)
-        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+    def test_create_nomember_in_secretgr(self):
+        self.try_create(self.nomember, self.secretGroup, status.HTTP_403_FORBIDDEN)
+    def test_create_nomember_in_normalgr(self):
+        self.try_create(self.nomember, self.normalGroup, status.HTTP_403_FORBIDDEN)
+    def test_create_nomember_in_publicgr(self):
+        self.try_create(self.nomember, self.publicGroup, status.HTTP_403_FORBIDDEN)
 
-    def test_get_groups_list_limited_1(self):
-        # Client authenticated and can see limited list of groups
-        self.client.force_authenticate(user=self.users[0])
-        response = self.client.get(self.groups_url)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(response.data), 5)
-        self.assertIn(self.groups[0].id, [d['id'] for d in response.data])
-        self.assertNotIn(self.groups[1].id, [d['id'] for d in response.data])
+    def test_create_member_in_secretgr(self):
+        self.try_create(self.member, self.secretGroup, status.HTTP_403_FORBIDDEN)
+    def test_create_member_in_normalgr(self):
+        self.try_create(self.member, self.normalGroup, status.HTTP_403_FORBIDDEN)
+    def test_create_member_in_publicgr(self):
+        self.try_create(self.member, self.publicGroup, status.HTTP_403_FORBIDDEN)
 
-    def test_get_groups_list_limited_2(self):
-        # Client authenticated and can see limited list of groups
-        self.client.force_authenticate(user=self.users[1])
-        response = self.client.get(self.groups_url)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(response.data), 4)
-        self.assertNotIn(self.groups[4].id, [d['id'] for d in response.data])
+    def test_create_admin_in_secretgr(self):
+        self.try_create(self.admin, self.secretGroup, status.HTTP_201_CREATED)
+    def test_create_admin_in_normalgr(self):
+        self.try_create(self.admin, self.normalGroup, status.HTTP_201_CREATED)
+    def test_create_admin_in_publicgr(self):
+        self.try_create(self.admin, self.publicGroup, status.HTTP_201_CREATED)
 
-    def test_get_groups_list_admin(self):
-        # Client authenticated and can see limited list of groups
-        self.client.force_authenticate(user=self.users[-1])
-        response = self.client.get(self.groups_url)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(response.data), 6)
+    ###############################################################################################
+    ##     UPDATE TESTS                                                                          ##
+    ###############################################################################################
 
-#### Get requests
-    def test_get_group_unauthed(self):
-        # Client is not authenticated
-        response = self.client.get(self.group_url % self.groups[0].id)
-        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+    def try_update(self, u, f, s):
+        uf = GroupFieldSerializer(f).data
+        uf['name'] = "Autre nom"
 
-    def test_get_group_public(self):
-        # Client can see public group
-        self.client.force_authenticate(user=self.users[0])
-        response = self.client.get(self.group_url % self.groups[0].id)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.client.force_authenticate(user=u)
+        r = self.client.put(self.group_field_url + str(f.id) + '/', uf, format='json')
 
-    def test_get_group_private(self):
-        # Client cannot see private group if he's not a member
-        self.client.force_authenticate(user=self.users[0])
-        response = self.client.get(self.group_url % self.groups[1].id)
-        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+        self.assertEqual(r.status_code, s)
+        if s == status.HTTP_200_OK:
+            self.assertEqual(GroupFieldSerializer(GroupField.objects.all().get(id=f.id)).data, uf)
 
-    def test_get_group_member(self):
-        # Client can see private group if he is a member
-        self.client.force_authenticate(user=self.users[0])
-        response = self.client.get(self.group_url % self.groups[2].id)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+    def test_update_nomember_in_secretgr(self):
+        self.try_update(self.nomember, self.secretGroupField, status.HTTP_403_FORBIDDEN)
+    def test_update_nomember_in_normalgr(self):
+        self.try_update(self.nomember, self.normalGroupField, status.HTTP_403_FORBIDDEN)
+    def test_update_nomember_in_publicgr(self):
+        self.try_update(self.nomember, self.publicGroupField, status.HTTP_403_FORBIDDEN)
 
-    def test_get_group_acknowledged(self):
-        # Client can see private group if it has been acknowledged by one of his groups
-        self.client.force_authenticate(user=self.users[0])
-        response = self.client.get(self.group_url % self.groups[3].id)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+    def test_update_member_in_secretgr(self):
+        self.try_update(self.member, self.secretGroupField, status.HTTP_403_FORBIDDEN)
+    def test_update_member_in_normalgr(self):
+        self.try_update(self.member, self.normalGroupField, status.HTTP_403_FORBIDDEN)
+    def test_update_member_in_publicgr(self):
+        self.try_update(self.member, self.publicGroupField, status.HTTP_403_FORBIDDEN)
 
-    def test_get_group_invited(self):
-        # Client can see private if he has been invited to it
-        self.client.force_authenticate(user=self.users[0])
-        response = self.client.get(self.group_url % self.groups[4].id)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+    def test_update_admin_in_secretgr(self):
+        self.try_update(self.admin, self.secretGroupField, status.HTTP_200_OK)
+    def test_update_admin_in_normalgr(self):
+        self.try_update(self.admin, self.normalGroupField, status.HTTP_200_OK)
+    def test_update_admin_in_publicgr(self):
+        self.try_update(self.admin, self.publicGroupField, status.HTTP_200_OK)
 
-#### Create requests
-    def test_create_unauthed(self):
-        # Client is not authenticated
-        response = self.client.post(self.groups_url, self.new_private_group_data)
-        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+    ###############################################################################################
+    ##     DESTROY TESTS                                                                         ##
+    ###############################################################################################
 
-    def test_create_private_group(self):
-        # Everybody can create a group
-        self.client.force_authenticate(user=self.users[1])
-        response = self.client.post(self.groups_url, self.new_private_group_data)
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        self.assertEqual(response.data['name'], self.new_private_group_data['name'])
-        self.assertEqual(response.data['is_private'], True)
-        Group.objects.get(pk=response.data['id']).delete()
+    def try_destroy(self, u, f, s):
+        self.client.force_authenticate(user=u)
+        r = self.client.delete(self.group_field_url + str(f.id) + '/', format='json')
+        self.assertEqual(r.status_code, s)
 
-    def test_create_public_group(self):
-        # Everybody can create a public group
-        self.client.force_authenticate(user=self.users[1])
-        response = self.client.post(self.groups_url, self.new_public_group_data)
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        self.assertEqual(response.data['is_private'], False)
-        Group.objects.get(pk=response.data['id']).delete()
+    def test_destroy_nomember_in_secretgr(self):
+        self.try_destroy(self.nomember, self.secretGroupField, status.HTTP_403_FORBIDDEN)
+    def test_destroy_nomember_in_normalgr(self):
+        self.try_destroy(self.nomember, self.normalGroupField, status.HTTP_403_FORBIDDEN)
+    def test_destroy_nomember_in_publicgr(self):
+        self.try_destroy(self.nomember, self.publicGroupField, status.HTTP_403_FORBIDDEN)
 
-#### Modification requests
-    def test_update_unauthed(self):
-        # Unauthed client cannot update a group
-        update_group_data = GroupSerializer(self.groups[2]).data
-        response = self.client.put(self.group_url % self.groups[2].id, update_group_data)
-        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+    def test_destroy_member_in_secretgr(self):
+        self.try_destroy(self.member, self.secretGroupField, status.HTTP_403_FORBIDDEN)
+    def test_destroy_member_in_normalgr(self):
+        self.try_destroy(self.member, self.normalGroupField, status.HTTP_403_FORBIDDEN)
+    def test_destroy_member_in_publicgr(self):
+        self.try_destroy(self.member, self.publicGroupField, status.HTTP_403_FORBIDDEN)
 
-    def test_update_forbidden(self):
-        # Client cannot update a group if he hasn't clearance
-        update_group_data = GroupSerializer(self.groups[2]).data
-        self.client.force_authenticate(user=self.users[1])
-        response = self.client.put(self.group_url % self.groups[2].id, update_group_data)
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+    def test_destroy_admin_in_secretgr(self):
+        self.try_destroy(self.admin, self.secretGroupField, status.HTTP_204_NO_CONTENT)
+    def test_destroy_admin_in_normalgr(self):
+        self.try_destroy(self.admin, self.normalGroupField, status.HTTP_204_NO_CONTENT)
+    def test_destroy_admin_in_publicgr(self):
+        self.try_destroy(self.admin, self.publicGroupField, status.HTTP_204_NO_CONTENT)
 
-    def test_update_ok(self):
-        # Client can update a group if he has clearance
-        update_group_data = GroupSerializer(self.groups[2]).data
-        self.client.force_authenticate(user=self.users[0])
-        old_name = update_group_data['name']
-        update_group_data['name'] = "A new name"
-        response = self.client.put(self.group_url % self.groups[2].id, update_group_data)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(reload(self.groups[2]).name, update_group_data['name'])
-        # Guarantee independance of tests
-        self.groups[2].name = old_name
-        self.groups[2].save()
 
-    def test_update_group_by_acknowledgment_delegation(self): # TODO
-        pass
+    ###############################################################################################
+    ##     LIST TESTS                                                                            ##
+    ###############################################################################################
 
-#### Deletion requests
+    # def try_delete(self, u, f, s):
+        # self.client.force_authenticate(user=u)
+        # r = self.client.post(self.group_field_url + str(f.id) + '/destroy', format='json')
+        # self.assertEqual(r.status_code, s)
 
-#### Invitation requests
-    def test_invite_unauthed(self):
-        response = self.client.put((self.group_url + "invite/") % self.groups[1].id, self.invite_data)
-        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+    # def test_delete_nomember_in_secretgr(self):
+        # self.try_delete(self.nomember, self.secretGroupField, status.HTTP_403_FORBIDDEN)
+    # def test_delete_nomember_in_normalgr(self):
+        # self.try_delete(self.nomember, self.normalGroupField, status.HTTP_403_FORBIDDEN)
+    # def test_delete_nomember_in_publicgr(self):
+        # self.try_delete(self.nomember, self.publicGroupField, status.HTTP_403_FORBIDDEN)
 
-    def test_invite_forbidden(self):
-        # Client has not perms to invite
-        self.client.force_authenticate(user=self.users[3])
-        response = self.client.put((self.group_url + "invite/") % self.groups[1].id, self.invite_data)
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+    # def test_delete_member_in_secretgr(self):
+        # self.try_delete(self.member, self.secretGroupField, status.HTTP_403_FORBIDDEN)
+    # def test_delete_member_in_normalgr(self):
+        # self.try_delete(self.member, self.normalGroupField, status.HTTP_403_FORBIDDEN)
+    # def test_delete_member_in_publicgr(self):
+        # self.try_delete(self.member, self.publicGroupField, status.HTTP_403_FORBIDDEN)
 
-    def test_invite_ok(self):
-        # Client has perms to invite
-        self.client.force_authenticate(user=self.users[2])
-        response = self.client.put((self.group_url + "invite/") % self.groups[1].id, self.invite_data)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertIn(self.groups[1], reload(self.users[0]).invited_to_groups.all())
-        # Guarantee independance of tests
-        self.users[0].invited_to_groups.remove(self.groups[1])
+    # def test_delete_admin_in_secretgr(self):
+        # self.try_delete(self.admin, self.secretGroupField, status.HTTP_204_NO_CONTENT)
+    # def test_delete_admin_in_normalgr(self):
+        # self.try_delete(self.admin, self.normalGroupField, status.HTTP_204_NO_CONTENT)
+    # def test_delete_admin_in_publicgr(self):
+        # self.try_delete(self.admin, self.publicGroupField, status.HTTP_204_NO_CONTENT)
 
-    def test_invite_duplicate(self):
-        # Client wants to invite someone who has already received an invitation
-        self.client.force_authenticate(user=self.users[3])
-        response = self.client.put((self.group_url + "invite/") % self.groups[4].id, self.invite_data)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
 
-    def test_invite_already_member(self):
-        # Client wants to invite a member
-        self.client.force_authenticate(user=self.users[1])
-        response = self.client.put((self.group_url + "invite/") % self.groups[2].id, self.invite_data)
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    ###############################################################################################
+    ##     RETRIEVE TESTS                                                                        ##
+    ###############################################################################################
+
+    def try_retrieve(self, u, f, s):
+        self.client.force_authenticate(user=u)
+        r = self.client.get(self.group_field_url + str(f.id) + '/', format='json')
+        self.assertEqual(r.status_code, s)
+
+        if r.status_code == status.HTTP_200_OK:
+            self.assertEqual( r.data, GroupFieldSerializer(f).data )
+
+
+    def test_retrieve_nomember_in_secretgr(self):
+        self.try_retrieve(self.nomember, self.secretGroupField, status.HTTP_403_FORBIDDEN)
+    def test_retrieve_nomember_in_normalgr(self):
+        self.try_retrieve(self.nomember, self.normalGroupField, status.HTTP_200_FORBIDDEN)
+    def test_retrieve_nomember_in_publicgr(self):
+        self.try_retrieve(self.nomember, self.publicGroupField, status.HTTP_200_OK)
+
+    def test_retrieve_member_in_secretgr(self):
+        self.try_retrieve(self.member, self.secretGroupField, status.HTTP_200_OK)
+    def test_retrieve_member_in_normalgr(self):
+        self.try_retrieve(self.member, self.normalGroupField, status.HTTP_200_OK)
+    def test_retrieve_member_in_publicgr(self):
+        self.try_retrieve(self.member, self.publicGroupField, status.HTTP_200_OK)
+
+    def test_retrieve_admin_in_secretgr(self):
+        self.try_retrieve(self.admin, self.secretGroupField, status.HTTP_200_OK)
+    def test_retrieve_admin_in_normalgr(self):
+        self.try_retrieve(self.admin, self.normalGroupField, status.HTTP_200_OK)
+    def test_retrieve_admin_in_publicgr(self):
+        self.try_retrieve(self.admin, self.publicGroupField, status.HTTP_200_OK)
+
+
+
+    ###############################################################################################
+    ##     VALIDATION TESTS                                                                      ##
+    ###############################################################################################
+
+    def try_validation(self, t, v, p):
+        self.client.force_authenticate(user=self.admin)
+        r = self.client.post(self.group_field_url, {'group': self.secretGroup.id, 'name': 'Test', 'type': t, 'accept': v}, format='json')
+        if p:
+            self.assertEqual(r.status_code, status.HTTP_201_CREATED)
+        else:
+            self.assertEqual(r.status_code, status.HTTP_400_BAD_REQUEST)
+
+
+    def test_validation_number(self):
+        self.try_validation(GroupField.TYPE_NUMBER, '', True)
+        self.try_validation(GroupField.TYPE_NUMBER, '_', True)
+        self.try_validation(GroupField.TYPE_NUMBER, '12_', True)
+        self.try_validation(GroupField.TYPE_NUMBER, '_43', True)
+        self.try_validation(GroupField.TYPE_NUMBER, '12_-43', True)
+        self.try_validation(GroupField.TYPE_NUMBER, '12_42', True)
+        self.try_validation(GroupField.TYPE_NUMBER, '-43_12', True)
+
+        self.try_validation(GroupField.TYPE_NUMBER, '43_12-10', False)
+        self.try_validation(GroupField.TYPE_NUMBER, '43__12', False)
+        self.try_validation(GroupField.TYPE_NUMBER, '4.3_', False)
+        self.try_validation(GroupField.TYPE_NUMBER, '12', False)
+        self.try_validation(GroupField.TYPE_NUMBER, '_10_', False)
+
+
+    def test_validation_email(self):
+        self.try_validation(GroupField.TYPE_EMAIL, '', True)
+        self.try_validation(GroupField.TYPE_EMAIL, 'toto', True)
+        self.try_validation(GroupField.TYPE_EMAIL, '.toto', True)
+        self.try_validation(GroupField.TYPE_EMAIL, 'test.toto', True)
+        self.try_validation(GroupField.TYPE_EMAIL, '.test.toto', True)
+        self.try_validation(GroupField.TYPE_EMAIL, '@test.toto', True)
+        self.try_validation(GroupField.TYPE_EMAIL, '@test.toto .test.tata', True)
+        self.try_validation(GroupField.TYPE_EMAIL, '@test.toto      .test.tata', True)
+        self.try_validation(GroupField.TYPE_EMAIL, '.test.toto      @test.tata .toto .tata @tata.toto .toto.tata', True)
+
+        self.try_validation(GroupField.TYPE_EMAIL, 'test.', False)
+        self.try_validation(GroupField.TYPE_EMAIL, 'maieuh@', False)
+        self.try_validation(GroupField.TYPE_EMAIL, 'maieuh@test.toto', False)
+        self.try_validation(GroupField.TYPE_EMAIL, '@test.toto, test.tata', False)
