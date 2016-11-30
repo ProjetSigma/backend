@@ -16,7 +16,7 @@ class UserManager(BaseUserManager):
         if not email:
             raise ValueError('Users must have an email address')
 
-        # username = email # TODO - Generate unique username
+        # username = email # TODO wi - Generate unique username
 
         user = self.model(
             email=self.normalize_email(email),
@@ -54,6 +54,7 @@ class User(AbstractBaseUser):
     last_modified = models.DateTimeField(auto_now=True)
     join_date = models.DateTimeField(auto_now_add=True)
 
+    #difference between superuser and staff ?
     is_superuser = models.BooleanField(default=False)
     is_staff = models.BooleanField(default=False)
 
@@ -61,7 +62,10 @@ class User(AbstractBaseUser):
 
     objects = UserManager()
 
+    #invited_to_groups is to delete, or we have to make a through="GroupInvitation" attribute
     invited_to_groups = models.ManyToManyField('Group', blank=True, related_name="invited_users");
+
+    #what is the purpose of that line if "memberships" already exist ?
     groups = models.ManyToManyField('Group', through='GroupMember', related_name='users')
 
     # Related fields:
@@ -76,12 +80,14 @@ class User(AbstractBaseUser):
     def get_full_name(self):
         return "{} {}".format(self.lastname, self.firstname)
 
+    #???????????????????
     def get_short_name(self):
         return self.email
 
     def is_sigma_admin(self):
         return self.is_staff or self.is_superuser
 
+    #??????????????????????????????????
     def is_in_cluster(self, cluster):
         return cluster in self.clusters.all()
 

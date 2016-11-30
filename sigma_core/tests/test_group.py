@@ -18,9 +18,9 @@ class GroupTests(APITestCase):
         self.member = User.objects.create(email='member@sigma.fr', lastname='Membre', firstname='Remmeb');
         self.admin = User.objects.create(email='admin@sigma.fr', lastname='Admin', firstname='Nimad');
 
-        self.secretGroup = Group.objects.create(name="Groupe Secret", description="", confidentiality=Group.CONF_SECRET)
-        self.normalGroup = Group.objects.create(name="Groupe Normal", description="", confidentiality=Group.CONF_NORMAL)
-        self.publicGroup = Group.objects.create(name="Groupe Public", description="", confidentiality=Group.CONF_PUBLIC)
+        self.secretGroup = Group.objects.create(name="Groupe Secret", description="", visibility=Group.CONF_SECRET)
+        self.normalGroup = Group.objects.create(name="Groupe Normal", description="", visibility=Group.CONF_NORMAL)
+        self.publicGroup = Group.objects.create(name="Groupe Public", description="", visibility=Group.CONF_PUBLIC)
 
         GroupMember.objects.create(user=self.member, group=self.secretGroup)
         GroupMember.objects.create(user=self.member, group=self.normalGroup)
@@ -136,31 +136,31 @@ class GroupTests(APITestCase):
     ##     LIST TESTS                                                                            ##
     ###############################################################################################
 
-    # def try_delete(self, u, f, s):
-        # self.client.force_authenticate(user=u)
-        # r = self.client.post(self.group_field_url + str(f.id) + '/destroy', format='json')
-        # self.assertEqual(r.status_code, s)
+    def try_delete(self, u, f, s):
+        self.client.force_authenticate(user=u)
+        r = self.client.post(self.group_field_url + str(f.id) + '/destroy', format='json')
+        self.assertEqual(r.status_code, s)
 
-    # def test_delete_nomember_in_secretgr(self):
-        # self.try_delete(self.nomember, self.secretGroupField, status.HTTP_403_FORBIDDEN)
-    # def test_delete_nomember_in_normalgr(self):
-        # self.try_delete(self.nomember, self.normalGroupField, status.HTTP_403_FORBIDDEN)
-    # def test_delete_nomember_in_publicgr(self):
-        # self.try_delete(self.nomember, self.publicGroupField, status.HTTP_403_FORBIDDEN)
+    def test_delete_nomember_in_secretgr(self):
+        self.try_delete(self.nomember, self.secretGroupField, status.HTTP_403_FORBIDDEN)
+    def test_delete_nomember_in_normalgr(self):
+        self.try_delete(self.nomember, self.normalGroupField, status.HTTP_403_FORBIDDEN)
+    def test_delete_nomember_in_publicgr(self):
+        self.try_delete(self.nomember, self.publicGroupField, status.HTTP_403_FORBIDDEN)
 
-    # def test_delete_member_in_secretgr(self):
-        # self.try_delete(self.member, self.secretGroupField, status.HTTP_403_FORBIDDEN)
-    # def test_delete_member_in_normalgr(self):
-        # self.try_delete(self.member, self.normalGroupField, status.HTTP_403_FORBIDDEN)
-    # def test_delete_member_in_publicgr(self):
-        # self.try_delete(self.member, self.publicGroupField, status.HTTP_403_FORBIDDEN)
+    def test_delete_member_in_secretgr(self):
+        self.try_delete(self.member, self.secretGroupField, status.HTTP_403_FORBIDDEN)
+    def test_delete_member_in_normalgr(self):
+        self.try_delete(self.member, self.normalGroupField, status.HTTP_403_FORBIDDEN)
+    def test_delete_member_in_publicgr(self):
+        self.try_delete(self.member, self.publicGroupField, status.HTTP_403_FORBIDDEN)
 
-    # def test_delete_admin_in_secretgr(self):
-        # self.try_delete(self.admin, self.secretGroupField, status.HTTP_204_NO_CONTENT)
-    # def test_delete_admin_in_normalgr(self):
-        # self.try_delete(self.admin, self.normalGroupField, status.HTTP_204_NO_CONTENT)
-    # def test_delete_admin_in_publicgr(self):
-        # self.try_delete(self.admin, self.publicGroupField, status.HTTP_204_NO_CONTENT)
+    def test_delete_admin_in_secretgr(self):
+        self.try_delete(self.admin, self.secretGroupField, status.HTTP_204_NO_CONTENT)
+    def test_delete_admin_in_normalgr(self):
+        self.try_delete(self.admin, self.normalGroupField, status.HTTP_204_NO_CONTENT)
+    def test_delete_admin_in_publicgr(self):
+        self.try_delete(self.admin, self.publicGroupField, status.HTTP_204_NO_CONTENT)
 
 
 
@@ -179,6 +179,8 @@ class GroupTests(APITestCase):
 
     def test_retrieve_nomember_in_secretgr(self):
         self.try_retrieve(self.nomember, self.secretGroupField, status.HTTP_403_FORBIDDEN)
+
+    #TODO : CHANGE IT WHEN THE ADEQUATE FUNCTIONS WILL BE CREATED
     def test_retrieve_nomember_in_normalgr(self):
         self.try_retrieve(self.nomember, self.normalGroupField, status.HTTP_200_FORBIDDEN)
     def test_retrieve_nomember_in_publicgr(self):
