@@ -3,6 +3,9 @@ from django.db.models import Q
 
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 
+from sigma_chat.models.chat_member import ChatMember
+from sigma_chat.models.chat import Chat
+
 
 class UserManager(BaseUserManager):
     def get_queryset(self):
@@ -66,6 +69,7 @@ class User(AbstractBaseUser):
 
     # Related fields:
     #   - memberships (model GroupMember)
+    #   - user_chatmember (model ChatMember.user)
 
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['lastname', 'firstname']
@@ -155,6 +159,29 @@ class User(AbstractBaseUser):
     def get_groups_with_confirmed_membership(self):
         from sigma_core.models.group_member import GroupMember
         return GroupMember.objects.filter(Q(user=self) & Q(is_accepted=True)).values_list('group', flat=True)
+
+    def get_chat_membership(self, chat):
+        try:
+            return self.user_chatmember.get(chat=chat)
+        except ChatMember.DoesNotExist:
+            return None
+
+    def is_chat_member(self, chat):
+        mem = self.get_chat_membership(chat)
+        return mem is not None and mem.is_member
+
+    def is_chat_admin(self, chat):
+        mem = self.get_chat_membership(chat)
+        return mem is not None and mem.is_admin
+
+    def is_chat_creator(self, chat):
+        mem = self.get_chat_membership(chat)
+        return mem is not None and mem.is_creator
+
+    def is_chat_banned(self, chat):
+        mem = self.get_chat_membership(chat)
+        return mem is not None and mem.is_banned
+
 
     ###############
     # Permissions #
