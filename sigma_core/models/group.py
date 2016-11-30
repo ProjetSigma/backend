@@ -27,14 +27,14 @@ class Group(models.Model):
             CONF_PUBLIC -> The group is public (all members can be seen)
             CONF_NORMAL -> The group is normal (all members that I am connected to can be seen)
             CONF_SECRET -> The group is private (only the members can see themselves) """
-    user_confidentiality = models.IntegerField(choices=POSSIBLE_CONF, default=0)
+    user_confidentiality = models.PositiveSmallIntegerField(choices=POSSIBLE_CONF, default=0)
 
     """Set the visibility
         If set to :
             CONF_PUBLIC -> The group can be seen by everyone
             CONF_NORMAL -> The group can be seen by people from acknowledged groups
             CONF_SECRET -> The group can be seen only by people who are in it """
-    visibility= models.PositiveSmallIntegerField(choices=POSSIBLE_CONF,default=0)
+    visibility = models.PositiveSmallIntegerField(choices=POSSIBLE_CONF,default=0)
 
     # Related fields:
     #   - invited_users (model User)

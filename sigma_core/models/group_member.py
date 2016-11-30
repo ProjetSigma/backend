@@ -16,7 +16,6 @@ class GroupMember(models.Model):
     group = models.ForeignKey('Group', related_name='memberships')
     created = models.DateTimeField(auto_now_add=True)
     join_date = models.DateField(blank=True, null=True)
-    leave_date = models.DateField(blank=True, null=True)
 
     # is_accepted = is in the group
     # is_accepted = models.BooleanField(default=False)
