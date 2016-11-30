@@ -1,6 +1,4 @@
 from django.db import models
-from sigma_core.models.group_member import GroupMember
-from sigma_core.models.group import Group
 from django.db.models import Q
 
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
@@ -97,6 +95,8 @@ class User(AbstractBaseUser):
         return len(set(self.memberships.values_list('group', flat=True)).intersection(user.memberships.all().values_list('group', flat=True))) > 0
 
     def get_group_membership(self, group):
+        from sigma_core.models.group_member import GroupMember
+        from sigma_core.models.group import Group
         try:
             return self.memberships.get(group=group)
         except GroupMember.DoesNotExist:
