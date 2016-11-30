@@ -1,24 +1,19 @@
 from django.db import models
 
+from sigma_core.models.publication import Publication
 from sigma_core.models.group import Group
 
-class Event(models.Model):
+class SharedPublication(models.Model):
 
     ################################################################
     # CONSTANTS                                                    #
     ################################################################
 
-    ################################################################
-    # FIELDS                                                       #
-    ################################################################
-
-    name = models.CharField(max_length=255)
-    description = models.CharField(max_length=1400)
-
-    date_start = models.DateTimeField()
-    date_end = models.DateTimeField()
-    place_name = models.CharField(max_length=255)
-    # ToDo : place_localisation
+    # Liste des champs de l'objet
+    publication = models.ForeignKey(Publication, related_name='shared')
+    group = models.ForeignKey(Group, related_name='shared_publications')
+    approved = models.BooleanField(default=False)
+    date = models.DateTimeField(auto_now_add=True)
 
     ################################################################
     # PERMISSIONS                                                  #
@@ -39,4 +34,4 @@ class Event(models.Model):
         return True
 
     def __str__(self):
-        return self.name
+        return self.publication.name

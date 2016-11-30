@@ -2,9 +2,6 @@ from rest_framework import serializers
 
 from sigma_core.models.user import User
 from sigma_core.models.cluster import Cluster
-from sigma_files.models import Image
-from sigma_files.serializers import ImageSerializer
-
 
 class UserSerializerMeta():
     model = User
@@ -32,7 +29,6 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta(UserSerializerMeta):
         pass
 
-    photo = ImageSerializer(read_only=True)
     clusters_ids = serializers.PrimaryKeyRelatedField(queryset=Cluster.objects.all(), many=True, source='clusters')
 
     def create(self, validated_data):

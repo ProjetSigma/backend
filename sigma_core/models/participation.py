@@ -1,24 +1,27 @@
 from django.db import models
 
-from sigma_core.models.group import Group
+from sigma_core.models.user import User
+from sigma_core.models.event import Event
 
-class Event(models.Model):
+class Participation(models.Model):
 
     ################################################################
     # CONSTANTS                                                    #
     ################################################################
 
+    POSSIBLE_STATUS = (
+        (0, 'Invited'),
+        (1, 'Interested'),
+        (2, 'Participates'),
+    )
+
     ################################################################
     # FIELDS                                                       #
     ################################################################
 
-    name = models.CharField(max_length=255)
-    description = models.CharField(max_length=1400)
-
-    date_start = models.DateTimeField()
-    date_end = models.DateTimeField()
-    place_name = models.CharField(max_length=255)
-    # ToDo : place_localisation
+    user = models.ForeignKey(User)
+    event = models.ForeignKey(Event)
+    status = models.IntegerField(choices=POSSIBLE_STATUS)
 
     ################################################################
     # PERMISSIONS                                                  #
@@ -39,4 +42,4 @@ class Event(models.Model):
         return True
 
     def __str__(self):
-        return self.name
+        return self.user.firstname

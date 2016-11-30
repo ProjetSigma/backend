@@ -192,7 +192,6 @@ class UserTests(APITestCase):
         self.assertEqual(response.data['lastname'], self.users[6].lastname)
         self.assertEqual(response.data['clusters_ids'], [self.clusters[1].id])
         self.assertNotIn('email', response.data)
-        self.assertNotIn('photo', response.data)
 
     def test_get_user_2_req_6(self):
         # Client authenticated: request user who has pending request into group
@@ -211,7 +210,6 @@ class UserTests(APITestCase):
         self.assertEqual(response.data['lastname'], self.users[2].lastname)
         self.assertEqual(response.data['clusters_ids'], [self.clusters[0].id])
         self.assertNotIn('email', response.data)
-        self.assertNotIn('photo', response.data)
 
     def test_get_user_3_req_8(self):
         # Client authenticated: request a user who is invited in a group whose I'm a member
@@ -221,7 +219,6 @@ class UserTests(APITestCase):
         self.assertEqual(response.data['lastname'], self.users[7].lastname)
         self.assertEqual(response.data['clusters_ids'], [self.clusters[1].id])
         self.assertNotIn('email', response.data)
-        self.assertNotIn('photo', response.data)
 
 
 #### "Get my data" requests
@@ -449,13 +446,6 @@ class UserTests(APITestCase):
         self.assertEqual(len(mail.outbox), 1)
         from sigma_core.views.user import reset_mail
         self.assertEqual(mail.outbox[0].subject, reset_mail['subject'])
-
-#### "Add photo" requests
-    def test_addphoto_ok(self):
-        self.client.force_authenticate(user=self.users[0])
-        with open("sigma_files/test_img.png", "rb") as img:
-            response = self.client.post(self.user_url + "addphoto/", {'file': img}, format='multipart')
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
 #### Deletion requests
     def test_destroy_user_unauthed(self):

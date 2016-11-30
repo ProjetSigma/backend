@@ -47,7 +47,6 @@ INSTALLED_APPS = (
     'django_nose',
 
     'sigma_core.apps.SigmaCoreConfig',
-    'sigma_files.apps.SigmaFilesConfig',
 )
 
 MIDDLEWARE_CLASSES = (
@@ -156,6 +155,6 @@ CORS_ORIGIN_ALLOW_ALL = True
 
 # Test (django_nose conf)
 TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
-NOSE_ARGS = ['--nocapture', '--nologcapture', '--with-coverage', '--cover-package=sigma,sigma_core,sigma_files', ] # To display debug during testing
+NOSE_ARGS = ['--nocapture', '--nologcapture', '--with-coverage', '--cover-package=sigma,sigma_core', ] # To display debug during testing
 
 AUTH_USER_MODEL = 'sigma_core.User'

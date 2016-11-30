@@ -48,7 +48,7 @@ class User(AbstractBaseUser):
     firstname = models.CharField(max_length=128)
     # username = models.CharField(max_length=128, unique=True) # TODO - Add unique username for frontend URLs
     phone = models.CharField(max_length=20, blank=True)
-    photo = models.OneToOneField('sigma_files.Image', blank=True, null=True, on_delete=models.SET_NULL)
+    photo = models.CharField(max_length=20, default = 'img/4.jpg')
 
     is_active = models.BooleanField(default=True)
     last_modified = models.DateTimeField(auto_now=True)

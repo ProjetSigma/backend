@@ -7,4 +7,7 @@
 env/
 .env/
 sigma/settings.py
-
+*~
+*.pyc
+*.swp
+sigma_core/migrations/*

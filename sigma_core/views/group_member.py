@@ -7,7 +7,8 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.filters import BaseFilterBackend
 
 from sigma_core.models.user import User
-from sigma_core.models.group import Group, GroupAcknowledgment
+from sigma_core.models.group import Group
+from sigma_core.models.group_acknowledgment import GroupAcknowledgment
 from sigma_core.models.group_member import GroupMember
 from sigma_core.serializers.group_member import GroupMemberSerializer
 
