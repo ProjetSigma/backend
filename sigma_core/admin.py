@@ -82,8 +82,8 @@ class ChildrenInline(admin.TabularInline):
     fk_name = "parent_group"
 
 class GroupAdmin(admin.ModelAdmin):
-    list_display = ['name', 'is_private', 'is_protected', 'can_anyone_ask', 'need_validation_to_join', 'confidentiality']
-    list_filter = ['is_private', 'is_protected', 'can_anyone_ask', 'need_validation_to_join', 'confidentiality']
+    list_display = ['name', 'is_protected', 'can_anyone_ask', 'need_validation_to_join', 'user_confidentiality']
+    list_filter = ['is_protected', 'can_anyone_ask', 'need_validation_to_join']
     search_fields = ['name', 'description']
     inlines = [MembersInline, InvitationsInline, ParentsInline, ChildrenInline]
 

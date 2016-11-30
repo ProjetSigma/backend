@@ -399,7 +399,6 @@
     "pk": 1,
     "fields": {
         "name": "\u00c9cole polytechnique",
-        "is_private": false,
         "description": "",
         "is_protected": true}
 }, {
@@ -407,7 +406,6 @@
     "pk": 2,
     "fields": {
         "name": "ENSTA",
-        "is_private": false,
         "description": "",
         "is_protected": true}
 }, {
@@ -415,7 +413,6 @@
     "pk": 10,
     "fields": {
         "name": "ENS Cachan",
-        "is_private": false,
         "description": "L'\u00c9cole normale sup\u00e9rieure de Cachan (aussi appel\u00e9e ENS Cachan ou Normale Sup' Cachan, prochainement ENS Paris-Saclay3, autrefois \u00c9cole normale sup\u00e9rieure de l'enseignement technique (ENSET)4), est une grande \u00e9cole fran\u00e7aise, faisant partie du r\u00e9seau des \u00c9coles normales sup\u00e9rieures.",
         "is_protected": true}
 }, {
@@ -423,7 +420,6 @@
     "pk": 11,
     "fields": {
         "name": "Supoptique",
-        "is_private": false,
         "description": "L\u2019Institut d'optique Graduate School (IOGS) (officiellement Institut d'optique th\u00e9orique et appliqu\u00e9e7, aussi connue sous le nom d'\u00c9cole sup\u00e9rieure d'optique ou SupOptique) est l'une des 210 \u00e9coles d'ing\u00e9nieurs fran\u00e7aises habilit\u00e9es \u00e0 d\u00e9livrer un dipl\u00f4me d'ing\u00e9nieur.",
         "is_protected": true}
 }, {
@@ -431,7 +427,6 @@
     "pk": 12,
     "fields": {
         "name": "Binet R\u00e9seau",
-        "is_private": false,
         "description": "Le binet qui d\u00e9veloppe les outils informatiques n\u00e9cessaires \u00e0 la vie en campus et entretient le r\u00e9seau \u00e9l\u00e8ve !",
         "is_protected": false}
 }, {
@@ -439,7 +434,6 @@
     "pk": 13,
     "fields": {
         "name": "DaTA",
-        "is_private": false,
         "description": "Association d'informatique de l'ENSTA Paristech, groupe de passion\u00e9s, de tous niveaux, ayant comme point commun d'aller toujours plus loin dans l'apprentissage des possibilit\u00e9s infinies offertes par les nouvelles technologies.",
         "is_protected": false}
 }, {
@@ -447,7 +441,6 @@
     "pk": 14,
     "fields": {
         "name": "JTX",
-        "is_private": false,
         "description": "Association vid\u00e9o de l'X.",
         "is_protected": false}
 }, {
@@ -455,7 +448,6 @@
     "pk": 15,
     "fields": {
         "name": "X2013",
-        "is_private": false,
         "description": "",
         "is_protected": false}
 }, {
@@ -463,23 +455,20 @@
     "pk": 16,
     "fields": {
         "name": "X2014",
-        "is_private": false,
-        "description": "",
+        "description": "Groupe des d\u00e9veloppeurs du projet Sigma",
         "is_protected": false}
 }, {
     "model": "sigma_core.group",
     "pk": 17,
     "fields": {
         "name": "Projet Sigma",
-        "is_private": false,
-        "description": "Groupe des d\u00e9veloppeurs du projet Sigma",
-        "is_protected": false}
+        "description": "FUCK YOU DM",
+        "is_protected": true}
 }, {
     "model": "sigma_core.group",
     "pk": 18,
     "fields": {
         "name": "Discussion",
-        "is_private": false,
         "description": "Le groupe des membres d'un chat.",
         "is_protected": false}
 }, {
