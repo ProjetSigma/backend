@@ -1,4 +1,6 @@
 from django.db import models
+from sigma_core.models.group_member import GroupMember
+from sigma_core.models.group import Group
 from django.db.models import Q
 
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
@@ -6,7 +8,7 @@ from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 
 class UserManager(BaseUserManager):
     def get_queryset(self):
-        return super().get_queryset().prefetch_related('clusters__group_ptr')
+        return super().get_queryset()
 
     def create_user(self, email, lastname, firstname, password=None):
         """
@@ -58,7 +60,6 @@ class User(AbstractBaseUser):
     is_superuser = models.BooleanField(default=False)
     is_staff = models.BooleanField(default=False)
 
-    clusters = models.ManyToManyField('Cluster', related_name="cluster_users") # users should be members of at least one cluster
 
     objects = UserManager()
 
@@ -80,32 +81,11 @@ class User(AbstractBaseUser):
     def get_full_name(self):
         return "{} {}".format(self.lastname, self.firstname)
 
-    #???????????????????
     def get_short_name(self):
         return self.email
 
     def is_sigma_admin(self):
         return self.is_staff or self.is_superuser
-
-    #??????????????????????????????????
-    def is_in_cluster(self, cluster):
-        return cluster in self.clusters.all()
-
-    def is_cluster_admin(self, cluster):
-        from sigma_core.models.cluster import Cluster
-        ms = self.get_group_membership(cluster.group_ptr)
-        return (ms is not None and ms.perm_rank == Cluster.ADMINISTRATOR_RANK)
-
-    def is_admin_of_one_cluster(self, clusters):
-        from functools import reduce
-        import operator
-        return reduce(operator.or_, [self.is_cluster_admin(c) for c in clusters])
-
-    def has_common_cluster(self, user):
-        """
-        Return True iff self has a cluster in common with user.
-        """
-        return len(set(self.clusters.all().values_list('id', flat=True)).intersection(user.clusters.all().values_list('id', flat=True))) > 0
 
     def has_common_group(self, user):
         """
@@ -117,8 +97,6 @@ class User(AbstractBaseUser):
         return len(set(self.memberships.values_list('group', flat=True)).intersection(user.memberships.all().values_list('group', flat=True))) > 0
 
     def get_group_membership(self, group):
-        from sigma_core.models.group_member import GroupMember
-        from sigma_core.models.group import Group
         try:
             return self.memberships.get(group=group)
         except GroupMember.DoesNotExist:
