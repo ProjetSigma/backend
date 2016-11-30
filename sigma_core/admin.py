@@ -20,14 +20,36 @@ admin.site.unregister(AuthGroup)
 #admin.site.register(GroupMember)
 #admin.site.register(GroupInvitation)
 #admin.site.register(GroupAcknowledgment)
+#admin.site.register(SharedPublication)
+#admin.site.register(Participation)
 
 admin.site.register(Cluster)
 admin.site.register(GroupField)
 admin.site.register(GroupFieldValue)
-admin.site.register(Participation)
-admin.site.register(Publication)
-admin.site.register(Event)
-admin.site.register(SharedPublication)
+
+
+class ParticipationInline(admin.TabularInline):
+    model = Participation
+    extra = 0
+
+class EventAdmin(admin.ModelAdmin):
+    list_display = ['name', 'date_start', 'date_end', 'place_name']
+    list_filter = ['date_start', 'date_end']
+    search_fields = ['name', 'place_name']
+    inlines = [ParticipationInline]
+
+admin.site.register(Event, EventAdmin)
+
+class SharedInline(admin.TabularInline):
+    model = SharedPublication
+    extra = 0
+
+class PublicationAdmin(admin.ModelAdmin):
+    inlines = [SharedInline]
+    list_display = ['name', 'group', 'author', 'related_event', 'internal', 'approved']
+    list_filter = ['group', 'author', 'internal', 'approved']
+
+admin.site.register(Publication, PublicationAdmin)
 
 class GroupsInline(admin.TabularInline):
     model = GroupMember
@@ -41,7 +63,7 @@ class UserAdmin(admin.ModelAdmin):
     list_display = ['firstname', 'lastname', 'email', 'is_active', 'is_superuser', 'is_staff']
     list_filter = ['is_active', 'is_superuser', 'is_staff']
     search_fields = ['firstname', 'lastname', 'email']
-    inline = [GroupsInline, InvitationsInline]
+    inlines = [GroupsInline, InvitationsInline]
 
 admin.site.register(User, UserAdmin)
 

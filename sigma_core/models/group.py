@@ -5,9 +5,11 @@ class Group(models.Model):
     # Constants and choices #
     #########################
 
-    CONF_PUBLIC = 0
-    CONF_NORMAL = 1
-    CONF_SECRET = 2
+    POSSIBLE_CONF = (
+        (0, 'Public'),
+        (1, 'Normal'),
+        (2, 'Secret'),
+    )
 
     ##########
     # Fields #
@@ -24,7 +26,7 @@ class Group(models.Model):
             CONF_PUBLIC -> The group is public (all members can be seen)
             CONF_NORMAL -> The group is normal (all members that I am connected to can be seen)
             CONF_SECRET -> The group is private (only the members can see themselves) """
-    confidentiality = models.PositiveSmallIntegerField(default=CONF_NORMAL)
+    confidentiality = models.IntegerField(choices=POSSIBLE_CONF)
 
 
     # Related fields:
