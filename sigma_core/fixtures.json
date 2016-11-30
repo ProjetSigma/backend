@@ -13,7 +13,6 @@
         "join_date": "2016-02-05T15:20:44.915Z",
         "is_superuser": true,
         "is_staff": true,
-        "clusters": [1],
         "invited_to_groups": []
     }
 }, {
@@ -31,7 +30,6 @@
         "join_date": "2016-02-05T15:27:00.147Z",
         "is_superuser": false,
         "is_staff": false,
-        "clusters": [1],
         "invited_to_groups": []
     }
 }, {
@@ -49,7 +47,6 @@
         "join_date": "2016-05-08T14:03:12.407Z",
         "is_superuser": false,
         "is_staff": false,
-        "clusters": [1],
         "invited_to_groups": []
     }
 }, {
@@ -67,7 +64,6 @@
         "join_date": "2016-05-08T14:07:07.982Z",
         "is_superuser": false,
         "is_staff": false,
-        "clusters": [1],
         "invited_to_groups": []
     }
 }, {
@@ -85,7 +81,6 @@
         "join_date": "2016-05-08T14:07:32.623Z",
         "is_superuser": false,
         "is_staff": false,
-        "clusters": [1],
         "invited_to_groups": []
     }
 }, {
@@ -103,7 +98,6 @@
         "join_date": "2016-05-08T14:08:12.832Z",
         "is_superuser": false,
         "is_staff": false,
-        "clusters": [1],
         "invited_to_groups": []
     }
 }, {
@@ -121,7 +115,6 @@
         "join_date": "2016-05-08T14:08:38.257Z",
         "is_superuser": false,
         "is_staff": false,
-        "clusters": [1],
         "invited_to_groups": []
     }
 }, {
@@ -139,7 +132,6 @@
         "join_date": "2016-05-08T14:09:03.672Z",
         "is_superuser": false,
         "is_staff": false,
-        "clusters": [1],
         "invited_to_groups": []
     }
 }, {
@@ -157,7 +149,6 @@
         "join_date": "2016-05-08T14:09:30.408Z",
         "is_superuser": false,
         "is_staff": false,
-        "clusters": [1],
         "invited_to_groups": []
     }
 }, {
@@ -175,7 +166,6 @@
         "join_date": "2016-05-08T14:09:46.944Z",
         "is_superuser": false,
         "is_staff": false,
-        "clusters": [10],
         "invited_to_groups": []
     }
 }, {
@@ -193,7 +183,6 @@
         "join_date": "2016-05-08T14:10:06.467Z",
         "is_superuser": false,
         "is_staff": false,
-        "clusters": [2],
         "invited_to_groups": []
     }
 }, {
@@ -211,7 +200,6 @@
         "join_date": "2016-05-08T14:11:35.663Z",
         "is_superuser": false,
         "is_staff": false,
-        "clusters": [2],
         "invited_to_groups": []
     }
 }, {
@@ -229,7 +217,6 @@
         "join_date": "2016-05-08T14:11:51.642Z",
         "is_superuser": false,
         "is_staff": false,
-        "clusters": [1],
         "invited_to_groups": []
     }
 }, {
@@ -247,7 +234,6 @@
         "join_date": "2016-05-08T14:12:11.648Z",
         "is_superuser": false,
         "is_staff": false,
-        "clusters": [1],
         "invited_to_groups": []
     }
 }, {
@@ -265,7 +251,6 @@
         "join_date": "2016-05-08T14:12:41.223Z",
         "is_superuser": false,
         "is_staff": false,
-        "clusters": [11],
         "invited_to_groups": []
     }
 }, {
@@ -283,7 +268,6 @@
         "join_date": "2016-05-08T14:13:01.678Z",
         "is_superuser": false,
         "is_staff": false,
-        "clusters": [11],
         "invited_to_groups": []
     }
 }, {
@@ -301,7 +285,6 @@
         "join_date": "2016-05-08T14:13:37.646Z",
         "is_superuser": false,
         "is_staff": false,
-        "clusters": [1],
         "invited_to_groups": []
     }
 }, {
@@ -319,7 +302,6 @@
         "join_date": "2016-05-08T14:14:03.688Z",
         "is_superuser": false,
         "is_staff": false,
-        "clusters": [1],
         "invited_to_groups": []
     }
 }, {
@@ -337,7 +319,6 @@
         "join_date": "2016-05-08T14:15:39.172Z",
         "is_superuser": false,
         "is_staff": false,
-        "clusters": [2],
         "invited_to_groups": []
     }
 }, {
@@ -355,7 +336,6 @@
         "join_date": "2016-05-08T14:16:23.212Z",
         "is_superuser": false,
         "is_staff": false,
-        "clusters": [2],
         "invited_to_groups": []
     }
 }, {
@@ -373,7 +353,6 @@
         "join_date": "2016-05-08T14:17:23.581Z",
         "is_superuser": false,
         "is_staff": false,
-        "clusters": [11],
         "invited_to_groups": []
     }
 }, {
@@ -391,7 +370,6 @@
         "join_date": "2016-05-08T14:18:04.562Z",
         "is_superuser": false,
         "is_staff": false,
-        "clusters": [11],
         "invited_to_groups": []
     }
 }, {
@@ -559,38 +537,13 @@
         "updated": "2016-05-08T15:34:41.856Z"
     }
 }, {
-    "model": "sigma_core.cluster",
-    "pk": 1,
-    "fields": {
-        "design": "default"
-    }
-}, {
-    "model": "sigma_core.cluster",
-    "pk": 2,
-    "fields": {
-        "design": "default"
-    }
-}, {
-    "model": "sigma_core.cluster",
-    "pk": 10,
-    "fields": {
-        "design": "default"
-    }
-}, {
-    "model": "sigma_core.cluster",
-    "pk": 11,
-    "fields": {
-        "design": "default"
-    }
-}, {
     "model": "sigma_core.groupmember",
     "pk": 1,
     "fields": {
         "user": 2,
         "group": 1,
         "created": "2016-02-05T15:39:52.907Z",
-        "join_date": "2013-09-01",
-        "leave_date": null
+        "join_date": "2013-09-01"
     }
 }, {
     "model": "sigma_core.groupmember",
@@ -599,8 +552,7 @@
         "user": 23,
         "group": 1,
         "created": "2016-05-08T14:28:03.054Z",
-        "join_date": "2016-05-08",
-        "leave_date": null
+        "join_date": "2016-05-08"
     }
 }, {
     "model": "sigma_core.groupmember",
@@ -609,8 +561,7 @@
         "user": 24,
         "group": 1,
         "created": "2016-05-08T14:28:09.167Z",
-        "join_date": "2016-05-08",
-        "leave_date": null
+        "join_date": "2016-05-08"
     }
 }, {
     "model": "sigma_core.groupmember",
@@ -619,8 +570,7 @@
         "user": 25,
         "group": 1,
         "created": "2016-05-08T14:28:14.985Z",
-        "join_date": "2016-05-08",
-        "leave_date": null
+        "join_date": "2016-05-08"
     }
 }, {
     "model": "sigma_core.groupmember",
@@ -629,8 +579,7 @@
         "user": 26,
         "group": 1,
         "created": "2016-05-08T14:28:28.703Z",
-        "join_date": "2016-05-08",
-        "leave_date": null
+        "join_date": "2016-05-08"
     }
 }, {
     "model": "sigma_core.groupmember",
@@ -639,8 +588,7 @@
         "user": 27,
         "group": 1,
         "created": "2016-05-08T14:28:41.826Z",
-        "join_date": "2016-05-08",
-        "leave_date": null
+        "join_date": "2016-05-08"
     }
 }, {
     "model": "sigma_core.groupmember",
@@ -649,8 +597,7 @@
         "user": 28,
         "group": 1,
         "created": "2016-05-08T14:28:46.857Z",
-        "join_date": "2016-05-08",
-        "leave_date": null
+        "join_date": "2016-05-08"
     }
 }, {
     "model": "sigma_core.groupmember",
@@ -659,8 +606,7 @@
         "user": 29,
         "group": 1,
         "created": "2016-05-08T14:28:52.686Z",
-        "join_date": "2016-05-08",
-        "leave_date": null
+        "join_date": "2016-05-08"
     }
 }, {
     "model": "sigma_core.groupmember",
@@ -669,8 +615,7 @@
         "user": 30,
         "group": 10,
         "created": "2016-05-08T14:29:04.410Z",
-        "join_date": "2016-05-08",
-        "leave_date": null
+        "join_date": "2016-05-08"
     }
 }, {
     "model": "sigma_core.groupmember",
@@ -679,8 +624,7 @@
         "user": 31,
         "group": 2,
         "created": "2016-05-08T14:29:11.524Z",
-        "join_date": "2016-05-08",
-        "leave_date": null
+        "join_date": "2016-05-08"
     }
 }, {
     "model": "sigma_core.groupmember",
@@ -689,8 +633,7 @@
         "user": 32,
         "group": 2,
         "created": "2016-05-08T14:29:16.897Z",
-        "join_date": null,
-        "leave_date": null
+        "join_date": null
     }
 }, {
     "model": "sigma_core.groupmember",
@@ -699,8 +642,7 @@
         "user": 33,
         "group": 1,
         "created": "2016-05-08T14:29:21.477Z",
-        "join_date": "2016-05-08",
-        "leave_date": null
+        "join_date": "2016-05-08"
     }
 }, {
     "model": "sigma_core.groupmember",
@@ -709,8 +651,7 @@
         "user": 34,
         "group": 1,
         "created": "2016-05-08T14:29:28.184Z",
-        "join_date": "2016-05-08",
-        "leave_date": null
+        "join_date": "2016-05-08"
     }
 }, {
     "model": "sigma_core.groupmember",
@@ -719,8 +660,7 @@
         "user": 35,
         "group": 11,
         "created": "2016-05-08T14:29:38.073Z",
-        "join_date": "2016-05-08",
-        "leave_date": null
+        "join_date": "2016-05-08"
     }
 }, {
     "model": "sigma_core.groupmember",
@@ -729,8 +669,7 @@
         "user": 36,
         "group": 11,
         "created": "2016-05-08T14:29:42.536Z",
-        "join_date": "2016-05-08",
-        "leave_date": null
+        "join_date": "2016-05-08"
     }
 }, {
     "model": "sigma_core.groupmember",
@@ -739,8 +678,7 @@
         "user": 37,
         "group": 1,
         "created": "2016-05-08T14:29:48.274Z",
-        "join_date": "2013-09-01",
-        "leave_date": null
+        "join_date": "2013-09-01"
     }
 }, {
     "model": "sigma_core.groupmember",
@@ -749,8 +687,7 @@
         "user": 38,
         "group": 1,
         "created": "2016-05-08T14:29:54.006Z",
-        "join_date": "2016-05-08",
-        "leave_date": null
+        "join_date": "2016-05-08"
     }
 }, {
     "model": "sigma_core.groupmember",
@@ -759,8 +696,7 @@
         "user": 39,
         "group": 2,
         "created": "2016-05-08T14:30:15.034Z",
-        "join_date": "2016-05-08",
-        "leave_date": null
+        "join_date": "2016-05-08"
     }
 }, {
     "model": "sigma_core.groupmember",
@@ -769,8 +705,7 @@
         "user": 40,
         "group": 2,
         "created": "2016-05-08T14:30:30.672Z",
-        "join_date": "2016-05-08",
-        "leave_date": null
+        "join_date": "2016-05-08"
     }
 }, {
     "model": "sigma_core.groupmember",
@@ -779,8 +714,7 @@
         "user": 41,
         "group": 11,
         "created": "2016-05-08T14:30:53.431Z",
-        "join_date": "2016-05-08",
-        "leave_date": null
+        "join_date": "2016-05-08"
     }
 }, {
     "model": "sigma_core.groupmember",
@@ -789,8 +723,7 @@
         "user": 42,
         "group": 11,
         "created": "2016-05-08T14:31:07.452Z",
-        "join_date": "2016-05-08",
-        "leave_date": null
+        "join_date": "2016-05-08"
     }
 }, {
     "model": "sigma_core.groupmember",
@@ -799,8 +732,7 @@
         "user": 23,
         "group": 12,
         "created": "2016-05-08T15:15:10.726Z",
-        "join_date": "2014-10-01",
-        "leave_date": null
+        "join_date": "2014-10-01"
     }
 }, {
     "model": "sigma_core.groupmember",
@@ -809,8 +741,7 @@
         "user": 24,
         "group": 12,
         "created": "2016-05-08T15:15:18.626Z",
-        "join_date": "2014-10-01",
-        "leave_date": null
+        "join_date": "2014-10-01"
     }
 }, {
     "model": "sigma_core.groupmember",
@@ -819,8 +750,7 @@
         "user": 27,
         "group": 12,
         "created": "2016-05-08T15:15:30.285Z",
-        "join_date": "2015-10-01",
-        "leave_date": null
+        "join_date": "2015-10-01"
     }
 }, {
     "model": "sigma_core.groupmember",
@@ -829,8 +759,7 @@
         "user": 25,
         "group": 12,
         "created": "2016-05-08T15:15:36.145Z",
-        "join_date": "2014-10-01",
-        "leave_date": null
+        "join_date": "2014-10-01"
     }
 }, {
     "model": "sigma_core.groupmember",
@@ -839,8 +768,7 @@
         "user": 37,
         "group": 12,
         "created": "2016-05-08T15:15:45.927Z",
-        "join_date": "2014-10-01",
-        "leave_date": null
+        "join_date": "2014-10-01"
     }
 }, {
     "model": "sigma_core.groupmember",
@@ -849,8 +777,7 @@
         "user": 38,
         "group": 12,
         "created": "2016-05-08T15:15:51.738Z",
-        "join_date": "2015-10-01",
-        "leave_date": null
+        "join_date": "2015-10-01"
     }
 }, {
     "model": "sigma_core.groupmember",
@@ -859,8 +786,7 @@
         "user": 32,
         "group": 13,
         "created": "2016-05-08T15:16:00.273Z",
-        "join_date": "2016-05-08",
-        "leave_date": null
+        "join_date": "2016-05-08"
     }
 }, {
     "model": "sigma_core.groupmember",
@@ -869,8 +795,7 @@
         "user": 31,
         "group": 13,
         "created": "2016-05-08T15:16:07.916Z",
-        "join_date": "2016-05-08",
-        "leave_date": null
+        "join_date": "2016-05-08"
     }
 }, {
     "model": "sigma_core.groupmember",
@@ -879,8 +804,7 @@
         "user": 23,
         "group": 14,
         "created": "2016-05-08T15:17:05.995Z",
-        "join_date": "2014-11-01",
-        "leave_date": null
+        "join_date": "2014-11-01"
     }
 }, {
     "model": "sigma_core.groupmember",
@@ -889,8 +813,7 @@
         "user": 24,
         "group": 14,
         "created": "2016-05-08T15:17:12.286Z",
-        "join_date": "2014-11-01",
-        "leave_date": null
+        "join_date": "2014-11-01"
     }
 }, {
     "model": "sigma_core.groupmember",
@@ -899,8 +822,7 @@
         "user": 33,
         "group": 14,
         "created": "2016-05-08T15:17:18.682Z",
-        "join_date": "2014-10-01",
-        "leave_date": null
+        "join_date": "2014-10-01"
     }
 }, {
     "model": "sigma_core.groupmember",
@@ -909,8 +831,7 @@
         "user": 23,
         "group": 15,
         "created": "2016-05-08T15:18:10.703Z",
-        "join_date": "2013-09-01",
-        "leave_date": null
+        "join_date": "2013-09-01"
     }
 }, {
     "model": "sigma_core.groupmember",
@@ -919,8 +840,7 @@
         "user": 24,
         "group": 15,
         "created": "2016-05-08T15:18:16.688Z",
-        "join_date": "2013-09-01",
-        "leave_date": null
+        "join_date": "2013-09-01"
     }
 }, {
     "model": "sigma_core.groupmember",
@@ -929,8 +849,7 @@
         "user": 25,
         "group": 15,
         "created": "2016-05-08T15:18:21.929Z",
-        "join_date": "2013-09-01",
-        "leave_date": null
+        "join_date": "2013-09-01"
     }
 }, {
     "model": "sigma_core.groupmember",
@@ -939,8 +858,7 @@
         "user": 26,
         "group": 15,
         "created": "2016-05-08T15:18:27.453Z",
-        "join_date": "2013-09-01",
-        "leave_date": null
+        "join_date": "2013-09-01"
     }
 }, {
     "model": "sigma_core.groupmember",
@@ -949,8 +867,7 @@
         "user": 27,
         "group": 16,
         "created": "2016-05-08T15:18:34.227Z",
-        "join_date": "2014-09-01",
-        "leave_date": null
+        "join_date": "2014-09-01"
     }
 }, {
     "model": "sigma_core.groupmember",
@@ -959,8 +876,7 @@
         "user": 28,
         "group": 15,
         "created": "2016-05-08T15:18:41.064Z",
-        "join_date": "2013-09-01",
-        "leave_date": null
+        "join_date": "2013-09-01"
     }
 }, {
     "model": "sigma_core.groupmember",
@@ -969,8 +885,7 @@
         "user": 29,
         "group": 16,
         "created": "2016-05-08T15:18:46.183Z",
-        "join_date": "2014-09-01",
-        "leave_date": null
+        "join_date": "2014-09-01"
     }
 }, {
     "model": "sigma_core.groupmember",
@@ -979,8 +894,7 @@
         "user": 33,
         "group": 15,
         "created": "2016-05-08T15:18:54.935Z",
-        "join_date": "2013-09-01",
-        "leave_date": null
+        "join_date": "2013-09-01"
     }
 }, {
     "model": "sigma_core.groupmember",
@@ -989,8 +903,7 @@
         "user": 34,
         "group": 16,
         "created": "2016-05-08T15:19:01.282Z",
-        "join_date": "2014-09-01",
-        "leave_date": null
+        "join_date": "2014-09-01"
     }
 }, {
     "model": "sigma_core.groupmember",
@@ -999,8 +912,7 @@
         "user": 37,
         "group": 15,
         "created": "2016-05-08T15:19:09.497Z",
-        "join_date": "2013-09-01",
-        "leave_date": null
+        "join_date": "2013-09-01"
     }
 }, {
     "model": "sigma_core.groupmember",
@@ -1009,8 +921,7 @@
         "user": 38,
         "group": 16,
         "created": "2016-05-08T15:19:18.055Z",
-        "join_date": "2014-09-01",
-        "leave_date": null
+        "join_date": "2014-09-01"
     }
 }, {
     "model": "sigma_core.groupmember",
@@ -1019,8 +930,7 @@
         "user": 23,
         "group": 17,
         "created": "2016-05-08T15:21:18.928Z",
-        "join_date": "2016-05-08",
-        "leave_date": null
+        "join_date": "2016-05-08"
     }
 }, {
     "model": "sigma_core.groupmember",
@@ -1029,8 +939,7 @@
         "user": 25,
         "group": 17,
         "created": "2016-05-08T15:21:25.989Z",
-        "join_date": "2016-05-08",
-        "leave_date": null
+        "join_date": "2016-05-08"
     }
 }, {
     "model": "sigma_core.groupmember",
@@ -1039,8 +948,7 @@
         "user": 26,
         "group": 17,
         "created": "2016-05-08T15:21:32.301Z",
-        "join_date": "2016-02-24",
-        "leave_date": null
+        "join_date": "2016-02-24"
     }
 }, {
     "model": "sigma_core.groupmember",
@@ -1049,8 +957,7 @@
         "user": 30,
         "group": 17,
         "created": "2016-05-08T15:21:41.262Z",
-        "join_date": "2016-05-08",
-        "leave_date": null
+        "join_date": "2016-05-08"
     }
 }, {
     "model": "sigma_core.groupmember",
@@ -1059,8 +966,7 @@
         "user": 35,
         "group": 17,
         "created": "2016-05-08T15:21:54.595Z",
-        "join_date": "2016-03-15",
-        "leave_date": null
+        "join_date": "2016-03-15"
     }
 }, {
     "model": "sigma_core.groupmember",
@@ -1069,8 +975,7 @@
         "user": 31,
         "group": 18,
         "created": "2016-05-08T15:35:49.250Z",
-        "join_date": "2016-05-03",
-        "leave_date": null
+        "join_date": "2016-05-03"
     }
 }, {
     "model": "sigma_core.groupmember",
@@ -1079,8 +984,7 @@
         "user": 40,
         "group": 18,
         "created": "2016-05-08T15:35:59.028Z",
-        "join_date": "2016-05-08",
-        "leave_date": null
+        "join_date": "2016-05-08"
     }
 }, {
     "model": "sigma_core.groupmember",
@@ -1089,8 +993,7 @@
         "user": 32,
         "group": 18,
         "created": "2016-05-08T15:36:07.857Z",
-        "join_date": "2016-05-08",
-        "leave_date": null
+        "join_date": "2016-05-08"
     }
 }, {
     "model": "oauth2_provider.application",
