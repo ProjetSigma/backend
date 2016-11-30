@@ -108,22 +108,51 @@ class GroupMemberViewSet(viewsets.ModelViewSet):
 
     def update(self, request, pk=None):
         """
-        Change the rights of a member of the group pk.
+        Change the rights of a member of the group.
         ---
         """
         #override to change the status of super_administrator if he wants to appoint someone else
         from sigma_core.models.group import Group
         try:
-            my_mship = GroupMember.objects.all().get(group=group, user=request.user)
-            right_to_change = request.data.get('right_to_change', None)
+            modified_mship = GroupMember.objects.all().get(pk=pk)
+            my_mship = GroupMember.objects.all().get(group=modified_mship.group,user=request.user)
+            serializer = GroupMemberSerializer(data=request.data)
 
-            if right_to_change=="is_super_administrator":
-                my_mship.is_super_administrator=False
-                my_mship.save()
+            if not serializer.is_valid():
+                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+            else:
+                if serializer.is_super_administrator != modified_mship.is_super_administrator:
+                    my_mship.is_super_administrator=False
+                    my_mship.save()
+                serializer.save()
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+
         except GroupMember.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
         except request.data.DoesNotExist:
             return Response(status=status.HTTP_400_BAD_REQUEST)
 
 
-        return super(viewsets.ModelViewSet, self).update(self,request,pk)
+
+    # def update(self, request, pk=None):
+    #     """
+    #     Change the rights of a member of the group pk.
+    #     ---
+    #     """
+    #     #override to change the status of super_administrator if he wants to appoint someone else
+    #     from sigma_core.models.group import Group
+    #     try:
+    #         my_mship = GroupMember.objects.all().get(group=group, user=request.user)
+    #         right_to_change = request.data.get('right_to_change', None)
+    #
+    #         if right_to_change=="is_super_administrator":
+    #             my_mship.is_super_administrator=False
+    #             my_mship.save()
+    #     except GroupMember.DoesNotExist:
+    #         return Response(status=status.HTTP_404_NOT_FOUND)
+    #     except request.data.DoesNotExist:
+    #         return Response(status=status.HTTP_400_BAD_REQUEST)
+    #
+    #
+    #     return super(viewsets.ModelViewSet, self).update(self,request,pk)

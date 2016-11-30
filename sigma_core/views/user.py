@@ -146,6 +146,7 @@ class UserViewSet(mixins.CreateModelMixin,      # Only Cluster admins can create
         user.save()
         return Response('Password successfully changed', status=status.HTTP_200_OK)
 
+    #Dangerous to send a password in clear...
     @decorators.list_route(methods=['post'], permission_classes=[AllowAny])
     def reset_password(self, request):
         """

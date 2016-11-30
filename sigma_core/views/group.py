@@ -43,12 +43,13 @@ class GroupViewSet(viewsets.ModelViewSet):
 #TO DO : filter the list
 #    def list(self, request):
 
-
+    #TODO : define the route
     def quit(self, request, pk):
         try:
             m_ship=GroupMember.objects.get(user=request.user,group=Group.objects.get(pk=pk))
             if not m_ship.is_super_administrator:
                 m_ship.destroy()
+                return Response(status=status.HTTP_200_SUCCESS)
             else:
                 return Response(status=status.HTTP_403_FORBIDDEN)
         except GroupMember.DoesNotExist:
