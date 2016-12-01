@@ -115,16 +115,28 @@ class GroupMember(models.Model):
         try:
             #Membership of the one who tries to update a GroupMember of the other dude
             mb = GroupMember.objects.get(group=self.group.id,user=request.user.id)
-            right_to_change = request.data.get('right_to_change', None)
 
-            if self.is_administrator:
-                return mb.is_super_administrator
-            else:
-                basic_rights = ["can_invite","can_kick","can_publish","can_be_contacted","can_modify_group_infos"]
-                if right_to_change in basic_rights:
-                    return self.can_modify_basic_rights(mb)
-                else:
-                    return mb.is_super_administrator
+            #new status of the membership
+            serializer = GroupMemberSerializer(data=request.data)
+
+            if not serializer.is_valid:
+                return False
+
+            new_basic_rights = [serializer.can_invite,serializer.can_kick,serializer.can_publish, \
+            serializer.can_be_contacted,serializer.can_modify_group_infos]
+            previous_basic_rights = [self.can_invite,self.can_kick,self.can_publish,self.can_be_contacted, \
+            self.can_modify_group_infos]
+
+            if not mb.can_modify_basic_rights:
+                for i in range(len(new_basic_rights)):
+                    if new_basic_rights[i] != previous_basic_rights[i]:
+                        return False
+
+            if (serializer.is_administrator != self.is_administrator or \
+            serializer.is_super_administrator != self.is_super_administrator) and not mb.is_super_administrator:
+                return False
+
+            return True
 
         except GroupMember.DoesNotExist:
             return False
