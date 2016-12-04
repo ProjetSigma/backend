@@ -25,12 +25,19 @@ class GroupInvitationViewSet(viewsets.ModelViewSet):
             invit.destroy()
         except GroupInvitation.DoesNotExist:
             raise Http404("Invitation not found")
+        return Response(request.data,status=status.HTTP_200_OK)
 
 
     def create(self, request):
         invit_serializer=GroupInvitationSerializer(data=request.data)
         if invit_serializer.is_valid():
-            if invit_serializer.group.can_anyone_ask:
+            try: #if the invitation already exists or the invitee is already a member
+                GroupInvitation.objects.get(user=invit_serializer.invitee,group=invit_serializer.group)
+                GroupMember.objects.get(user=invit_serializer.invitee,group=invit_serializer.group)
+                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            except:
+                pass
+            if not invit_serializer.group.need_validation_to_join:
                 GroupMember.objets.create(user=invit_serializer.invitee,group=invit_serializer.group)
             else:
                 invit_serializer.save()

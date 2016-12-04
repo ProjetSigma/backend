@@ -133,9 +133,9 @@ class GroupMember(models.Model):
                         return False
 
             if (serializer.is_administrator != self.is_administrator or \
-            serializer.is_super_administrator != self.is_super_administrator) and not mb.is_super_administrator:
+            serializer.is_super_administrator != self.is_super_administrator) and \
+            (not mb.is_super_administrator or (mb_is_super_administrator and self==mb)):
                 return False
-
             return True
 
         except GroupMember.DoesNotExist:

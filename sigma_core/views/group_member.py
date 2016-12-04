@@ -55,25 +55,6 @@ class GroupMemberViewSet(viewsets.ModelViewSet):
         """
         return super().list(request)
 
-    def create(self, request):
-        serializer = GroupMemberSerializer(data=request.data)
-        if not serializer.is_valid():
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-        if request.data.get('user_id', None) != request.user.id and not request.user.is_sigma_admin():
-            return Response('You cannot add someone else to a group', status=status.HTTP_403_FORBIDDEN)
-
-        try:
-            group = Group.objects.get(pk=request.data.get('group_id', None))
-        except Group.DoesNotExist:
-            return Response(status=status.HTTP_404_NOT_FOUND)
-
-        if not group.can_anyone_join:
-            return Response('You cannot join this group without an invitation', status=status.HTTP_403_FORBIDDEN)
-
-        mem = serializer.save()
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
-
     def destroy(self, request, pk=None):
         from sigma_core.models.group import Group
         try:
