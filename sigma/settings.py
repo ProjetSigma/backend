@@ -7,3 +7,7 @@ class contains_all_list(list):
         return True
 
 INTERNAL_IPS = contains_all_list()
+
+MIDDLEWARE = [
+    'debug_toolbar.middleware.DebugToolbarMiddleware',
+]
