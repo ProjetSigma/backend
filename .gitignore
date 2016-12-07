@@ -6,7 +6,6 @@
 /secret.key
 env/
 .env/
-sigma/settings.py
 *~
 *.pyc
 *.swp
